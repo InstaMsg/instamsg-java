@@ -16,5 +16,6 @@ public class Main {
 		}
 		
 		PublisherSubscriberInit.initPublisherSubscriberParams(args, logFilePath);
+		common.instamsg.driver.Globals.globalSystemInit(logFilePath.toString());
 	}
 }
