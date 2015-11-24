@@ -11,4 +11,10 @@ public class DeviceTime implements Time {
 
 	}
 
+	@Override
+	public long getCurrentTick() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

@@ -1,7 +1,9 @@
 package common.instamsg.driver.include;
 
+
 public interface ModulesProviderInterface {
 	
+	Config getConfig();
 	FileSystem getFileSystem();
 	Misc getMisc();
 	SerialLogger getSerialLogger();

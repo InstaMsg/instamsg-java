@@ -4,6 +4,7 @@ import utils.ChangeableString;
 import utils.Config;
 
 import common.apps.utils.PublisherSubscriberInit;
+import common.instamsg.driver.Instamsg;
 import common.instamsg.driver.include.Globals;
 
 public class Main {
@@ -17,5 +18,7 @@ public class Main {
 		
 		PublisherSubscriberInit.initPublisherSubscriberParams(args, logFilePath);
 		common.instamsg.driver.Globals.globalSystemInit(logFilePath.toString());
+		Instamsg instamsg = new Instamsg();
+		instamsg.start(null, 3);
 	}
 }

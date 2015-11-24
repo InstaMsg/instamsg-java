@@ -10,4 +10,8 @@ public class DeviceTime implements Time {
 
 	}
 
+	@Override
+	public long getCurrentTick() {
+		return 0;
+	}
 }

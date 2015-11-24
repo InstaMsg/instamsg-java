@@ -10,4 +10,10 @@ public class DeviceMisc implements Misc {
 
 	}
 
+	@Override
+	public String get_device_uuid() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
