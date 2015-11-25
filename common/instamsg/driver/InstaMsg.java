@@ -3,14 +3,16 @@ package common.instamsg.driver;
 
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.ModulesProviderFactory;
 import common.instamsg.driver.include.ModulesProviderInterface;
 import common.instamsg.driver.include.OneToOneResult;
 import common.instamsg.driver.include.Socket;
-import common.instamsg.mqtt.src.MQTTPacket;
-import common.instamsg.mqtt.src.MQTTPacket.MQTTString;
+
 
 public class InstaMsg {
 	
@@ -215,7 +217,7 @@ class MQTTFixedHeader{
 	
     int packetType;
     boolean dup;
-    MQTTPacket.QoS qos;
+    int qos;
     boolean retain;
 }
 
@@ -228,7 +230,7 @@ class MQTTFixedHeaderPlusMsgId {
 class MessageData {
 	
     MQTTMessage message;
-    MQTTString topicName;
+    String topicName;
 }
 
 class MQTTMessage {
