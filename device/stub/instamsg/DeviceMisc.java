@@ -10,9 +10,11 @@ public class DeviceMisc implements Misc {
 
 	}
 
+	/**
+	 * This method returns the univerally-unique-identifier for this device.
+	 */
 	@Override
-	public String get_device_uuid() {
-		// TODO Auto-generated method stub
+	public String getDeviceUuid() {
 		return null;
 	}
 

@@ -12,6 +12,14 @@ import common.instamsg.driver.include.Watchdog;
 
 public class Globals {
 	
+	public static enum ReturnCode
+	{
+	    SOCKET_READ_TIMEOUT,
+	    BUFFER_OVERFLOW,
+	    FAILURE,
+	    SUCCESS
+	};
+	
 	public static Misc misc;
 	public static SerialLogger serialLogger;
 	public static Time time;

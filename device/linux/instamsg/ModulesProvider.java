@@ -1,6 +1,7 @@
 package device.linux.instamsg;
 
 
+import common.instamsg.driver.include.Config;
 import common.instamsg.driver.include.FileSystem;
 import common.instamsg.driver.include.Misc;
 import common.instamsg.driver.include.ModulesProviderInterface;
@@ -33,6 +34,11 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public Watchdog getWatchdog() {
 		return new DeviceWatchdog();
+	}
+
+	@Override
+	public Config getConfig() {
+		return null;
 	}
 
 }

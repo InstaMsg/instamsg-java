@@ -1,5 +1,6 @@
 package device.stub.instamsg;
 
+import common.instamsg.driver.include.Config;
 import common.instamsg.driver.include.FileSystem;
 import common.instamsg.driver.include.Misc;
 import common.instamsg.driver.include.ModulesProviderInterface;
@@ -32,6 +33,12 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public Watchdog getWatchdog() {
 		return new DeviceWatchdog();
+	}
+
+	@Override
+	public Config getConfig() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
