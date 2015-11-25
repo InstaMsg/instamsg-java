@@ -55,6 +55,7 @@ public class MqttConnectOptions {
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
 	private String willDestination = null;
 	private MqttMessage willMessage = null;
+	private String clientId;
 	private String userName;
 	private char[] password;
 	private SocketFactory socketFactory;
@@ -80,6 +81,14 @@ public class MqttConnectOptions {
 	 * More information about these values can be found in the setter methods.
 	 */
 	public MqttConnectOptions() {
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 	/**

@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
@@ -72,6 +73,16 @@ public class MqttConnect extends MqttWireMessage {
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
 		this.MqttVersion = MqttVersion;
+	}
+	
+	public MqttConnect(MqttConnectOptions options) {
+		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
+		
+		this.clientId = options.getClientId();
+		this.cleanSession = options.isCleanSession();
+		this.userName = options.getUserName();
+		this.password = options.getPassword();
+		this.MqttVersion = options.getMqttVersion();
 	}
 
 	public String toString() {

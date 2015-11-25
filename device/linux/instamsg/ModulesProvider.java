@@ -6,6 +6,7 @@ import common.instamsg.driver.include.FileSystem;
 import common.instamsg.driver.include.Misc;
 import common.instamsg.driver.include.ModulesProviderInterface;
 import common.instamsg.driver.include.SerialLogger;
+import common.instamsg.driver.include.Socket;
 import common.instamsg.driver.include.Time;
 import common.instamsg.driver.include.Watchdog;
 
@@ -39,6 +40,11 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public Config getConfig() {
 		return null;
+	}
+
+	@Override
+	public Socket getSocket(String hostName, int port) {
+		return new DeviceSocket(hostName, port);
 	}
 
 }

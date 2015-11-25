@@ -9,5 +9,6 @@ public interface ModulesProviderInterface {
 	SerialLogger getSerialLogger();
 	Time getTime();
 	Watchdog getWatchdog();
+	Socket getSocket(String hostName, int port);	
 	
 }
