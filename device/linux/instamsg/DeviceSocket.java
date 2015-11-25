@@ -1,10 +1,15 @@
 package device.linux.instamsg;
 
+import java.io.IOException;
+
 import common.instamsg.driver.Globals.ReturnCode;
+import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.include.Socket;
 
 public class DeviceSocket extends Socket {
 
+	java.net.Socket socket = null;
+	
 	public DeviceSocket(String hostName, int port) {
 		super(hostName, port);
 	}
@@ -19,7 +24,16 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public void connectUnderlyingSocketMediumTryOnce() {
-
+		try {
+			socket = new java.net.Socket(host, port);
+			
+		} catch (Exception e) {
+			
+			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while connecting to [" + host + "] on port [" + port + "]");
+			return;
+		}
+		
+		socketCorrupted = false;
 	}
 
 	/**
@@ -92,7 +106,16 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public ReturnCode socketWrite(byte[] buffer, int len) {
-		return ReturnCode.FAILURE;
+		try {
+			socket.getOutputStream().write(buffer);
+			
+		} catch (IOException e) {
+			
+			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while writing bytes to socket");
+			return ReturnCode.FAILURE;
+		}
+		
+		return ReturnCode.SUCCESS;
 	}
 
 	
@@ -104,6 +127,13 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public void releaseUnderlyingSocketMediumGuaranteed() {
+		try {
+			socket.close();
+			
+		} catch (IOException e) {
+	
+			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while closing the socket");
+		}
 		
 	}
 }

@@ -62,6 +62,7 @@ public class InstaMsg {
 		
 	}
 	
+	
 	private static byte[] getEncodedMqttMessageAsByteStream(MqttWireMessage message) {
 		
 		byte[] bytes;
@@ -97,9 +98,23 @@ public class InstaMsg {
 		return result;      
 	}
 	
+	
 	private static ReturnCode sendPacket(InstaMsg c, byte[] packet) {
-		return ReturnCode.FAILURE;
+		
+		if(c.socket.socketCorrupted == true) {
+			errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
+			return ReturnCode.FAILURE;
+		}
+		
+		if(c.socket.socketWrite(packet, packet.length) == ReturnCode.FAILURE) {
+			c.socket.socketCorrupted = true;
+			return ReturnCode.FAILURE;
+		}
+		
+		System.out.println(packet.length + " bytes successively sent over socket.");
+		return ReturnCode.SUCCESS;
 	}
+	
 	
 	public static ReturnCode MQTTConnect(InstaMsg c) {
 		
@@ -113,6 +128,7 @@ public class InstaMsg {
 		return sendPacket(c, packet);
 	}	
 
+	
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks, String platform) {
 
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(platform);
@@ -128,12 +144,15 @@ public class InstaMsg {
 
 		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
 		{
+			c.messageHandlers[i] = new MessageHandlers();			
 			c.messageHandlers[i].msgId = 0;
 			c.messageHandlers[i].topicFilter = null;
 
+			c.resultHandlers[i] = new ResultHandlers();
 			c.resultHandlers[i].msgId = 0;
 			c.resultHandlers[i].timeout = 0;
 
+			c.oneToOneResponseHandlers[i] = new OneToOneHandlers();
 			c.oneToOneResponseHandlers[i].msgId = 0;
 			c.oneToOneResponseHandlers[i].timeout = 0;
 		}
@@ -164,7 +183,7 @@ public class InstaMsg {
 
 	
 	public static void main(String[] args) {
-		
+		initInstaMsg(new InstaMsg(), null, "linux");
 	}
 }
 

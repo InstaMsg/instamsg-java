@@ -119,7 +119,7 @@ public class MqttConnectOptions {
 	 * contains whitespace characters.
 	 */
 	public void setUserName(String userName) {
-		if ((userName != null) && (userName.trim().equals(""))) {
+		if (userName == null) {
 			throw new IllegalArgumentException();
 		}
 		this.userName = userName;

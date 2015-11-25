@@ -4,8 +4,10 @@ import common.instamsg.driver.Globals.ReturnCode;
 
 public abstract class Socket {
 
-	String host;
-	int port;
+	public static final String SOCKET_ERROR = "[SOCKET-ERROR] ";
+	
+	protected String host;
+	protected int port;
 	
 	public boolean socketCorrupted = true;
 	
