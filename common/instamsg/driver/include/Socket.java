@@ -6,18 +6,19 @@ public abstract class Socket {
 
 	String host;
 	int port;
-	boolean socketCorrupted = true;
+	
+	public boolean socketCorrupted = true;
 	
 	protected Socket(String hostName, int port) {
 		this.host = hostName;
 		this.port = port;
 	}
 	
-	void initSocket() {
+	public void initSocket() {
 		connectUnderlyingSocketMediumTryOnce();
 	}
 
-	void releaseSocket() {
+	public void releaseSocket() {
 		releaseUnderlyingSocketMediumGuaranteed();
 	}
 	

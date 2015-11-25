@@ -98,8 +98,7 @@ public class InstaMsg {
 	}
 	
 	private static ReturnCode sendPacket(InstaMsg c, byte[] packet) {
-		// TODO Auto-generated method stub
-		return null;
+		return ReturnCode.FAILURE;
 	}
 	
 	public static ReturnCode MQTTConnect(InstaMsg c) {
@@ -117,27 +116,17 @@ public class InstaMsg {
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks, String platform) {
 
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(platform);
-		int i;
-
-		/*
-
-		    init_config();
-
-		#ifdef FILE_SYSTEM_INTERFACE_ENABLED
-		    init_file_system(&(c->singletonUtilityFs), "");
-		#endif
-
-
-		    (c->ipstack).socketCorrupted = 1;
-			init_socket(&(c->ipstack), INSTAMSG_HOST, INSTAMSG_PORT);
-		    if((c->ipstack).socketCorrupted ==1)
-		    {
-		        return;
-		    }
-		 */
+		
+		c.socket = modulesProvideInterface.getSocket(Globals.INSTAMSG_HOST, Globals.INSTAMSG_PORT);		
+		c.socket.socketCorrupted = true;
+		
+		c.socket.initSocket();
+		if(c.socket.socketCorrupted == true) {
+			return;
+		}
 
 
-		for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
 		{
 			c.messageHandlers[i].msgId = 0;
 			c.messageHandlers[i].topicFilter = null;
@@ -149,11 +138,6 @@ public class InstaMsg {
 			c.oneToOneResponseHandlers[i].timeout = 0;
 		}
 
-		/*
-		 * TODO: This seems to be unused, even in C.
-		 *       Remove this.
-		 */
-		//defaultMessageHandler = NULL;
 
 		c.nextPackedId = MAX_PACKET_ID;		    
 		c.initialCallbacks = callbacks;
@@ -176,8 +160,7 @@ public class InstaMsg {
 
 		c.connected = false;
 		MQTTConnect(c);
-	}
-	
+	}	
 
 	
 	public static void main(String[] args) {

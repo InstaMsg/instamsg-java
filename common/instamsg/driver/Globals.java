@@ -36,10 +36,17 @@ public class Globals {
 	public static int NETWORK_INFO_INTERVAL = 300;
 	
 	public static int pingRequestInterval;
-	public static int compulsorySocketReadAfterMQTTPublishInterval;
-	
+	public static int compulsorySocketReadAfterMQTTPublishInterval;	
 	
 	public static char[] GLOBAL_BUFFER = new char[MAX_BUFFER_SIZE];
+	
+	public static String INSTAMSG_HOST;
+	public static int INSTAMSG_PORT;
+	
+	static {
+		INSTAMSG_HOST = "platform.instamsg.io";
+		INSTAMSG_PORT = 1883;
+	}
 	
 	public static void RESET_GLOBAL_BUFFER(){
 		GLOBAL_BUFFER = new char[MAX_BUFFER_SIZE];
