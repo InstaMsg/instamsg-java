@@ -1,14 +1,13 @@
 package common.apps.publisher;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-
 import utils.ChangeableString;
 import utils.Config;
 import common.apps.utils.PublisherSubscriberInit;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttClient;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 
 public class Main {
