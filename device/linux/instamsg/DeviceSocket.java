@@ -1,6 +1,7 @@
 package device.linux.instamsg;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import common.instamsg.driver.Globals;
 import common.instamsg.driver.Globals.ReturnCode;
@@ -28,6 +29,7 @@ public class DeviceSocket extends Socket {
 		
 		try {
 			socket = new java.net.Socket(host, port);
+			socket.setSoTimeout(Globals.SOCKET_READ_TIMEOUT_SECS * 1000);
 			
 		} catch (Exception e) {
 			
@@ -90,7 +92,43 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
-		return ReturnCode.FAILURE;
+		
+		for(int i = 0; i < len; i++) {
+			
+			try {
+				byte c = (byte) socket.getInputStream().read();
+				buffer[i] = c;
+				
+			} catch (SocketTimeoutException e) {
+				
+				if(guaranteed == true) {
+					
+					/*
+					 * We need to persevere till all the bytes are read.
+					 */
+					continue;
+					
+				} else {
+					
+					/*
+					 * Case c).
+					 */
+					return ReturnCode.SOCKET_READ_TIMEOUT;
+				}
+				
+			} catch (IOException e) {
+				
+				/*
+				 * Case b) and e).
+				 */
+				return ReturnCode.FAILURE;
+			}
+		}
+
+		/*
+		 * Case a) and d).
+		 */
+		return ReturnCode.SUCCESS;
 	}
 
 	

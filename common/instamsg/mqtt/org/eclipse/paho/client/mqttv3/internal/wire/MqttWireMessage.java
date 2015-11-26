@@ -44,10 +44,11 @@ public abstract class MqttWireMessage {
 	public static final byte MESSAGE_TYPE_PINGREQ = 12;
 	public static final byte MESSAGE_TYPE_PINGRESP = 13;
 	public static final byte MESSAGE_TYPE_DISCONNECT = 14;
+	public static final byte MESSAGE_TYPE_PROVACK = 15;
 	
 	String packet_names[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH",
 			"PUBACK", "PUBREC", "PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK",
-			"UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP", "DISCONNECT" };
+			"UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP", "DISCONNECT", "PROVACK" };
 
 	/** The type of the message (e.g. CONNECT, PUBLISH, PUBACK) */
 	private byte type;

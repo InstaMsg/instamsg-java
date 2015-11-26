@@ -35,6 +35,8 @@ public class Globals {
 	public static int MAX_CLIENT_ID_SIZE = 50;
 	public static int NETWORK_INFO_INTERVAL = 300;
 	public static int MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE = 5;
+	public static int MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM = 1;
+	public static int SOCKET_READ_TIMEOUT_SECS = 1;
 	
 	public static int pingRequestInterval;
 	public static int compulsorySocketReadAfterMQTTPublishInterval;	

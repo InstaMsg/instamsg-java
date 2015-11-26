@@ -46,6 +46,8 @@ public class InstaMsg {
 	
 	int connectionAttempts = 0;
 	
+	byte[] readBuf = new byte[Globals.MAX_BUFFER_SIZE];
+	
 	
 	
 	public static void log(String log) {
@@ -117,7 +119,148 @@ public class InstaMsg {
 	}
 	
 	
+	private static int encodeLength(byte[] buffer, int length) {
+	    int rc = 0;
+
+	    do
+	    {
+	        byte d = (byte) (length % 128);
+	        length /= 128;
+	        
+	        /* if there are more digits to encode, set the top bit of this digit */
+	        if (length > 0) {
+	            d |= 0x80;
+	        }
+	        
+	        buffer[1 + rc] = d;
+	        rc++;
+	        
+	    } while (length > 0);
+	    
+	    return rc;
+	}
+	
+	
+	private static void fillFixedHeaderFieldsFromPacketHeader(MQTTFixedHeader fixedHeader, byte packetHeader) {
+		//System.out.println(String.format("0x%02X", packetHeader));
+		fixedHeader.packetType = (byte) ((packetHeader >> 4) & 0x0F);
+		//System.out.println(String.format("0x%02X", fixedHeader.packetType));
+	}
+	
+	
+	private static ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
+		
+		if(c.socket.socketCorrupted == true) {
+			
+			errorLog("Socket not available at physical layer .. so packet cannot be read from server.");
+			return ReturnCode.FAILURE;
+		}
+		
+		c.readBuf = new byte[Globals.MAX_BUFFER_SIZE];
+		
+	    /*
+	     * 1. read the header byte.  This has the packet type in it.
+	     */
+		int numRetries = Globals.MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM;
+		ReturnCode rc = ReturnCode.FAILURE;
+	    do
+	    {
+	        rc = c.socket.socketRead(c.readBuf, 1, false);
+	        if(rc == ReturnCode.FAILURE)
+	        {
+	            c.socket.socketCorrupted = true;
+	            return ReturnCode.FAILURE;
+	        }
+
+	        if(rc == ReturnCode.SOCKET_READ_TIMEOUT)
+	        {
+	            numRetries--;
+	        }
+	    } while((rc == ReturnCode.SOCKET_READ_TIMEOUT) && (numRetries > 0));	    
+	    
+	    
+	    /*
+	     * If at this point, we still had a socket-timeout, it means we really have nothing to read.
+	     */
+	    if(rc == ReturnCode.SOCKET_READ_TIMEOUT)
+	    {
+	        return ReturnCode.SOCKET_READ_TIMEOUT;
+	    }
+
+	    
+	    int len = 1;
+	    
+	    /*
+	     *  2. read the remaining length.  This is variable in itself
+	     */
+	    int rem_len = 0;
+	    int multiplier = 1;
+	    byte[] i = new byte[1];
+	    do
+	    {
+	    	if(c.socket.socketRead(i, 1, true) == ReturnCode.FAILURE)
+	        {
+	            c.socket.socketCorrupted = true;
+	            return ReturnCode.FAILURE;
+	        }
+
+	        rem_len += (i[0] & 127) * multiplier;
+	        multiplier *= 128;
+	    } while ((i[0] & 128) != 0);
+	    
+	    
+	    
+	    len += encodeLength(c.readBuf, rem_len);
+	
+
+	    /*
+	     *  3. read the rest of the buffer 
+	     */
+	    if(rem_len > 0)
+	    {
+		    byte[] remainingBytes = new byte[rem_len];
+
+	    	if(c.socket.socketRead(remainingBytes, rem_len, true) == ReturnCode.FAILURE)
+	        {
+	            c.socket.socketCorrupted = true;
+	            return ReturnCode.FAILURE;
+	        }
+	    	
+	    	for(int j = 0; j < remainingBytes.length; j++) {
+	    		c.readBuf[len + j] = remainingBytes[j];
+	    	}
+	    }
+
+	    fillFixedHeaderFieldsFromPacketHeader(fixedHeader, c.readBuf[0]);
+	    System.out.println("Total length of packet received = " + (len + rem_len));
+	    return ReturnCode.SUCCESS;
+	}
+	
+	
+
+
 	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
+		ReturnCode rc = ReturnCode.FAILURE;
+		
+		do {
+			
+			MQTTFixedHeader fixedHeader = new MQTTFixedHeader();
+			
+			rc = readPacket(c, fixedHeader);
+			if(rc != ReturnCode.SUCCESS) {
+				return;
+			}
+			
+			if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
+				System.out.println("MIL GAYA PROVACK");
+				System.exit(0);
+			} else {
+				System.out.println("KUCHH AUR MILA .. BYE BYE " + fixedHeader.packetType);
+				System.exit(0);
+			}
+		
+		} while (rc == ReturnCode.SUCCESS);
+		
 		
 	}
 	
@@ -277,10 +420,13 @@ interface MessageHandler<T>{
 
 class MQTTFixedHeader{
 	
-    int packetType;
+    byte packetType;
+    
+    /*
     boolean dup;
     int qos;
     boolean retain;
+    */
 }
 
 class MQTTFixedHeaderPlusMsgId {
