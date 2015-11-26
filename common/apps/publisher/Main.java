@@ -13,6 +13,8 @@ public class Main {
 		
 		InitialCallbacks callbacks = new InitialCallbacks() {
 
+			int counter = 0;
+			
 			@Override
 			public ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult) {
 				return ReturnCode.SUCCESS;
@@ -31,9 +33,11 @@ public class Main {
 			@Override
 			public ReturnCode coreLoopyBusinessLogicInitiatedBySelf() {
 
+				counter++;
+				
 				return 
 				InstaMsg.MQTTPublish("listener_topic",
-									 "Hi.. Ajay testing java-client",
+									 "Hi.. Ajay testing java-client " + counter,
 									 2,
 									 false,
 									 new ResultHandler() {

@@ -3,6 +3,7 @@ package common.instamsg.driver;
 
 
 
+import utils.Config;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.ModulesProviderFactory;
 import common.instamsg.driver.include.ModulesProviderInterface;
@@ -574,7 +575,7 @@ public class InstaMsg {
 	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
 		instaMsg = new InstaMsg();
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider("linux");
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
 
 		boolean socketReadJustNow = false;
 
