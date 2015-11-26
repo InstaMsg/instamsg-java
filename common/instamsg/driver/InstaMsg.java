@@ -2,6 +2,7 @@ package common.instamsg.driver;
 
 
 
+
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.ModulesProviderFactory;
 import common.instamsg.driver.include.ModulesProviderInterface;
@@ -9,8 +10,10 @@ import common.instamsg.driver.include.OneToOneResult;
 import common.instamsg.driver.include.Socket;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 
@@ -21,6 +24,8 @@ public class InstaMsg {
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
 	static String NO_CLIENT_ID = "NONE";
+	
+	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;
 	
 
 	static ModulesProviderInterface modulesProvideInterface;
@@ -79,6 +84,16 @@ public class InstaMsg {
 		
 	}
 	
+	private static int getNextPackedId(InstaMsg c) {
+		
+		if(c.nextPackedId == MAX_PACKET_ID) {
+			c.nextPackedId = 1;
+		} else {
+			c.nextPackedId++;
+		}
+		
+		return c.nextPackedId;
+	}
 	
 	private static byte[] getEncodedMqttMessageAsByteStream(MqttWireMessage message) {
 		
@@ -128,6 +143,7 @@ public class InstaMsg {
 			return ReturnCode.FAILURE;
 		}
 		
+		infoLog(packet.length + "-sized packet successfully sent over wire.");
 		return ReturnCode.SUCCESS;
 	}
 	
@@ -349,6 +365,33 @@ public class InstaMsg {
 	}
 	
 	
+	public static ReturnCode MQTTPublish(String topicName,
+										 String payload,
+										 int qos,
+										 boolean dup,
+										 ResultHandler resultHandler,
+										 int resultHandlerTimeout,
+										 boolean retain,
+										 boolean logging) {
+		
+		MqttMessage baseMessage = new MqttMessage();
+		baseMessage.setPayload(payload.getBytes());
+		baseMessage.setQos(qos);
+		baseMessage.setDuplicate(dup);
+		baseMessage.setRetained(retain);
+		
+		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
+		pubMsg.setMessageId(getNextPackedId(instaMsg));
+		
+		byte[] packet = getEncodedMqttMessageAsByteStream(pubMsg);
+		if(packet == null) {
+			return ReturnCode.FAILURE;
+		}
+		
+		return sendPacket(instaMsg, packet);		
+	}
+
+	
 	public static ReturnCode MQTTConnect(InstaMsg c) {
 		
 		MqttConnect connectMsg = new MqttConnect(c.connectOptions);
@@ -446,6 +489,15 @@ public class InstaMsg {
 				}
 
 				if(true) {
+				    MQTTPublish("listener_topic",
+				    		    "Hi.. Ajay testing java-client",
+				    		    2,
+				    		    false,
+				    		    null,
+				    		    MQTT_RESULT_HANDLER_TIMEOUT,
+				    		    false,
+			                	true);
+
 					if(false) {
 						break;
 					}
@@ -484,7 +536,7 @@ class MessageHandlers {
 	int msgId;
 	int timeout;
 	String topicFilter;
-	MessageHandler<MessageData> handler;
+	ResultHandler resultHandler;
 }
 
 class ResultHandlers {
@@ -516,21 +568,19 @@ class MQTTFixedHeader{
     */
 }
 
-class MQTTFixedHeaderPlusMsgId {
-	
-    MQTTFixedHeader fixedHeader;
-    int msgId;
-}
-
+/*
 class MessageData {
 	
     MQTTMessage message;
     String topicName;
 }
+*/
 
+/*
 class MQTTMessage {
 	
     MQTTFixedHeaderPlusMsgId fixedHeaderPlusMsgId;
     String payload;
     int payloadlen;
 }
+*/

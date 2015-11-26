@@ -203,7 +203,7 @@ public class MqttMessage {
 		}
 	}
 
-	protected void setDuplicate(boolean dup) {
+	public void setDuplicate(boolean dup) {
 		this.dup = dup;
 	}
 
