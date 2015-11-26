@@ -34,6 +34,7 @@ public class Globals {
 	public static int LOG_LEVEL = 2;
 	public static int MAX_CLIENT_ID_SIZE = 50;
 	public static int NETWORK_INFO_INTERVAL = 300;
+	public static int MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE = 5;
 	
 	public static int pingRequestInterval;
 	public static int compulsorySocketReadAfterMQTTPublishInterval;	

@@ -2,6 +2,7 @@ package device.linux.instamsg;
 
 import java.io.IOException;
 
+import common.instamsg.driver.Globals;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.include.Socket;
@@ -24,6 +25,7 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public void connectUnderlyingSocketMediumTryOnce() {
+		
 		try {
 			socket = new java.net.Socket(host, port);
 			
@@ -34,6 +36,8 @@ public class DeviceSocket extends Socket {
 		}
 		
 		socketCorrupted = false;
+		InstaMsg.infoLog("TCP-SOCKET UNDERLYING_MEDIUM INITIATED FOR HOST = [" + 
+		                  Globals.INSTAMSG_HOST + "], PORT = [" + Globals.INSTAMSG_PORT + "].");
 	}
 
 	/**
@@ -106,6 +110,7 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public ReturnCode socketWrite(byte[] buffer, int len) {
+		
 		try {
 			socket.getOutputStream().write(buffer);
 			
@@ -127,6 +132,7 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public void releaseUnderlyingSocketMediumGuaranteed() {
+		
 		try {
 			socket.close();
 			

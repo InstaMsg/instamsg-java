@@ -15,7 +15,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWir
 
 public class InstaMsg {
 	
-	public static InstaMsg instaMsg = new InstaMsg();
+	private static InstaMsg instaMsg;;
 	
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
@@ -43,6 +43,8 @@ public class InstaMsg {
 	Socket socket;
 	
 	boolean connected = false;
+	
+	int connectionAttempts = 0;
 	
 	
 	
@@ -111,8 +113,12 @@ public class InstaMsg {
 			return ReturnCode.FAILURE;
 		}
 		
-		System.out.println(packet.length + " bytes successively sent over socket.");
 		return ReturnCode.SUCCESS;
+	}
+	
+	
+	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
+		
 	}
 	
 	
@@ -127,11 +133,17 @@ public class InstaMsg {
 		
 		return sendPacket(c, packet);
 	}	
-
 	
-	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks, String platform) {
 
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(platform);
+	public static void clearInstaMsg(InstaMsg c) {
+		
+		c.socket.releaseSocket();		
+		c.connected = false;
+	}
+	
+
+	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks) {
+
 		
 		c.socket = modulesProvideInterface.getSocket(Globals.INSTAMSG_HOST, Globals.INSTAMSG_PORT);		
 		c.socket.socketCorrupted = true;
@@ -183,7 +195,56 @@ public class InstaMsg {
 
 	
 	public static void main(String[] args) {
-		initInstaMsg(new InstaMsg(), null, "linux");
+		
+		instaMsg = new InstaMsg();
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider("linux");
+
+		boolean socketReadJustNow = false;
+		
+		while(true) {
+			
+			initInstaMsg(instaMsg, null);			
+			infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
+			
+			while(true) {
+				
+				socketReadJustNow = false;
+				
+				if(instaMsg.socket.socketCorrupted == true) {
+					errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
+					
+				} else {
+					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
+					socketReadJustNow = true;
+				}
+				
+				if(true) {
+					
+				}
+				
+	            if(instaMsg.socket.socketCorrupted == true) {
+	            	
+	            } else if(instaMsg.socket.socketCorrupted == false) {
+	            	
+	                instaMsg.connectionAttempts++;
+	                errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
+
+	                if(instaMsg.connectionAttempts > Globals.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
+	                {
+	                    instaMsg.connectionAttempts = 0;
+	                    
+	                    errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
+	                    instaMsg.socket.socketCorrupted = true;
+	                }
+	            }
+
+	            if(instaMsg.socket.socketCorrupted == true) {
+	            	
+	                clearInstaMsg(instaMsg);
+	                break;
+	            }				
+			}
+		}
 	}
 }
 
