@@ -1,8 +1,5 @@
 package common.instamsg.driver;
 
-
-
-
 import utils.Config;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.ModulesProviderFactory;
@@ -29,8 +26,7 @@ public class InstaMsg {
 	static int MAX_PACKET_ID = 10000;
 	static String NO_CLIENT_ID = "NONE";
 	
-	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;
-	
+	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;	
 
 	static ModulesProviderInterface modulesProvideInterface;
 	
@@ -92,9 +88,6 @@ public class InstaMsg {
 		};
 	}
 	
-	
-
-
 	
 	private static int getNextPackedId(InstaMsg c) {
 		

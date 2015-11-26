@@ -21,7 +21,7 @@ public class Globals {
 	};
 	
 	public static Misc misc;
-	public static SerialLogger serialLogger;
+	public static Log logger;
 	public static Time time;
 	public static Watchdog watchdog;
 	public static common.instamsg.driver.include.Config config;
@@ -67,8 +67,8 @@ public class Globals {
 
 	    Log.currentLogLevel = Globals.LOG_LEVEL;
 	    
-	    serialLogger = modulesProvider.getSerialLogger();
-	    serialLogger.initSerialLogger();
+	    logger = modulesProvider.getLogger();
+	    logger.initLogger();
 	    
 	    time = modulesProvider.getTime();
 	    time.initGlobalTimer();
@@ -77,9 +77,11 @@ public class Globals {
 	    watchdog.watchdogInit();
 
 	    
+	    /*
 	    if(Config.FILE_SYSTEM_INTERFACE_ENABLED){
 	    	common.instamsg.driver.Log.initFileLogger(Log.fileLogger, logFilePath);
 	    }
+	    */
 	}
 	
 	/*
