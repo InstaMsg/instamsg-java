@@ -13,6 +13,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
@@ -84,6 +85,22 @@ public class InstaMsg {
 		
 	}
 	
+	
+	private static void fireResultHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId)
+	{       
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+		{
+			if (c.resultHandlers[i].msgId == msgId)
+			{
+				c.resultHandlers[i].resultHandler.handle(msgId);
+				c.resultHandlers[i].msgId = 0;
+
+				break;
+			}
+		}
+	}
+
+	
 	private static int getNextPackedId(InstaMsg c) {
 		
 		if(c.nextPackedId == MAX_PACKET_ID) {
@@ -94,6 +111,28 @@ public class InstaMsg {
 		
 		return c.nextPackedId;
 	}
+	
+	
+	private static void attachResultHandler(InstaMsg c, int msgId, int timeout, ResultHandler resultHandler)
+	{
+	    if(resultHandler == null)
+	    {
+	        return;
+	    }
+
+	    for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+	    {
+	        if (c.resultHandlers[i].msgId == 0)
+	        {
+	            c.resultHandlers[i].msgId = msgId;
+	            c.resultHandlers[i].timeout = timeout;
+	            c.resultHandlers[i].resultHandler = resultHandler;
+
+	            break;
+	        }
+	    }
+	}
+
 	
 	private static byte[] getEncodedMqttMessageAsByteStream(MqttWireMessage message) {
 		
@@ -143,7 +182,6 @@ public class InstaMsg {
 			return ReturnCode.FAILURE;
 		}
 		
-		infoLog(packet.length + "-sized packet successfully sent over wire.");
 		return ReturnCode.SUCCESS;
 	}
 	
@@ -335,6 +373,7 @@ public class InstaMsg {
 			}
 			
 			if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
+				
 				try {
 					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
 					if(msg.getReturnCode() == 0) {
@@ -348,20 +387,35 @@ public class InstaMsg {
 						handleConnOrProvAckGeneric(c, msg.getReturnCode());
 					}
 					
-				} catch (MqttException e) {
-					
-					errorLog("Error occurred while decoding MQTT-PROVACK message");
-					
-					c.socket.socketCorrupted = true;
-					rc = ReturnCode.FAILURE;
+				} catch (MqttException e) {					
+					rc = handleMessageDecodingFailure(c, "MQTT-PROVACK");
 				}
 
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
+				
+				try {
+					MqttPubRec msg = (MqttPubRec) MqttWireMessage.createWireMessage(c.readBuf);
+					fireResultHandlerUsingMsgIdAsTheKey(instaMsg, msg.getMessageId());
+					
+				} catch (MqttException e) {
+					rc = handleMessageDecodingFailure(c, "MQTT-PUBREC");
+				}
+				
 			} else {
-
+				System.out.println("Packet received of type = " + fixedHeader.packetType);
 			}
 		
 		} while (rc == ReturnCode.SUCCESS);		
 		
+	}
+
+	private static ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
+		ReturnCode rc;
+		errorLog("Error occurred while decoding " + messageType + " message");
+		
+		c.socket.socketCorrupted = true;
+		rc = ReturnCode.FAILURE;
+		return rc;
 	}
 	
 	
@@ -381,7 +435,13 @@ public class InstaMsg {
 		baseMessage.setRetained(retain);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
-		pubMsg.setMessageId(getNextPackedId(instaMsg));
+		if((qos == 1) || (qos == 2))
+		{
+			int msgId = getNextPackedId(instaMsg);
+			
+			pubMsg.setMessageId(msgId);
+			attachResultHandler(instaMsg, msgId, resultHandlerTimeout, resultHandler);
+		}
 		
 		byte[] packet = getEncodedMqttMessageAsByteStream(pubMsg);
 		if(packet == null) {
@@ -493,7 +553,14 @@ public class InstaMsg {
 				    		    "Hi.. Ajay testing java-client",
 				    		    2,
 				    		    false,
-				    		    null,
+				    		    new ResultHandler() {
+									
+									@Override
+									public void handle(int msgId) {
+										infoLog("PUBACK received for msg-id [" + msgId +"]");
+										
+									}
+								},
 				    		    MQTT_RESULT_HANDLER_TIMEOUT,
 				    		    false,
 			                	true);
@@ -543,7 +610,7 @@ class ResultHandlers {
 	
 	int msgId;
 	int timeout;
-	MessageHandler<MQTTFixedHeaderPlusMsgId> handler;
+	ResultHandler resultHandler;
 }
 
 class OneToOneHandlers {
