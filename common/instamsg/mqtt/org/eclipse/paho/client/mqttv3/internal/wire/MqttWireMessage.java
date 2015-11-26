@@ -198,6 +198,9 @@ public abstract class MqttWireMessage {
 			else if (type == MqttWireMessage.MESSAGE_TYPE_CONNACK) {
 				result = new MqttConnack(info, data);
 			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
+				result = new MqttProvack(info, data);
+			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_PINGREQ) {
 				result = new MqttPingReq(info, data);
 			}

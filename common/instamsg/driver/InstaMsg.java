@@ -10,6 +10,7 @@ import common.instamsg.driver.include.Socket;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 
@@ -47,6 +48,18 @@ public class InstaMsg {
 	int connectionAttempts = 0;
 	
 	byte[] readBuf = new byte[Globals.MAX_BUFFER_SIZE];
+
+	private String filesTopic;
+
+	private String rebootTopic;
+
+	private String serverLogsTopic;
+
+	private String enableServerLoggingTopic;
+
+	private String fileUploadUrl;
+
+	private String receiveConfigTopic;
 	
 	
 	
@@ -232,11 +245,65 @@ public class InstaMsg {
 	    }
 
 	    fillFixedHeaderFieldsFromPacketHeader(fixedHeader, c.readBuf[0]);
-	    System.out.println("Total length of packet received = " + (len + rem_len));
 	    return ReturnCode.SUCCESS;
 	}
 	
+	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc)
+	{
+	    if(connackRc == 0x00)  /* Connection Accepted */
+	    {
+	        infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
+	        c.connected = true;
+
+	        /*
+	        sendClientData(get_client_session_data, TOPIC_SESSION_DATA);
+	        sendClientData(get_client_metadata, TOPIC_METADATA);
+	        sendClientData(get_network_data, TOPIC_NETWORK_DATA);
+
+	        registerEditableConfig(&pingRequestInterval,
+	                               "PING_REQ_INTERVAL",
+	                               CONFIG_INT,
+	                               "180",
+	                               "Keep-Alive Interval between Device and InstaMsg-Server");
+
+	        registerEditableConfig(&compulsorySocketReadAfterMQTTPublishInterval,
+	                               "COMPULSORY_SOCKET_READ_AFTER_MQTT_PUBLISH_INTERVAL",
+	                               CONFIG_INT,
+	                               "3",
+	                               "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
+
+	        if(c->onConnectCallback != NULL)
+	        {
+	            c->onConnectCallback();
+	            c->onConnectCallback = NULL;
+	        }
+	        */
+	    }
+	    else
+	    {
+	        infoLog("Client-Connection failed with code [" + connackRc + "]");
+	    }
+	}
+
 	
+	private static void setValuesOfSpecialTopics(InstaMsg c)
+	{
+	    c.filesTopic               = "instamsg/clients/" + c.clientIdComplete + "/files";
+	    c.rebootTopic              = "instamsg/clients/" + c.clientIdComplete + "/reboot";
+	    c.enableServerLoggingTopic = "instamsg/clients/" + c.clientIdComplete + "/enableServerLogging";
+	    c.serverLogsTopic          = "instamsg/clients/" + c.clientIdComplete + "/logs";
+	    c.receiveConfigTopic       = "instamsg/clients/" + c.clientIdComplete + "/config/serverToClient";
+	    c.fileUploadUrl            = "/api/beta/clients/" + c.clientIdComplete + "/files";
+
+
+	    infoLog("\nThe special-topics value :: \n");
+	    infoLog("FILES_TOPIC = [" + c.filesTopic + "]");
+	    infoLog("REBOOT_TOPIC = [" + c.rebootTopic + "]");
+	    infoLog("ENABLE_SERVER_LOGGING_TOPIC = [" + c.enableServerLoggingTopic + "]");
+	    infoLog("SERVER_LOGS_TOPIC = [" + c.serverLogsTopic + "]");
+	    infoLog("FILE_UPLOAD_URL = [" + c.fileUploadUrl + "]");
+	    infoLog("CONFIG_FROM_SERVER_TO_CLIENT = [" + c.receiveConfigTopic + "]");
+	}
 
 
 	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
@@ -252,15 +319,32 @@ public class InstaMsg {
 			}
 			
 			if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
-				System.out.println("MIL GAYA PROVACK");
-				System.exit(0);
+				try {
+					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
+					if(msg.getReturnCode() == 0) {
+						/*
+						 * Connection was established successfully;
+						 */
+						c.clientIdComplete = msg.getClientId();
+						infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
+						
+						setValuesOfSpecialTopics(c);
+						handleConnOrProvAckGeneric(c, msg.getReturnCode());
+					}
+					
+				} catch (MqttException e) {
+					
+					errorLog("Error occurred while decoding MQTT-PROVACK message");
+					
+					c.socket.socketCorrupted = true;
+					rc = ReturnCode.FAILURE;
+				}
+
 			} else {
-				System.out.println("KUCHH AUR MILA .. BYE BYE " + fixedHeader.packetType);
-				System.exit(0);
+
 			}
 		
-		} while (rc == ReturnCode.SUCCESS);
-		
+		} while (rc == ReturnCode.SUCCESS);		
 		
 	}
 	
@@ -338,56 +422,59 @@ public class InstaMsg {
 
 	
 	public static void main(String[] args) {
-		
+
 		instaMsg = new InstaMsg();
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider("linux");
 
 		boolean socketReadJustNow = false;
-		
+
 		while(true) {
-			
+
 			initInstaMsg(instaMsg, null);			
 			infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
-			
+
 			while(true) {
-				
+
 				socketReadJustNow = false;
-				
+
 				if(instaMsg.socket.socketCorrupted == true) {
 					errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
-					
+
 				} else {
 					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
 					socketReadJustNow = true;
 				}
-				
+
 				if(true) {
-					
+					if(false) {
+						break;
+					}
 				}
-				
-	            if(instaMsg.socket.socketCorrupted == true) {
-	            	
-	            } else if(instaMsg.socket.socketCorrupted == false) {
-	            	
-	                instaMsg.connectionAttempts++;
-	                errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
-
-	                if(instaMsg.connectionAttempts > Globals.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
-	                {
-	                    instaMsg.connectionAttempts = 0;
-	                    
-	                    errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
-	                    instaMsg.socket.socketCorrupted = true;
-	                }
-	            }
-
-	            if(instaMsg.socket.socketCorrupted == true) {
-	            	
-	                clearInstaMsg(instaMsg);
-	                break;
-	            }				
 			}
+
+			if(instaMsg.socket.socketCorrupted == true) {
+
+			} else if(instaMsg.socket.socketCorrupted == false) {
+
+				instaMsg.connectionAttempts++;
+				errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
+
+				if(instaMsg.connectionAttempts > Globals.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
+				{
+					instaMsg.connectionAttempts = 0;
+
+					errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
+					instaMsg.socket.socketCorrupted = true;
+				}
+			}
+
+			if(instaMsg.socket.socketCorrupted == true) {
+
+				clearInstaMsg(instaMsg);
+				break;
+			}				
 		}
+
 	}
 }
 
