@@ -56,15 +56,10 @@ public class InstaMsg {
 	byte[] readBuf = new byte[Globals.MAX_BUFFER_SIZE];
 
 	private String filesTopic;
-
 	private String rebootTopic;
-
 	private String serverLogsTopic;
-
 	private String enableServerLoggingTopic;
-
 	private String fileUploadUrl;
-
 	private String receiveConfigTopic;
 	
 	
@@ -86,19 +81,7 @@ public class InstaMsg {
 	}
 	
 	
-	private static void fireResultHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId)
-	{       
-		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
-		{
-			if (c.resultHandlers[i].msgId == msgId)
-			{
-				c.resultHandlers[i].resultHandler.handle(msgId);
-				c.resultHandlers[i].msgId = 0;
 
-				break;
-			}
-		}
-	}
 
 	
 	private static int getNextPackedId(InstaMsg c) {
@@ -131,6 +114,21 @@ public class InstaMsg {
 	            break;
 	        }
 	    }
+	}
+	
+	
+	private static void fireResultHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId)
+	{       
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+		{
+			if (c.resultHandlers[i].msgId == msgId)
+			{
+				c.resultHandlers[i].resultHandler.handle(msgId);
+				c.resultHandlers[i].msgId = 0;
+
+				break;
+			}
+		}
 	}
 
 	
@@ -466,6 +464,7 @@ public class InstaMsg {
 	
 
 	public static void clearInstaMsg(InstaMsg c) {
+		infoLog("CLEARING INSTAMSG !!!!");
 		
 		c.socket.releaseSocket();		
 		c.connected = false;
@@ -524,7 +523,7 @@ public class InstaMsg {
 	}	
 
 	
-	public static void main(String[] args) {
+	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
 		instaMsg = new InstaMsg();
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider("linux");
@@ -542,6 +541,7 @@ public class InstaMsg {
 
 				if(instaMsg.socket.socketCorrupted == true) {
 					errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
+					break;
 
 				} else {
 					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
@@ -549,29 +549,15 @@ public class InstaMsg {
 				}
 
 				if(true) {
-				    MQTTPublish("listener_topic",
-				    		    "Hi.. Ajay testing java-client",
-				    		    2,
-				    		    false,
-				    		    new ResultHandler() {
-									
-									@Override
-									public void handle(int msgId) {
-										infoLog("PUBACK received for msg-id [" + msgId +"]");
-										
-									}
-								},
-				    		    MQTT_RESULT_HANDLER_TIMEOUT,
-				    		    false,
-			                	true);
-
-					if(false) {
+					
+					while(true) {
+						callbacks.coreLoopyBusinessLogicInitiatedBySelf();
 						break;
 					}
 				}
 			}
 
-			if(instaMsg.socket.socketCorrupted == true) {
+			if(instaMsg.connected == true) {
 
 			} else if(instaMsg.socket.socketCorrupted == false) {
 
