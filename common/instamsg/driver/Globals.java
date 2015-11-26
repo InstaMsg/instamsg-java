@@ -81,4 +81,27 @@ public class Globals {
 	    	common.instamsg.driver.Log.initFileLogger(Log.fileLogger, logFilePath);
 	    }
 	}
+	
+	/*
+	 * This method causes the current thread to wait for "n" seconds.
+	 */
+	public static void startAndCountdownTimer(int seconds, boolean showRunningStatus)
+	{
+	    int i;
+	    long j;
+	    long cycles = 1000000 / time.getMinimumDelayPossibleInMicroSeconds();
+
+	    for(i = 0; i < seconds; i++)
+	    {
+	        if(showRunningStatus == true)
+	        {
+	        	InstaMsg.infoLog(seconds - 1 + "");
+	        }
+
+	        for(j = 0; j < cycles; j++)
+	        {
+	            time.minimumDelay();
+	        }
+	    }
+	}
 }

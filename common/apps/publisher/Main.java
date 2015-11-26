@@ -40,8 +40,8 @@ public class Main {
 
 										@Override
 										public void handle(int msgId) {
+											
 											InstaMsg.infoLog("PUBACK received for msg-id [" + msgId +"]");
-
 										}
 									},
 									InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,

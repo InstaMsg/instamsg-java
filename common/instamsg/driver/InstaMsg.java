@@ -13,7 +13,9 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
@@ -62,6 +64,8 @@ public class InstaMsg {
 	private String fileUploadUrl;
 	private String receiveConfigTopic;
 	
+	private static ResultHandler pubCompResultHandler;
+	
 	
 	
 	public static void log(String log) {
@@ -77,7 +81,14 @@ public class InstaMsg {
 	}
 	
 	static {
-		
+		pubCompResultHandler = new ResultHandler() {
+			
+			@Override
+			public void handle(int msgId) {
+				
+				infoLog("PUBCOMP received for msg-id [" + msgId + "]");
+			}
+		};
 	}
 	
 	
@@ -337,6 +348,25 @@ public class InstaMsg {
 	    }
 	}
 
+
+	static void removeExpiredResultHandlers(InstaMsg c)
+	{
+	    for (int i = 0; i < MAX_MESSAGE_HANDLERS; i++)
+	    {
+	    	if(c.resultHandlers[i].msgId == 0) {
+	    		continue;
+	    	}
+	    	
+	    	if(c.resultHandlers[i].timeout < 0) {
+	    		infoLog("No pub/sub response received for msgid [" + c.resultHandlers[i].msgId + "], removing..");
+	    		c.resultHandlers[i].msgId = 0;
+	    	}
+	    	else {
+	    		c.resultHandlers[i].timeout = c.resultHandlers[i].timeout - 1;
+	    	}
+	    }
+	}
+
 	
 	private static void setValuesOfSpecialTopics(InstaMsg c)
 	{
@@ -392,11 +422,29 @@ public class InstaMsg {
 			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
 				
 				try {
-					MqttPubRec msg = (MqttPubRec) MqttWireMessage.createWireMessage(c.readBuf);
-					fireResultHandlerUsingMsgIdAsTheKey(instaMsg, msg.getMessageId());
+					MqttPubRec pubRecMsg = (MqttPubRec) MqttWireMessage.createWireMessage(c.readBuf);
+					fireResultHandlerUsingMsgIdAsTheKey(instaMsg, pubRecMsg.getMessageId());
+					
+					attachResultHandler(instaMsg, pubRecMsg.getMessageId(), MQTT_RESULT_HANDLER_TIMEOUT, pubCompResultHandler);
+
+					MqttPubRel pubRelMsg = new MqttPubRel(pubRecMsg);
+					byte[] pubRelPacket = getEncodedMqttMessageAsByteStream(pubRelMsg);
+					if(pubRelPacket != null) {
+						sendPacket(instaMsg, pubRelPacket);
+					}
 					
 				} catch (MqttException e) {
 					rc = handleMessageDecodingFailure(c, "MQTT-PUBREC");
+				}
+				
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBCOMP) {
+				
+				try {
+					MqttPubComp pubCompMsg = (MqttPubComp) MqttWireMessage.createWireMessage(c.readBuf);
+					fireResultHandlerUsingMsgIdAsTheKey(instaMsg, pubCompMsg.getMessageId());
+					
+				} catch (MqttException e) {
+					rc = handleMessageDecodingFailure(c, "MQTT-PUBCOMP");
 				}
 				
 			} else {
@@ -551,6 +599,12 @@ public class InstaMsg {
 				if(true) {
 					
 					while(true) {
+						removeExpiredResultHandlers(instaMsg);
+						
+						if(socketReadJustNow == false) {
+							Globals.startAndCountdownTimer(1, false);
+						}
+						
 						callbacks.coreLoopyBusinessLogicInitiatedBySelf();
 						break;
 					}
