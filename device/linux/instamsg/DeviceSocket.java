@@ -5,7 +5,7 @@ import java.net.SocketTimeoutException;
 
 import common.instamsg.driver.Globals;
 import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.Socket;
 
 public class DeviceSocket extends Socket {
@@ -33,12 +33,12 @@ public class DeviceSocket extends Socket {
 			
 		} catch (Exception e) {
 			
-			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while connecting to [" + host + "] on port [" + port + "]");
+			Log.errorLog(SOCKET_ERROR + "Error occurred while connecting to [" + host + "] on port [" + port + "]");
 			return;
 		}
 		
 		socketCorrupted = false;
-		InstaMsg.infoLog("TCP-SOCKET UNDERLYING_MEDIUM INITIATED FOR HOST = [" + 
+		Log.infoLog("TCP-SOCKET UNDERLYING_MEDIUM INITIATED FOR HOST = [" + 
 		                  Globals.INSTAMSG_HOST + "], PORT = [" + Globals.INSTAMSG_PORT + "].");
 	}
 
@@ -154,7 +154,7 @@ public class DeviceSocket extends Socket {
 			
 		} catch (IOException e) {
 			
-			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while writing bytes to socket");
+			Log.errorLog(SOCKET_ERROR + "Error occurred while writing bytes to socket");
 			return ReturnCode.FAILURE;
 		}
 		
@@ -176,7 +176,7 @@ public class DeviceSocket extends Socket {
 			
 		} catch (IOException e) {
 	
-			InstaMsg.errorLog(SOCKET_ERROR + "Error occurred while closing the socket");
+			Log.errorLog(SOCKET_ERROR + "Error occurred while closing the socket");
 		}
 		
 	}

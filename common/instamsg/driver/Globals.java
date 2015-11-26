@@ -97,7 +97,7 @@ public class Globals {
 	    {
 	        if(showRunningStatus == true)
 	        {
-	        	InstaMsg.infoLog(seconds - 1 + "");
+	        	Log.infoLog(seconds - 1 + "");
 	        }
 
 	        for(j = 0; j < cycles; j++)

@@ -33,7 +33,9 @@ public class DeviceLogger extends Log {
 	 */
 	@Override
 	public ReturnCode loggerWrite(byte[] buffer, int len) {
-		return ReturnCode.FAILURE;
+		
+		System.out.println(new String(buffer));
+		return ReturnCode.SUCCESS;
 	}
 
 	

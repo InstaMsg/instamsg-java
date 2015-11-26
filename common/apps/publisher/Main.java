@@ -4,6 +4,7 @@ import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.ResultHandler;
+import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.OneToOneResult;
 
 
@@ -45,7 +46,7 @@ public class Main {
 										@Override
 										public void handle(int msgId) {
 											
-											InstaMsg.infoLog("PUBACK received for msg-id [" + msgId +"]");
+											Log.infoLog("PUBACK received for msg-id [" + msgId +"]");
 										}
 									},
 									InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,

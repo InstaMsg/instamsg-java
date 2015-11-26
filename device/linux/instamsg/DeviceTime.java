@@ -1,6 +1,6 @@
 package device.linux.instamsg;
 
-import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.Time;
 
 public class DeviceTime implements Time {
@@ -31,7 +31,7 @@ public class DeviceTime implements Time {
 			
 		} catch (InterruptedException e) {
 
-			InstaMsg.infoLog("Some error occurred while thread-sleeping");
+			Log.infoLog("Some error occurred while thread-sleeping");
 		}
 	}
 	

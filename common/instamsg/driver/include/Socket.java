@@ -2,7 +2,6 @@ package common.instamsg.driver.include;
 
 import common.instamsg.driver.Globals;
 import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.InstaMsg;
 
 public abstract class Socket {
 
@@ -27,7 +26,7 @@ public abstract class Socket {
 	public void releaseSocket() {
 		
 		releaseUnderlyingSocketMediumGuaranteed();		
-	    InstaMsg.infoLog("COMPLETE [TCP-SOCKET] STRUCTURE, INCLUDING THE UNDERLYING MEDIUM CLEANED FOR HOST = [" +
+	    Log.infoLog("COMPLETE [TCP-SOCKET] STRUCTURE, INCLUDING THE UNDERLYING MEDIUM CLEANED FOR HOST = [" +
 	                     Globals.INSTAMSG_HOST + "], PORT = [" + Globals.INSTAMSG_PORT + "].");
 
 	}

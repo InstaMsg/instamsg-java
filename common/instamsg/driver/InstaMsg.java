@@ -2,6 +2,7 @@ package common.instamsg.driver;
 
 import utils.Config;
 import common.instamsg.driver.Globals.ReturnCode;
+import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.ModulesProviderFactory;
 import common.instamsg.driver.include.ModulesProviderInterface;
 import common.instamsg.driver.include.OneToOneResult;
@@ -28,7 +29,7 @@ public class InstaMsg {
 	
 	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;	
 
-	static ModulesProviderInterface modulesProvideInterface;
+	public static ModulesProviderInterface modulesProvideInterface;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
@@ -65,27 +66,17 @@ public class InstaMsg {
 	
 	
 	
-	public static void log(String log) {
-		System.out.println(log);
-	}
-	
-	public static void infoLog(String log) {
-		log(log);
-	}
-	
-	public static void errorLog(String log) {
-		log(log);
-	}
-	
 	static {
 		pubCompResultHandler = new ResultHandler() {
 			
 			@Override
 			public void handle(int msgId) {
 				
-				infoLog("PUBCOMP received for msg-id [" + msgId + "]");
+				Log.infoLog("PUBCOMP received for msg-id [" + msgId + "]");
 			}
 		};
+		
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
 	}
 	
 	
@@ -144,7 +135,7 @@ public class InstaMsg {
 			bytes = message.getHeader();
 			
 		} catch (MqttException e) {
-			errorLog("Could not fetch header from message.");
+			Log.errorLog("Could not fetch header from message.");
 			return null;
 		}
 		
@@ -153,7 +144,7 @@ public class InstaMsg {
 			pl = message.getPayload();
 			
 		} catch (MqttException e) {
-			errorLog("Could not fetch payload from message");
+			Log.errorLog("Could not fetch payload from message");
 			return null;
 		}
 		
@@ -176,7 +167,7 @@ public class InstaMsg {
 	private static ReturnCode sendPacket(InstaMsg c, byte[] packet) {
 		
 		if(c.socket.socketCorrupted == true) {
-			errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
+			Log.errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
 			return ReturnCode.FAILURE;
 		}
 		
@@ -222,7 +213,7 @@ public class InstaMsg {
 		
 		if(c.socket.socketCorrupted == true) {
 			
-			errorLog("Socket not available at physical layer .. so packet cannot be read from server.");
+			Log.errorLog("Socket not available at physical layer .. so packet cannot be read from server.");
 			return ReturnCode.FAILURE;
 		}
 		
@@ -309,7 +300,7 @@ public class InstaMsg {
 	{
 	    if(connackRc == 0x00)  /* Connection Accepted */
 	    {
-	        infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
+	        Log.infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
 	        c.connected = true;
 
 	        /*
@@ -338,7 +329,7 @@ public class InstaMsg {
 	    }
 	    else
 	    {
-	        infoLog("Client-Connection failed with code [" + connackRc + "]");
+	        Log.infoLog("Client-Connection failed with code [" + connackRc + "]");
 	    }
 	}
 
@@ -352,7 +343,7 @@ public class InstaMsg {
 	    	}
 	    	
 	    	if(c.resultHandlers[i].timeout < 0) {
-	    		infoLog("No pub/sub response received for msgid [" + c.resultHandlers[i].msgId + "], removing..");
+	    		Log.infoLog("No pub/sub response received for msgid [" + c.resultHandlers[i].msgId + "], removing..");
 	    		c.resultHandlers[i].msgId = 0;
 	    	}
 	    	else {
@@ -372,13 +363,13 @@ public class InstaMsg {
 	    c.fileUploadUrl            = "/api/beta/clients/" + c.clientIdComplete + "/files";
 
 
-	    infoLog("\nThe special-topics value :: \n");
-	    infoLog("FILES_TOPIC = [" + c.filesTopic + "]");
-	    infoLog("REBOOT_TOPIC = [" + c.rebootTopic + "]");
-	    infoLog("ENABLE_SERVER_LOGGING_TOPIC = [" + c.enableServerLoggingTopic + "]");
-	    infoLog("SERVER_LOGS_TOPIC = [" + c.serverLogsTopic + "]");
-	    infoLog("FILE_UPLOAD_URL = [" + c.fileUploadUrl + "]");
-	    infoLog("CONFIG_FROM_SERVER_TO_CLIENT = [" + c.receiveConfigTopic + "]");
+	    Log.infoLog("\nThe special-topics value :: \n");
+	    Log.infoLog("FILES_TOPIC = [" + c.filesTopic + "]");
+	    Log.infoLog("REBOOT_TOPIC = [" + c.rebootTopic + "]");
+	    Log.infoLog("ENABLE_SERVER_LOGGING_TOPIC = [" + c.enableServerLoggingTopic + "]");
+	    Log.infoLog("SERVER_LOGS_TOPIC = [" + c.serverLogsTopic + "]");
+	    Log.infoLog("FILE_UPLOAD_URL = [" + c.fileUploadUrl + "]");
+	    Log.infoLog("CONFIG_FROM_SERVER_TO_CLIENT = [" + c.receiveConfigTopic + "]");
 	}
 
 
@@ -403,7 +394,7 @@ public class InstaMsg {
 						 * Connection was established successfully;
 						 */
 						c.clientIdComplete = msg.getClientId();
-						infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
+						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
 						
 						setValuesOfSpecialTopics(c);
 						handleConnOrProvAckGeneric(c, msg.getReturnCode());
@@ -451,7 +442,7 @@ public class InstaMsg {
 
 	private static ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
 		ReturnCode rc;
-		errorLog("Error occurred while decoding " + messageType + " message");
+		Log.errorLog("Error occurred while decoding " + messageType + " message");
 		
 		c.socket.socketCorrupted = true;
 		rc = ReturnCode.FAILURE;
@@ -506,7 +497,7 @@ public class InstaMsg {
 	
 
 	public static void clearInstaMsg(InstaMsg c) {
-		infoLog("CLEARING INSTAMSG !!!!");
+		Log.infoLog("CLEARING INSTAMSG !!!!");
 		
 		c.socket.releaseSocket();		
 		c.connected = false;
@@ -568,21 +559,20 @@ public class InstaMsg {
 	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
 		instaMsg = new InstaMsg();
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
 
 		boolean socketReadJustNow = false;
 
 		while(true) {
 
 			initInstaMsg(instaMsg, null);			
-			infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
+			Log.infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
 
 			while(true) {
 
 				socketReadJustNow = false;
 
 				if(instaMsg.socket.socketCorrupted == true) {
-					errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
+					Log.errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
 					break;
 
 				} else {
@@ -610,13 +600,13 @@ public class InstaMsg {
 			} else if(instaMsg.socket.socketCorrupted == false) {
 
 				instaMsg.connectionAttempts++;
-				errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
+				Log.errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
 
 				if(instaMsg.connectionAttempts > Globals.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
 				{
 					instaMsg.connectionAttempts = 0;
 
-					errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
+					Log.errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
 					instaMsg.socket.socketCorrupted = true;
 				}
 			}
