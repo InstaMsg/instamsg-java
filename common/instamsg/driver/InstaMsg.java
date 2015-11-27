@@ -1,5 +1,6 @@
 package common.instamsg.driver;
 
+import utils.ChangeableInt;
 import utils.Config;
 import common.instamsg.driver.Config.CONFIG_TYPE;
 import common.instamsg.driver.Globals.ReturnCode;
@@ -8,10 +9,12 @@ import common.instamsg.driver.include.ModulesProviderFactory;
 import common.instamsg.driver.include.ModulesProviderInterface;
 import common.instamsg.driver.include.OneToOneResult;
 import common.instamsg.driver.include.Socket;
+import common.instamsg.driver.include.Time;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
@@ -32,6 +35,7 @@ public class InstaMsg {
 
 	public static ModulesProviderInterface modulesProvideInterface;
 	public static common.instamsg.driver.Config config;
+	public static Time time;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
@@ -66,8 +70,8 @@ public class InstaMsg {
 	
 	private static ResultHandler pubCompResultHandler;
 	
-	int pingRequestInterval;
-	int compulsorySocketReadAfterMQTTPublishInterval;
+	ChangeableInt pingRequestInterval = new ChangeableInt(0);
+	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	
 	
 	
@@ -83,6 +87,7 @@ public class InstaMsg {
 		
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
 		config = modulesProvideInterface.getConfig();
+		time = modulesProvideInterface.getTime();
 	}
 	
 	
@@ -309,14 +314,14 @@ public class InstaMsg {
 	        Log.infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
 	        c.connected = true;
 	        
-	        config.registerEditableConfig(new Integer(c.pingRequestInterval),
+	        config.registerEditableConfig(c.pingRequestInterval,
 	        		                      "PING_REQ_INTERVAL",
                                           CONFIG_TYPE.CONFIG_INT,
                                           "180",
                                           "Keep-Alive Interval between Device and InstaMsg-Server");
 	        
 
-	        config.registerEditableConfig(new Integer(c.compulsorySocketReadAfterMQTTPublishInterval),
+	        config.registerEditableConfig(c.compulsorySocketReadAfterMQTTPublishInterval,
 	                                      "COMPULSORY_SOCKET_READ_AFTER_MQTT_PUBLISH_INTERVAL",
 	                                      CONFIG_TYPE.CONFIG_INT,
 	                                      "3",
@@ -359,6 +364,23 @@ public class InstaMsg {
 	    		c.resultHandlers[i].timeout = c.resultHandlers[i].timeout - 1;
 	    	}
 	    }
+	}
+
+	
+	private static void sendPingReqToServer(InstaMsg c)
+	{
+		if(c.socket.socketCorrupted == true) {
+			
+			Log.errorLog("Socket not available at physical layer .. so server cannot be pinged for maintaining keep-alive.");
+			return;
+		}
+		
+		MqttPingReq pingReqMsg = new MqttPingReq();
+		
+		byte[] packet = getEncodedMqttMessageAsByteStream(pingReqMsg);
+		if(packet != null) {
+			sendPacket(c, packet);
+		}
 	}
 
 	
@@ -460,7 +482,12 @@ public class InstaMsg {
 					rc = handleMessageDecodingFailure(c, "MQTT-PUBLISH");
 				}
 
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PINGRESP) {
+				
+				Log.infoLog("PINGRESP received... relations are intact !!\n");				
+				
 			} else {
+				
 				Log.infoLog("Packet received of type = " + fixedHeader.packetType);
 			}
 		
@@ -593,6 +620,10 @@ public class InstaMsg {
 	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
 		instaMsg = new InstaMsg();
+		
+		long currentTick = time.getCurrentTick();		
+		long nextPingReqTick = currentTick + instaMsg.pingRequestInterval.intValue();
+		long nextBusinessLogicTick = currentTick + businessLogicInterval;
 
 		boolean socketReadJustNow = false;
 
@@ -623,8 +654,23 @@ public class InstaMsg {
 							Globals.startAndCountdownTimer(1, false);
 						}
 						
-						callbacks.coreLoopyBusinessLogicInitiatedBySelf();
-						break;
+						long latestTick = time.getCurrentTick();
+						
+						if((latestTick >= nextPingReqTick) && (instaMsg.pingRequestInterval.intValue() != 0)) {
+							
+                            Log.infoLog("Time to play ping-pong with server !!!\n");
+                            sendPingReqToServer(instaMsg);
+
+                            nextPingReqTick = latestTick + instaMsg.pingRequestInterval.intValue();
+						}
+						
+						if(latestTick >= nextBusinessLogicTick) {
+							
+							callbacks.coreLoopyBusinessLogicInitiatedBySelf();
+							
+							nextBusinessLogicTick = latestTick + businessLogicInterval;
+							break;
+						}
 					}
 				}
 			}

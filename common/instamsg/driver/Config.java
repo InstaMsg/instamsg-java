@@ -1,5 +1,7 @@
 package common.instamsg.driver;
 
+import utils.ChangeableInt;
+import utils.ChangeableString;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.Log;
 
@@ -82,13 +84,13 @@ public abstract class Config {
 	     */
 	    if(type == CONFIG_TYPE.CONFIG_STRING)
 	    {
-	    	var = stringified_value;
+	    	((ChangeableString) var).changeTo(stringified_value);
 	        Log.infoLog(CONFIG + "Using value [" + var + "] for key [" + key + "] of type STRING");
 	    }
 	    else
 	    {
-	        var = Integer.parseInt(stringified_value);
-	        Log.infoLog(CONFIG + "Using value [" + var + "] for key [" + key + "] of type INTEGER");
+	        ((ChangeableInt) var).changeTo(Integer.parseInt(stringified_value));;
+	        Log.infoLog(CONFIG + "Using value [" + ((ChangeableInt) var).intValue() + "] for key [" + key + "] of type INTEGER");
 	    }
 
 

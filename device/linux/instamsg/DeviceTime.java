@@ -1,5 +1,7 @@
 package device.linux.instamsg;
 
+import java.util.Date;
+
 import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.Time;
 
@@ -40,7 +42,7 @@ public class DeviceTime implements Time {
 	 */
 	@Override
 	public long getCurrentTick() {
-		return 0;
+		return (new Date().getTime() / 1000);
 	}
 
 }
