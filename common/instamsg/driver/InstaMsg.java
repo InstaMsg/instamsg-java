@@ -7,10 +7,13 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 
@@ -97,6 +100,7 @@ public class InstaMsg {
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	
 	int publishCount = 0;
+	private InitialCallbacks callbacks;
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -384,14 +388,9 @@ public class InstaMsg {
 	        sendClientData(get_client_session_data, TOPIC_SESSION_DATA);
 	        sendClientData(get_client_metadata, TOPIC_METADATA);
 	        sendClientData(get_network_data, TOPIC_NETWORK_DATA);
+			*/
 
-
-	        if(c->onConnectCallback != NULL)
-	        {
-	            c->onConnectCallback();
-	            c->onConnectCallback = NULL;
-	        }
-	        */
+	        c.callbacks.onConnectOneTimeOperations();
 	    }
 	    else
 	    {
@@ -456,6 +455,45 @@ public class InstaMsg {
 	}
 
 
+	private static ReturnCode deliverMessageToSelf(InstaMsg c, MqttPublish pubMsg) {
+		
+		String topicName = pubMsg.getTopicName();		
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+		{
+			if (topicName.equals(c.messageHandlers[i].topicFilter))
+			{
+				try {
+					c.messageHandlers[i].messageHandler.handle(new MessageData(topicName, new String(pubMsg.getPayload())));
+					
+				} catch (MqttException e) {
+					Log.errorLog("Error occurred while handling PUBLISH message for topic [" + topicName + "]");
+				}
+				
+				break;
+			}
+		}
+		
+		/*
+		 * Also, send ack if applicable.
+		 */
+		byte[] packet = null;
+		
+		int receivedMsgQos = pubMsg.getMessage().getQos();
+		if(receivedMsgQos == QOS.QOS1.ordinal()) {
+			packet = getEncodedMqttMessageAsByteStream(new MqttPubAck(pubMsg));
+			
+		} else {
+			packet = getEncodedMqttMessageAsByteStream(new MqttPubRec(pubMsg));
+		}
+		
+		if(packet == null) {
+			return ReturnCode.FAILURE;
+		}
+		
+		return sendPacket(c, packet);
+	}
+	
+	
 	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
 		InstaMsg.ReturnCode rc = InstaMsg.ReturnCode.FAILURE;
 		
@@ -526,7 +564,7 @@ public class InstaMsg {
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
                         
                     } else {
-						Log.infoLog("Not handling received-topic-message for topic = [" + topicName + "]");
+						deliverMessageToSelf(c, pubMsg);
 
 					}
 					
@@ -538,9 +576,35 @@ public class InstaMsg {
 				
 				Log.infoLog("PINGRESP received... relations are intact !!\n");				
 				
+			} else if (fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_SUBACK) {
+				
+				try {
+					MqttSuback subAckMsg = (MqttSuback) MqttWireMessage.createWireMessage(c.readBuf);
+					fireResultHandlerUsingMsgIdAsTheKey(c, subAckMsg.getMessageId());
+					
+					/*
+					 * TODO: handle this case.. present in C.
+	                if (subAckMsg. == 0x80)
+	                {
+	                    for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+	                    {
+	                        if (c.messageHandlers[i].msgId == subAckMsg.getMessageId())
+	                        {
+	                            c.messageHandlers[i].topicFilter = null;
+	                            break;
+	                        }
+	                    }
+	                }
+	                */
+
+					
+				} catch (MqttException e) {
+					rc = handleMessageDecodingFailure(c, "MQTT-PUBCOMP");
+		
+				}
+			
 			} else {
 				
-				Log.infoLog("Packet received of type = " + fixedHeader.packetType);
 			}
 		
 		} while (rc == InstaMsg.ReturnCode.SUCCESS);		
@@ -627,6 +691,74 @@ public class InstaMsg {
 	    }
 	    
 	    return rc;
+	}
+	
+	
+	public static ReturnCode MQTTSubscribe(String topicName,
+										   QOS qos,
+										   MessageHandler messageHandler,
+										   ResultHandler resultHandler,
+										   int resultHandlerTimeout,
+										   boolean logging) {
+		
+		InstaMsg c = instaMsg;
+		
+		ReturnCode rc = ReturnCode.FAILURE;
+		
+		if(logging == true) {
+			Log.infoLog("Subscribing to topic [" + topicName + "]");
+		}
+
+		int msgId = getNextPackedId(instaMsg);
+		attachResultHandler(instaMsg, msgId, resultHandlerTimeout, resultHandler);
+
+		
+		/*
+		 * We follow optimistic approach, and assume that the subscription will be successful, and accordingly assign the
+		 * message-handlers.
+		 *
+		 * If the subscription is unsuccessful, we would then remove/unsubscribe the topic.
+		 */
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+		{
+			if (c.messageHandlers[i].topicFilter == null)
+			{
+				c.messageHandlers[i].msgId = msgId;
+				c.messageHandlers[i].topicFilter = topicName;
+				c.messageHandlers[i].messageHandler = messageHandler;
+
+				break;
+			}
+		}
+   
+		String[] topicNames = new String[1];
+		int[] qosValues = new int[1];		
+		topicNames[0] = topicName;
+		qosValues[0] = qos.ordinal();
+		
+		MqttSubscribe subMsg = new MqttSubscribe(topicNames, qosValues);
+		subMsg.setMessageId(msgId);
+		
+		byte[] packet = getEncodedMqttMessageAsByteStream(subMsg);
+		if(packet == null) {
+			rc = ReturnCode.FAILURE;
+		}
+		
+		if(packet != null) {
+			rc = sendPacket(c, packet);
+		}	
+		
+		if(logging == true) {
+			
+			if(rc == ReturnCode.SUCCESS) {				
+				Log.infoLog("Subscribed successfully.\n");
+				
+			} else {
+				Log.infoLog("Subscribing failed, error-code = [" + rc.ordinal() + "]\n");
+			}
+		}
+		
+		return rc;
 	}
 
 	
@@ -730,6 +862,8 @@ public class InstaMsg {
 
 		instaMsg = new InstaMsg();
 		
+		instaMsg.callbacks = callbacks;
+		
 		long currentTick = time.getCurrentTick();		
 		long nextPingReqTick = currentTick + instaMsg.pingRequestInterval.intValue();
 		long nextBusinessLogicTick = currentTick + businessLogicInterval;
@@ -816,7 +950,7 @@ class MessageHandlers {
 	int msgId;
 	int timeout;
 	String topicFilter;
-	ResultHandler resultHandler;
+	MessageHandler messageHandler;
 }
 
 class ResultHandlers {
