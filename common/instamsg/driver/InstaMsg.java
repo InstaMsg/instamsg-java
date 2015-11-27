@@ -642,6 +642,30 @@ public class InstaMsg {
 		return sendPacket(c, packet);
 	}	
 	
+	
+	/*
+	 * This method causes the current thread to wait for "n" seconds.
+	 */
+	public static void startAndCountdownTimer(int seconds, boolean showRunningStatus)
+	{
+	    int i;
+	    long j;
+	    long cycles = 1000000 / time.getMinimumDelayPossibleInMicroSeconds();
+	
+	    for(i = 0; i < seconds; i++)
+	    {
+	        if(showRunningStatus == true)
+	        {
+	        	Log.infoLog(seconds - 1 + "");
+	        }
+	
+	        for(j = 0; j < cycles; j++)
+	        {
+	            time.minimumDelay();
+	        }
+	    }
+	}
+	
 
 	public static void clearInstaMsg(InstaMsg c) {
 		Log.infoLog("CLEARING INSTAMSG !!!!");
@@ -784,29 +808,6 @@ public class InstaMsg {
 		}
 
 	}
-
-	/*
-	 * This method causes the current thread to wait for "n" seconds.
-	 */
-	public static void startAndCountdownTimer(int seconds, boolean showRunningStatus)
-	{
-	    int i;
-	    long j;
-	    long cycles = 1000000 / time.getMinimumDelayPossibleInMicroSeconds();
-	
-	    for(i = 0; i < seconds; i++)
-	    {
-	        if(showRunningStatus == true)
-	        {
-	        	Log.infoLog(seconds - 1 + "");
-	        }
-	
-	        for(j = 0; j < cycles; j++)
-	        {
-	            time.minimumDelay();
-	        }
-	    }
-	}
 }
 
 
@@ -829,17 +830,11 @@ class OneToOneHandlers {
 	
 	int msgId;
 	int timeout;
-	MessageHandler<OneToOneResult> handler;
-}
-
-interface MessageHandler<T>{
-	void onMessage(T message);
 }
 
 class MQTTFixedHeader{
 	
-    byte packetType;
-    
+    byte packetType;    
     /*
     boolean dup;
     int qos;
@@ -847,19 +842,3 @@ class MQTTFixedHeader{
     */
 }
 
-/*
-class MessageData {
-	
-    MQTTMessage message;
-    String topicName;
-}
-*/
-
-/*
-class MQTTMessage {
-	
-    MQTTFixedHeaderPlusMsgId fixedHeaderPlusMsgId;
-    String payload;
-    int payloadlen;
-}
-*/
