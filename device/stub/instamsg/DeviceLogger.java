@@ -8,7 +8,7 @@ public class DeviceLogger extends Log {
 
 
 
-	/*
+	/**
 	 * This method MUST connect the underlying medium (even if it means to retry continuously).
 	 */
 	@Override
@@ -17,7 +17,7 @@ public class DeviceLogger extends Log {
 	}
 
 	
-	/*
+	/**
 	 * This method writes first "len" bytes from "buffer" onto the serial-logger-interface.
 	 *
 	 * This is a blocking function. So, either of the following must hold true ::
@@ -37,7 +37,7 @@ public class DeviceLogger extends Log {
 	}
 
 	
-	/*
+	/**
 	 * This method MUST release the underlying medium (even if it means to retry continuously).
 	 * But if it is ok to re-connect without releasing the underlying-system-resource, then this can be left empty.
 	 */

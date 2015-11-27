@@ -1,5 +1,7 @@
 package common.instamsg.driver.include;
 
+import common.instamsg.driver.Config;
+
 
 public interface ModulesProviderInterface {
 	
@@ -10,5 +12,4 @@ public interface ModulesProviderInterface {
 	Time getTime();
 	Watchdog getWatchdog();
 	Socket getSocket(String hostName, int port);	
-	
 }

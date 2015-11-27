@@ -1,6 +1,7 @@
 package common.instamsg.driver;
 
 import utils.Config;
+import common.instamsg.driver.Config.CONFIG_TYPE;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.ModulesProviderFactory;
@@ -30,6 +31,7 @@ public class InstaMsg {
 	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;	
 
 	public static ModulesProviderInterface modulesProvideInterface;
+	public static common.instamsg.driver.Config config;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
@@ -64,6 +66,9 @@ public class InstaMsg {
 	
 	private static ResultHandler pubCompResultHandler;
 	
+	int pingRequestInterval;
+	int compulsorySocketReadAfterMQTTPublishInterval;
+	
 	
 	
 	static {
@@ -77,6 +82,7 @@ public class InstaMsg {
 		};
 		
 		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
+		config = modulesProvideInterface.getConfig();
 	}
 	
 	
@@ -302,23 +308,26 @@ public class InstaMsg {
 	    {
 	        Log.infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
 	        c.connected = true;
+	        
+	        config.registerEditableConfig(new Integer(c.pingRequestInterval),
+	        		                      "PING_REQ_INTERVAL",
+                                          CONFIG_TYPE.CONFIG_INT,
+                                          "180",
+                                          "Keep-Alive Interval between Device and InstaMsg-Server");
+	        
+
+	        config.registerEditableConfig(new Integer(c.compulsorySocketReadAfterMQTTPublishInterval),
+	                                      "COMPULSORY_SOCKET_READ_AFTER_MQTT_PUBLISH_INTERVAL",
+	                                      CONFIG_TYPE.CONFIG_INT,
+	                                      "3",
+	                                      "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. " +
+	                                      "This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
 
 	        /*
 	        sendClientData(get_client_session_data, TOPIC_SESSION_DATA);
 	        sendClientData(get_client_metadata, TOPIC_METADATA);
 	        sendClientData(get_network_data, TOPIC_NETWORK_DATA);
 
-	        registerEditableConfig(&pingRequestInterval,
-	                               "PING_REQ_INTERVAL",
-	                               CONFIG_INT,
-	                               "180",
-	                               "Keep-Alive Interval between Device and InstaMsg-Server");
-
-	        registerEditableConfig(&compulsorySocketReadAfterMQTTPublishInterval,
-	                               "COMPULSORY_SOCKET_READ_AFTER_MQTT_PUBLISH_INTERVAL",
-	                               CONFIG_INT,
-	                               "3",
-	                               "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
 
 	        if(c->onConnectCallback != NULL)
 	        {
@@ -439,9 +448,8 @@ public class InstaMsg {
 					
 					String topicName = pubMsg.getTopicName();					
                     if(topicName.equals(c.receiveConfigTopic)) {
-                    	/*
+                    	
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
-                        */
                         
                     } else {
 						Log.infoLog("Not handling received-topic-message for topic = [" + topicName + "]");
@@ -460,11 +468,11 @@ public class InstaMsg {
 		
 	}
 
-	/*
 	private static void handleConfigReceived(InstaMsg c, String payload) {
+		
 		Log.infoLog(common.instamsg.driver.Config.CONFIG + "Received the config-payload [" + payload + "] from server");
+		config.processConfig(payload);
 	}
-	*/
 
 
 	private static ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {

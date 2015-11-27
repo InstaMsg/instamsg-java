@@ -1,6 +1,6 @@
 package device.stub.instamsg;
 
-import common.instamsg.driver.include.Config;
+import common.instamsg.driver.Config;
 import common.instamsg.driver.include.FileSystem;
 import common.instamsg.driver.include.Log;
 import common.instamsg.driver.include.Misc;
@@ -36,15 +36,15 @@ public class ModulesProvider implements ModulesProviderInterface {
 		return new DeviceWatchdog();
 	}
 
-	@Override
-	public Config getConfig() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
+
 	@Override
 	public Socket getSocket(String hostName, int port) {
 		return new DeviceSocket(hostName, port);
+	}
+
+	@Override
+	public Config getConfig() {
+		return new DeviceConfig();
 	}
 
 }

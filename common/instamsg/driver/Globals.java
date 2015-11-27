@@ -22,8 +22,8 @@ public class Globals {
 	public static Misc misc;
 	public static Log logger;
 	public static Time time;
+	public static common.instamsg.driver.Config config;
 	public static Watchdog watchdog;
-	public static common.instamsg.driver.include.Config config;
 	public static final int MAX_BUFFER_SIZE = 1000;
 	public static final byte[] LOG_GLOBAL_BUFFER= new byte [MAX_BUFFER_SIZE];
 	
@@ -49,11 +49,12 @@ public class Globals {
 	}
 	
 
-	public static void globalSystemInit(String logFilePath){
+	public static void globalSystemInit(){
 		
 		ModulesProviderInterface modulesProvider = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
 		
-		config  = modulesProvider.getConfig();
+		config = modulesProvider.getConfig();
+		config.initConfig();
 		
 	    misc = modulesProvider.getMisc();
 		misc.bootstrapInit();
