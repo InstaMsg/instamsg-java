@@ -1,6 +1,5 @@
 package common.instamsg.driver;
 
-import common.instamsg.driver.InstaMsg.ReturnCode;
 
 
 public abstract class Socket {
