@@ -48,7 +48,7 @@ public class InstaMsg {
 	    SUCCESS
 	}
 
-	private static InstaMsg instaMsg;
+	public static InstaMsg instaMsg;
 	
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
@@ -65,7 +65,7 @@ public class InstaMsg {
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
-	OneToOneHandlers[] oneToOneResponseHandlers = new OneToOneHandlers[MAX_MESSAGE_HANDLERS];
+	OneToOneHandlers[] oneToOneHandlers = new OneToOneHandlers[MAX_MESSAGE_HANDLERS];
 
 	int nextPackedId;
 
@@ -81,7 +81,7 @@ public class InstaMsg {
 	
 	Socket socket;
 	
-	boolean connected = false;
+	public boolean connected = false;
 	
 	int connectionAttempts = 0;
 	
@@ -101,6 +101,8 @@ public class InstaMsg {
 	
 	int publishCount = 0;
 	private InitialCallbacks callbacks;
+	
+	static String ONE_TO_ONE = "[ONE-TO-ONE] ";
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -147,7 +149,7 @@ public class InstaMsg {
 	}
 	
 	
-	private static int getNextPackedId(InstaMsg c) {
+	public static int getNextPackedId(InstaMsg c) {
 		
 		if(c.nextPackedId == MAX_PACKET_ID) {
 			c.nextPackedId = 1;
@@ -158,6 +160,24 @@ public class InstaMsg {
 		return c.nextPackedId;
 	}
 	
+	
+	public static ReturnCode doMqttSendPublish(String peer, String message) {
+		return MQTTPublish(peer,
+                  		   message,
+                		   QOS.QOS2,
+                		   false,
+                		   new ResultHandler() {
+			
+									@Override
+									public void handle(int msgId) {
+										Log.infoLog("[DEFAULT-PUBLISH-HANDLER] PUBACK received for msg-id [" + msgId + "]");
+									
+									}
+								},
+						   InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
+						   false,
+						   true);
+	}
 	
 	private static void attachResultHandler(InstaMsg c, int msgId, int timeout, ResultHandler resultHandler)
 	{
@@ -179,6 +199,25 @@ public class InstaMsg {
 	    }
 	}
 	
+	private static void attachOneToOneHandler(InstaMsg c, int msgId, int timeout, OneToOneHandler oneToOneHandler) {
+		
+		if(oneToOneHandler == null) {
+			return;
+		}
+
+
+		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i) {
+			
+			if (c.oneToOneHandlers[i].msgId == 0) {
+				c.oneToOneHandlers[i].msgId = msgId;
+				c.oneToOneHandlers[i].timeout = timeout;
+				c.oneToOneHandlers[i].oneToOneHandler = oneToOneHandler;
+
+				break;
+			}
+		}
+	}
+	
 	
 	private static void fireResultHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId)
 	{       
@@ -192,6 +231,23 @@ public class InstaMsg {
 				break;
 			}
 		}
+	}
+	
+	
+	private static ReturnCode fireOneToOneHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId, OneToOneResult result)
+	{
+	    for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+	    {
+	        if (c.oneToOneHandlers[i].msgId == msgId)
+	        {
+	            c.oneToOneHandlers[i].oneToOneHandler.oneToOneMessageHandler(result);
+	            c.oneToOneHandlers[i].msgId = 0;
+
+	            return ReturnCode.SUCCESS;
+	        }
+	    }
+
+	    return ReturnCode.FAILURE;
 	}
 
 	
@@ -416,6 +472,25 @@ public class InstaMsg {
 	    	}
 	    }
 	}
+	
+	
+	static void removeExpiredOneToOneHandlers(InstaMsg c)
+	{
+	    for (int i = 0; i < MAX_MESSAGE_HANDLERS; i++)
+	    {
+	    	if(c.oneToOneHandlers[i].msgId == 0) {
+	    		continue;
+	    	}
+	    	
+	    	if(c.oneToOneHandlers[i].timeout < 0) {
+	    		Log.infoLog("No one-to-one response received for msgid [" + c.oneToOneHandlers[i].msgId + "], removing..");
+	    		c.oneToOneHandlers[i].msgId = 0;
+	    	}
+	    	else {
+	    		c.oneToOneHandlers[i].timeout = c.oneToOneHandlers[i].timeout - 1;
+	    	}
+	    }
+	}
 
 	
 	private static void sendPingReqToServer(InstaMsg c)
@@ -558,9 +633,12 @@ public class InstaMsg {
 				try {
 					MqttPublish pubMsg = (MqttPublish) MqttWireMessage.createWireMessage(c.readBuf);
 					
-					String topicName = pubMsg.getTopicName();					
-                    if(topicName.equals(c.receiveConfigTopic)) {
-                    	
+					String topicName = pubMsg.getTopicName();
+					if(topicName.equals(c.clientIdComplete)) {
+						oneToOneMessageArrived(c, new String(pubMsg.getPayload()));
+						
+					}
+					else if(topicName.equals(c.receiveConfigTopic)) {                    	
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
                         
                     } else {
@@ -611,6 +689,52 @@ public class InstaMsg {
 		
 	}
 
+	
+	private static void oneToOneMessageArrived(InstaMsg c, String payload) {
+		
+		Log.infoLog(ONE_TO_ONE + " Payload == [" + payload + "s]");
+		
+		String peerMessage = Json.getJsonKeyValueIfPresent(payload, "body");
+		String peer = Json.getJsonKeyValueIfPresent(payload, "reply_to");
+		String peerMsgId = Json.getJsonKeyValueIfPresent(payload, "message_id");
+		String responseMsgId = Json.getJsonKeyValueIfPresent(payload, "response_id");
+
+		if(peerMsgId.length() == 0) {
+			Log.errorLog(ONE_TO_ONE + "Peer-Message-Id not received ... not proceeding further");
+			return;
+		}
+		
+		if(peer.length() == 0) {
+			Log.errorLog(ONE_TO_ONE + "Peer-value not received ... not proceeding further");
+			return;
+		}
+		
+		OneToOneResult oneToOneResult = new OneToOneResult(peer, Integer.parseInt(peerMsgId), true, peerMessage);
+		Log.debugLog(ONE_TO_ONE + "Peer-Message = ["    + oneToOneResult.peerMsg   + "], " +
+		                          "Peer = ["            + oneToOneResult.peer      + "], " +
+				                  "Peer-Message-Id = [" + oneToOneResult.peerMsgId + "]");
+		
+		if(responseMsgId.length() == 0) {
+			
+			/*
+		     * This is a fresh message, so use the global callback.
+		     */
+			c.callbacks.oneToOneMessageHandler(oneToOneResult);
+			
+		} else {
+			
+			/*
+		     * This is for an already exisiting message, that was sent by the current-client to the peer.
+		     * Call its handler (if at all it exists).
+		     */
+			if(fireOneToOneHandlerUsingMsgIdAsTheKey(c, Integer.parseInt(responseMsgId), oneToOneResult) == ReturnCode.FAILURE) {
+				
+				Log.errorLog(ONE_TO_ONE + "No handler found for one-to-one for message-id [" + responseMsgId + "]");
+		    }
+		}
+	}
+	
+	
 	private static void handleConfigReceived(InstaMsg c, String payload) {
 		
 		Log.infoLog(common.instamsg.driver.Config.CONFIG + "Received the config-payload [" + payload + "] from server");
@@ -762,6 +886,20 @@ public class InstaMsg {
 	}
 
 	
+	public static ReturnCode MQTTSend(String peer, String payload, OneToOneHandler oneToOneHandler, int timeout) {
+		
+		InstaMsg c = instaMsg;
+		int id = getNextPackedId(c);
+
+		String message = "{\"message_id\": \""  + id + 
+				         "\", \"reply_to\": \"" + c.clientIdComplete +
+				         "\", \"body\": \""     + payload + "\"}";
+
+  		attachOneToOneHandler(c, id, timeout, oneToOneHandler);
+  		return doMqttSendPublish(peer, message);
+	}
+	
+
 	public static InstaMsg.ReturnCode MQTTConnect(InstaMsg c) {
 		
 		MqttConnect connectMsg = new MqttConnect(c.connectOptions);
@@ -828,9 +966,9 @@ public class InstaMsg {
 			c.resultHandlers[i].msgId = 0;
 			c.resultHandlers[i].timeout = 0;
 
-			c.oneToOneResponseHandlers[i] = new OneToOneHandlers();
-			c.oneToOneResponseHandlers[i].msgId = 0;
-			c.oneToOneResponseHandlers[i].timeout = 0;
+			c.oneToOneHandlers[i] = new OneToOneHandlers();
+			c.oneToOneHandlers[i].msgId = 0;
+			c.oneToOneHandlers[i].timeout = 0;
 		}
 
 
@@ -892,6 +1030,7 @@ public class InstaMsg {
 					
 					while(true) {
 						removeExpiredResultHandlers(instaMsg);
+						removeExpiredOneToOneHandlers(instaMsg);
 						
 						if(socketReadJustNow == false) {
 							InstaMsg.startAndCountdownTimer(1, false);
@@ -964,6 +1103,7 @@ class OneToOneHandlers {
 	
 	int msgId;
 	int timeout;
+	OneToOneHandler oneToOneHandler;
 }
 
 class MQTTFixedHeader{

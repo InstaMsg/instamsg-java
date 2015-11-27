@@ -17,7 +17,7 @@ public class Main {
 			int counter = 0;
 			
 			@Override
-			public InstaMsg.ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult) {
+			public InstaMsg.ReturnCode oneToOneMessageHandler(OneToOneResult result) {
 				return InstaMsg.ReturnCode.SUCCESS;
 			}
 

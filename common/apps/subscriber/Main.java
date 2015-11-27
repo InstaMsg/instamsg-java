@@ -18,8 +18,16 @@ public class Main {
 		InitialCallbacks callbacks = new InitialCallbacks() {
 
 			@Override
-			public InstaMsg.ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult) {
-				return InstaMsg.ReturnCode.SUCCESS;
+			public InstaMsg.ReturnCode oneToOneMessageHandler(OneToOneResult result) {
+
+				if(result.succeeded == true) {
+					Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
+			    	result.reply("Got your response ==> " + result.peerMsg + " :)");
+			    
+					return ReturnCode.SUCCESS;
+				}
+				
+				return ReturnCode.FAILURE;
 			}
 
 			@Override
