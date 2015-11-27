@@ -432,13 +432,40 @@ public class InstaMsg {
 					rc = handleMessageDecodingFailure(c, "MQTT-PUBCOMP");
 				}
 				
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
+				
+				try {
+					MqttPublish pubMsg = (MqttPublish) MqttWireMessage.createWireMessage(c.readBuf);
+					
+					String topicName = pubMsg.getTopicName();					
+                    if(topicName.equals(c.receiveConfigTopic)) {
+                    	/*
+                        handleConfigReceived(c, new String(pubMsg.getPayload()));
+                        */
+                        
+                    } else {
+						Log.infoLog("Not handling received-topic-message for topic = [" + topicName + "]");
+
+					}
+					
+				} catch (MqttException e) {
+					rc = handleMessageDecodingFailure(c, "MQTT-PUBLISH");
+				}
+
 			} else {
-				System.out.println("Packet received of type = " + fixedHeader.packetType);
+				Log.infoLog("Packet received of type = " + fixedHeader.packetType);
 			}
 		
 		} while (rc == ReturnCode.SUCCESS);		
 		
 	}
+
+	/*
+	private static void handleConfigReceived(InstaMsg c, String payload) {
+		Log.infoLog(common.instamsg.driver.Config.CONFIG + "Received the config-payload [" + payload + "] from server");
+	}
+	*/
+
 
 	private static ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
 		ReturnCode rc;
@@ -505,7 +532,6 @@ public class InstaMsg {
 	
 
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks) {
-
 		
 		c.socket = modulesProvideInterface.getSocket(Globals.INSTAMSG_HOST, Globals.INSTAMSG_PORT);		
 		c.socket.socketCorrupted = true;

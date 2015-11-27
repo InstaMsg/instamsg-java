@@ -42,4 +42,8 @@ public abstract class Log {
 	public static void errorLog(String log) {
 		Log.log(log, INSTAMSG_LOG_LEVEL_ERROR);
 	}
+	
+	public static void debugLog(String log) {
+		Log.log(log, INSTAMSG_LOG_LEVEL_DEBUG);
+	}
 }
