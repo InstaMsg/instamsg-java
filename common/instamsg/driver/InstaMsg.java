@@ -73,6 +73,8 @@ public class InstaMsg {
 	ChangeableInt pingRequestInterval = new ChangeableInt(0);
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	
+	int publishCount = 0;
+	
 	
 	
 	static {
@@ -536,12 +538,45 @@ public class InstaMsg {
 			attachResultHandler(instaMsg, msgId, resultHandlerTimeout, resultHandler);
 		}
 		
+		if(logging == true) {
+			Log.infoLog("Publishing message [" + payload + "] to topic [" + topicName + "]");
+		}
+		
 		byte[] packet = getEncodedMqttMessageAsByteStream(pubMsg);
 		if(packet == null) {
 			return ReturnCode.FAILURE;
 		}
 		
-		return sendPacket(instaMsg, packet);		
+		ReturnCode rc = sendPacket(instaMsg, packet);	
+		if(rc == ReturnCode.SUCCESS) {
+			instaMsg.publishCount++;
+		}
+		
+	    if(logging == true)
+	    {
+	        if(rc == ReturnCode.SUCCESS)
+	        {
+	            Log.infoLog("Published successfully.\n");
+
+	            if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0)
+	            {
+	                if((instaMsg.publishCount % instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue()) == 0)
+	                {
+	                    Log.infoLog("Doing out-of-order socket-read, as [" + 
+	                                instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() + "] " +
+	                    		    " MQTT-Publishes have been done");
+
+	                    readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
+	                }
+	            }
+	        }
+	        else
+	        {
+	            Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
+	        }
+	    }
+	    
+	    return rc;
 	}
 
 	
@@ -619,6 +654,7 @@ public class InstaMsg {
 	
 	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
+		Globals.globalSystemInit();
 		instaMsg = new InstaMsg();
 		
 		long currentTick = time.getCurrentTick();		

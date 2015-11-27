@@ -1,6 +1,5 @@
 package common.apps.publisher;
 
-import common.instamsg.driver.Globals;
 import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
@@ -12,8 +11,6 @@ import common.instamsg.driver.include.OneToOneResult;
 public class Main {
 	
 	public static void main(String[] args) {
-		
-		Globals.globalSystemInit();
 		
 		InitialCallbacks callbacks = new InitialCallbacks() {
 
