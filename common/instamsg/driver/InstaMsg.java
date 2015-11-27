@@ -634,11 +634,14 @@ public class InstaMsg {
 					MqttPublish pubMsg = (MqttPublish) MqttWireMessage.createWireMessage(c.readBuf);
 					
 					String topicName = pubMsg.getTopicName();
-					if(topicName.equals(c.clientIdComplete)) {
+					if(topicName.equals(c.rebootTopic)) {
+						Log.infoLog("Received REBOOT request from server.. rebooting !!!");
+						misc.rebootDevice();
+						
+					} else if(topicName.equals(c.clientIdComplete)) {
 						oneToOneMessageArrived(c, new String(pubMsg.getPayload()));
 						
-					}
-					else if(topicName.equals(c.receiveConfigTopic)) {                    	
+					} else if(topicName.equals(c.receiveConfigTopic)) {                    	
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
                         
                     } else {
