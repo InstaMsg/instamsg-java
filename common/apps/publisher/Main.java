@@ -1,6 +1,7 @@
 package common.apps.publisher;
 
 import common.instamsg.driver.Globals.ReturnCode;
+import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.ResultHandler;
@@ -39,7 +40,7 @@ public class Main {
 				return 
 				InstaMsg.MQTTPublish("listener_topic",
 									 "Hi.. Ajay testing java-client " + counter,
-									 2,
+									 QOS.QOS2,
 									 false,
 									 new ResultHandler() {
 

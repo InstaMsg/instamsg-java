@@ -25,6 +25,12 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWir
 
 public class InstaMsg {
 	
+	public static enum QOS {
+		QOS0,
+		QOS1,
+		QOS2
+	}
+	
 	private static InstaMsg instaMsg;;
 	
 	static int MAX_MESSAGE_HANDLERS = 5;
@@ -516,7 +522,7 @@ public class InstaMsg {
 	
 	public static ReturnCode MQTTPublish(String topicName,
 										 String payload,
-										 int qos,
+										 QOS qos,
 										 boolean dup,
 										 ResultHandler resultHandler,
 										 int resultHandlerTimeout,
@@ -525,12 +531,12 @@ public class InstaMsg {
 		
 		MqttMessage baseMessage = new MqttMessage();
 		baseMessage.setPayload(payload.getBytes());
-		baseMessage.setQos(qos);
+		baseMessage.setQos(qos.ordinal());
 		baseMessage.setDuplicate(dup);
 		baseMessage.setRetained(retain);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
-		if((qos == 1) || (qos == 2))
+		if((qos == QOS.QOS1) || (qos == QOS.QOS2))
 		{
 			int msgId = getNextPackedId(instaMsg);
 			

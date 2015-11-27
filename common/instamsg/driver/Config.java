@@ -3,6 +3,7 @@ package common.instamsg.driver;
 import utils.ChangeableInt;
 import utils.ChangeableString;
 import common.instamsg.driver.Globals.ReturnCode;
+import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.include.Log;
 
 public abstract class Config {
@@ -28,7 +29,7 @@ public abstract class Config {
 	{
 	    return InstaMsg.MQTTPublish(topicName,
 	                       			message,
-	                       			1,
+	                       			QOS.QOS1,
 	                       			false,
 	                       			null,
 	                       			InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
