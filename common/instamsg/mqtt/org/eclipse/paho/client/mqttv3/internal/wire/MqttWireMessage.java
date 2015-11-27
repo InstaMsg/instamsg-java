@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttPersistable;
-import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 
 
 /**
@@ -174,7 +173,7 @@ public abstract class MqttWireMessage {
 			long remLen = readMBI(in).getValue();
 			long totalToRead = counter.getCounter() + remLen;
 
-			MqttWireMessage result;
+			MqttWireMessage result = null;
 			long remainder = totalToRead - counter.getCounter();
 			byte[] data = new byte[0];
 			// The remaining bytes must be the payload...
@@ -229,7 +228,6 @@ public abstract class MqttWireMessage {
 				result = new MqttDisconnect(info, data);
 			}
 			else {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 			}
 			return result;
 		} catch(IOException io) {

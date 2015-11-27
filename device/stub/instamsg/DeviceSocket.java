@@ -1,7 +1,7 @@
 package device.stub.instamsg;
 
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.include.Socket;
+import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.Socket;
 
 public class DeviceSocket extends Socket {
 
@@ -71,8 +71,8 @@ public class DeviceSocket extends Socket {
 	 * So, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
-		return ReturnCode.FAILURE;
+	public InstaMsg.ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
+		return InstaMsg.ReturnCode.FAILURE;
 	}
 
 	
@@ -91,8 +91,8 @@ public class DeviceSocket extends Socket {
 	 * In this case, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public ReturnCode socketWrite(byte[] buffer, int len) {
-		return ReturnCode.FAILURE;
+	public InstaMsg.ReturnCode socketWrite(byte[] buffer, int len) {
+		return InstaMsg.ReturnCode.FAILURE;
 	}
 
 	

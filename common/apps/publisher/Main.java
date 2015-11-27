@@ -1,12 +1,11 @@
 package common.apps.publisher;
 
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.OneToOneResult;
+import common.instamsg.driver.InstaMsg.QOS;
+import common.instamsg.driver.Log;
 import common.instamsg.driver.ResultHandler;
-import common.instamsg.driver.include.Log;
-import common.instamsg.driver.include.OneToOneResult;
 
 
 public class Main {
@@ -18,28 +17,28 @@ public class Main {
 			int counter = 0;
 			
 			@Override
-			public ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult) {
-				return ReturnCode.SUCCESS;
+			public InstaMsg.ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult) {
+				return InstaMsg.ReturnCode.SUCCESS;
 			}
 
 			@Override
-			public ReturnCode onDisconnect() {
-				return ReturnCode.SUCCESS;
+			public InstaMsg.ReturnCode onDisconnect() {
+				return InstaMsg.ReturnCode.SUCCESS;
 			}
 
 			@Override
-			public ReturnCode onConnectOneTimeOperations() {
-				return ReturnCode.SUCCESS;
+			public InstaMsg.ReturnCode onConnectOneTimeOperations() {
+				return InstaMsg.ReturnCode.SUCCESS;
 			}
 
 			@Override
-			public ReturnCode coreLoopyBusinessLogicInitiatedBySelf() {
+			public InstaMsg.ReturnCode coreLoopyBusinessLogicInitiatedBySelf() {
 
 				counter++;
 				
 				return 
 				InstaMsg.MQTTPublish("listener_topic",
-									 "Hi.. Ajay testing java-client " + counter,
+									 "Test " + counter,
 									 QOS.QOS2,
 									 false,
 									 new ResultHandler() {

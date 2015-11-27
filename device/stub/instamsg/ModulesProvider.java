@@ -1,20 +1,14 @@
 package device.stub.instamsg;
 
 import common.instamsg.driver.Config;
-import common.instamsg.driver.include.FileSystem;
-import common.instamsg.driver.include.Log;
-import common.instamsg.driver.include.Misc;
-import common.instamsg.driver.include.ModulesProviderInterface;
-import common.instamsg.driver.include.Socket;
-import common.instamsg.driver.include.Time;
-import common.instamsg.driver.include.Watchdog;
+import common.instamsg.driver.Log;
+import common.instamsg.driver.Misc;
+import common.instamsg.driver.ModulesProviderInterface;
+import common.instamsg.driver.Socket;
+import common.instamsg.driver.Time;
+import common.instamsg.driver.Watchdog;
 
 public class ModulesProvider implements ModulesProviderInterface {
-
-	@Override
-	public FileSystem getFileSystem() {
-		return new DeviceFileSystem();
-	}
 
 	@Override
 	public Misc getMisc() {

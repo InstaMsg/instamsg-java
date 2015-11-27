@@ -16,7 +16,6 @@
  */
 package common.instamsg.mqtt.org.eclipse.paho.client.mqttv3;
 
-import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.MessageCatalog;
 
 /**
  * Thrown if an error occurs communicating with the server.
@@ -212,7 +211,7 @@ public class MqttException extends Exception {
 	 * @return the detail message, which may be <code>null</code>.
 	 */
 	public String getMessage() {
-		return MessageCatalog.getMessage(reasonCode);
+		return null;
 	}
 	
 	/**

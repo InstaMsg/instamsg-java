@@ -1,4 +1,4 @@
-package utils;
+package common.instamsg.driver;
 
 public class ChangeableString {
     String str;

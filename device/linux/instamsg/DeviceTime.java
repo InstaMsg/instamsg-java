@@ -2,8 +2,8 @@ package device.linux.instamsg;
 
 import java.util.Date;
 
-import common.instamsg.driver.include.Log;
-import common.instamsg.driver.include.Time;
+import common.instamsg.driver.Log;
+import common.instamsg.driver.Time;
 
 public class DeviceTime implements Time {
 

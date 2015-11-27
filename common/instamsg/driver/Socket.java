@@ -1,7 +1,7 @@
-package common.instamsg.driver.include;
+package common.instamsg.driver;
 
-import common.instamsg.driver.Globals;
-import common.instamsg.driver.Globals.ReturnCode;
+import common.instamsg.driver.InstaMsg.ReturnCode;
+
 
 public abstract class Socket {
 
@@ -27,12 +27,12 @@ public abstract class Socket {
 		
 		releaseUnderlyingSocketMediumGuaranteed();		
 	    Log.infoLog("COMPLETE [TCP-SOCKET] STRUCTURE, INCLUDING THE UNDERLYING MEDIUM CLEANED FOR HOST = [" +
-	                     Globals.INSTAMSG_HOST + "], PORT = [" + Globals.INSTAMSG_PORT + "].");
+	                     InstaMsg.INSTAMSG_HOST + "], PORT = [" + InstaMsg.INSTAMSG_PORT + "].");
 
 	}
 	
 	public abstract void connectUnderlyingSocketMediumTryOnce();	
-	public abstract ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed);
-	public abstract ReturnCode socketWrite(byte[] buffer, int len);
+	public abstract InstaMsg.ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed);
+	public abstract InstaMsg.ReturnCode socketWrite(byte[] buffer, int len);
 	public abstract void releaseUnderlyingSocketMediumGuaranteed();
 }

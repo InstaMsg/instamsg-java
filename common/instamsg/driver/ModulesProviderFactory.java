@@ -1,4 +1,5 @@
-package common.instamsg.driver.include;
+package common.instamsg.driver;
+
 
 public class ModulesProviderFactory {
 	

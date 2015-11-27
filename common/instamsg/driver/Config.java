@@ -1,10 +1,6 @@
 package common.instamsg.driver;
 
-import utils.ChangeableInt;
-import utils.ChangeableString;
-import common.instamsg.driver.Globals.ReturnCode;
 import common.instamsg.driver.InstaMsg.QOS;
-import common.instamsg.driver.include.Log;
 
 public abstract class Config {
 
@@ -25,7 +21,7 @@ public abstract class Config {
 	public static final String CONFIG_DESCRIPTION_KEY  =  "desc";
 
 	
-	static ReturnCode publishConfig(String topicName, String message)
+	static InstaMsg.ReturnCode publishConfig(String topicName, String message)
 	{
 	    return InstaMsg.MQTTPublish(topicName,
 	                       			message,
@@ -50,7 +46,7 @@ public abstract class Config {
 	    /*
 	     * Finally, publish the config on the server, so that the device and server remain in sync.
 	     */
-	    Globals.startAndCountdownTimer(1, false);
+	    InstaMsg.startAndCountdownTimer(1, false);
 	    publishConfig(TOPIC_CONFIG_SEND, configJson);
 	}
 
@@ -108,6 +104,6 @@ public abstract class Config {
 	
 	public abstract void initConfig();
 	public abstract String getConfigValueFromPersistentStorage(String key);
-	public abstract ReturnCode saveConfigValueOnPersistentStorage(String key, String json);
-	public abstract ReturnCode deleteConfigValueFromPersistentStorage(String key);
+	public abstract InstaMsg.ReturnCode saveConfigValueOnPersistentStorage(String key, String json);
+	public abstract InstaMsg.ReturnCode deleteConfigValueFromPersistentStorage(String key);
 }

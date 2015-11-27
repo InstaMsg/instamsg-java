@@ -1,8 +1,8 @@
 package device.stub.instamsg;
 
 
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.include.Log;
+import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.Log;
 
 public class DeviceLogger extends Log {
 
@@ -32,8 +32,8 @@ public class DeviceLogger extends Log {
 	 * In this case, FAILURE must be returned immediately.
 	 */
 	@Override
-	public ReturnCode loggerWrite(byte[] buffer, int len) {
-		return ReturnCode.FAILURE;		
+	public InstaMsg.ReturnCode loggerWrite(byte[] buffer, int len) {
+		return InstaMsg.ReturnCode.FAILURE;		
 	}
 
 	

@@ -1,12 +1,8 @@
-package common.instamsg.driver.include;
-
-import common.instamsg.driver.Config;
-
+package common.instamsg.driver;
 
 public interface ModulesProviderInterface {
 	
 	Config getConfig();
-	FileSystem getFileSystem();
 	Misc getMisc();
 	Log getLogger();
 	Time getTime();

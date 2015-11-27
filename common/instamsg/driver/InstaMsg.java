@@ -1,15 +1,6 @@
 package common.instamsg.driver;
 
-import utils.ChangeableInt;
-import utils.Config;
 import common.instamsg.driver.Config.CONFIG_TYPE;
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.include.Log;
-import common.instamsg.driver.include.ModulesProviderFactory;
-import common.instamsg.driver.include.ModulesProviderInterface;
-import common.instamsg.driver.include.OneToOneResult;
-import common.instamsg.driver.include.Socket;
-import common.instamsg.driver.include.Time;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -25,13 +16,36 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWir
 
 public class InstaMsg {
 	
+	/**
+	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
+	 */
+	public static final String DEVICE_NAME     =   "linux";
+	public static final int CURRENT_LOG_LEVEL  =   Log.INSTAMSG_LOG_LEVEL_INFO;
+	public static final int MAX_BUFFER_SIZE    =   1000;
+	/**
+	 *
+	 */
+
+	
+	
+
+
+	
 	public static enum QOS {
 		QOS0,
 		QOS1,
 		QOS2
 	}
 	
-	private static InstaMsg instaMsg;;
+	public static enum ReturnCode
+	{
+	    SOCKET_READ_TIMEOUT,
+	    BUFFER_OVERFLOW,
+	    FAILURE,
+	    SUCCESS
+	}
+
+	private static InstaMsg instaMsg;
 	
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
@@ -42,6 +56,9 @@ public class InstaMsg {
 	public static ModulesProviderInterface modulesProvideInterface;
 	public static common.instamsg.driver.Config config;
 	public static Time time;
+	public static Log logger;
+	public static Misc misc;
+	public static Watchdog watchdog;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
@@ -65,7 +82,7 @@ public class InstaMsg {
 	
 	int connectionAttempts = 0;
 	
-	byte[] readBuf = new byte[Globals.MAX_BUFFER_SIZE];
+	byte[] readBuf = new byte[InstaMsg.MAX_BUFFER_SIZE];
 
 	private String filesTopic;
 	private String rebootTopic;
@@ -80,7 +97,18 @@ public class InstaMsg {
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	
 	int publishCount = 0;
+
+
+	public static int NETWORK_INFO_INTERVAL = 300;
+	public static int MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE = 5;
+	public static int MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM = 1;
+	public static int SOCKET_READ_TIMEOUT_SECS = 1;
 	
+	public static int INSTAMSG_PORT;
+	public static String INSTAMSG_HOST;
+	
+
+
 	
 	
 	static {
@@ -93,9 +121,25 @@ public class InstaMsg {
 			}
 		};
 		
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(Config.DEVICE_NAME);
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(InstaMsg.DEVICE_NAME);
+		
 		config = modulesProvideInterface.getConfig();
+		config.initConfig();
+		
 		time = modulesProvideInterface.getTime();
+		time.initGlobalTimer();
+		
+		logger = modulesProvideInterface.getLogger();
+		logger.initLogger();
+		
+		misc = modulesProvideInterface.getMisc();
+
+		watchdog = modulesProvideInterface.getWatchdog();
+		watchdog.watchdogInit();
+		
+		
+		INSTAMSG_HOST = "platform.instamsg.io";
+		INSTAMSG_PORT = 1883;
 	}
 	
 	
@@ -183,19 +227,19 @@ public class InstaMsg {
 	}
 	
 	
-	private static ReturnCode sendPacket(InstaMsg c, byte[] packet) {
+	private static InstaMsg.ReturnCode sendPacket(InstaMsg c, byte[] packet) {
 		
 		if(c.socket.socketCorrupted == true) {
 			Log.errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
-		if(c.socket.socketWrite(packet, packet.length) == ReturnCode.FAILURE) {
+		if(c.socket.socketWrite(packet, packet.length) == InstaMsg.ReturnCode.FAILURE) {
 			c.socket.socketCorrupted = true;
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
-		return ReturnCode.SUCCESS;
+		return InstaMsg.ReturnCode.SUCCESS;
 	}
 	
 	
@@ -228,43 +272,43 @@ public class InstaMsg {
 	}
 	
 	
-	private static ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
+	private static InstaMsg.ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
 		
 		if(c.socket.socketCorrupted == true) {
 			
 			Log.errorLog("Socket not available at physical layer .. so packet cannot be read from server.");
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
-		c.readBuf = new byte[Globals.MAX_BUFFER_SIZE];
+		c.readBuf = new byte[InstaMsg.MAX_BUFFER_SIZE];
 		
 	    /*
 	     * 1. read the header byte.  This has the packet type in it.
 	     */
-		int numRetries = Globals.MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM;
-		ReturnCode rc = ReturnCode.FAILURE;
+		int numRetries = InstaMsg.MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM;
+		InstaMsg.ReturnCode rc = InstaMsg.ReturnCode.FAILURE;
 	    do
 	    {
 	        rc = c.socket.socketRead(c.readBuf, 1, false);
-	        if(rc == ReturnCode.FAILURE)
+	        if(rc == InstaMsg.ReturnCode.FAILURE)
 	        {
 	            c.socket.socketCorrupted = true;
-	            return ReturnCode.FAILURE;
+	            return InstaMsg.ReturnCode.FAILURE;
 	        }
 
-	        if(rc == ReturnCode.SOCKET_READ_TIMEOUT)
+	        if(rc == InstaMsg.ReturnCode.SOCKET_READ_TIMEOUT)
 	        {
 	            numRetries--;
 	        }
-	    } while((rc == ReturnCode.SOCKET_READ_TIMEOUT) && (numRetries > 0));	    
+	    } while((rc == InstaMsg.ReturnCode.SOCKET_READ_TIMEOUT) && (numRetries > 0));	    
 	    
 	    
 	    /*
 	     * If at this point, we still had a socket-timeout, it means we really have nothing to read.
 	     */
-	    if(rc == ReturnCode.SOCKET_READ_TIMEOUT)
+	    if(rc == InstaMsg.ReturnCode.SOCKET_READ_TIMEOUT)
 	    {
-	        return ReturnCode.SOCKET_READ_TIMEOUT;
+	        return InstaMsg.ReturnCode.SOCKET_READ_TIMEOUT;
 	    }
 
 	    
@@ -278,10 +322,10 @@ public class InstaMsg {
 	    byte[] i = new byte[1];
 	    do
 	    {
-	    	if(c.socket.socketRead(i, 1, true) == ReturnCode.FAILURE)
+	    	if(c.socket.socketRead(i, 1, true) == InstaMsg.ReturnCode.FAILURE)
 	        {
 	            c.socket.socketCorrupted = true;
-	            return ReturnCode.FAILURE;
+	            return InstaMsg.ReturnCode.FAILURE;
 	        }
 
 	        rem_len += (i[0] & 127) * multiplier;
@@ -300,10 +344,10 @@ public class InstaMsg {
 	    {
 		    byte[] remainingBytes = new byte[rem_len];
 
-	    	if(c.socket.socketRead(remainingBytes, rem_len, true) == ReturnCode.FAILURE)
+	    	if(c.socket.socketRead(remainingBytes, rem_len, true) == InstaMsg.ReturnCode.FAILURE)
 	        {
 	            c.socket.socketCorrupted = true;
-	            return ReturnCode.FAILURE;
+	            return InstaMsg.ReturnCode.FAILURE;
 	        }
 	    	
 	    	for(int j = 0; j < remainingBytes.length; j++) {
@@ -312,7 +356,7 @@ public class InstaMsg {
 	    }
 
 	    fillFixedHeaderFieldsFromPacketHeader(fixedHeader, c.readBuf[0]);
-	    return ReturnCode.SUCCESS;
+	    return InstaMsg.ReturnCode.SUCCESS;
 	}
 	
 	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc)
@@ -413,14 +457,14 @@ public class InstaMsg {
 
 
 	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
-		ReturnCode rc = ReturnCode.FAILURE;
+		InstaMsg.ReturnCode rc = InstaMsg.ReturnCode.FAILURE;
 		
 		do {
 			
 			MQTTFixedHeader fixedHeader = new MQTTFixedHeader();
 			
 			rc = readPacket(c, fixedHeader);
-			if(rc != ReturnCode.SUCCESS) {
+			if(rc != InstaMsg.ReturnCode.SUCCESS) {
 				return;
 			}
 			
@@ -499,7 +543,7 @@ public class InstaMsg {
 				Log.infoLog("Packet received of type = " + fixedHeader.packetType);
 			}
 		
-		} while (rc == ReturnCode.SUCCESS);		
+		} while (rc == InstaMsg.ReturnCode.SUCCESS);		
 		
 	}
 
@@ -510,19 +554,19 @@ public class InstaMsg {
 	}
 
 
-	private static ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
-		ReturnCode rc;
+	private static InstaMsg.ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
+		InstaMsg.ReturnCode rc;
 		Log.errorLog("Error occurred while decoding " + messageType + " message");
 		
 		c.socket.socketCorrupted = true;
-		rc = ReturnCode.FAILURE;
+		rc = InstaMsg.ReturnCode.FAILURE;
 		return rc;
 	}
 	
 	
-	public static ReturnCode MQTTPublish(String topicName,
+	public static InstaMsg.ReturnCode MQTTPublish(String topicName,
 										 String payload,
-										 QOS qos,
+										 InstaMsg.QOS qos,
 										 boolean dup,
 										 ResultHandler resultHandler,
 										 int resultHandlerTimeout,
@@ -536,7 +580,7 @@ public class InstaMsg {
 		baseMessage.setRetained(retain);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
-		if((qos == QOS.QOS1) || (qos == QOS.QOS2))
+		if((qos == InstaMsg.QOS.QOS1) || (qos == InstaMsg.QOS.QOS2))
 		{
 			int msgId = getNextPackedId(instaMsg);
 			
@@ -550,17 +594,17 @@ public class InstaMsg {
 		
 		byte[] packet = getEncodedMqttMessageAsByteStream(pubMsg);
 		if(packet == null) {
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
-		ReturnCode rc = sendPacket(instaMsg, packet);	
-		if(rc == ReturnCode.SUCCESS) {
+		InstaMsg.ReturnCode rc = sendPacket(instaMsg, packet);	
+		if(rc == InstaMsg.ReturnCode.SUCCESS) {
 			instaMsg.publishCount++;
 		}
 		
 	    if(logging == true)
 	    {
-	        if(rc == ReturnCode.SUCCESS)
+	        if(rc == InstaMsg.ReturnCode.SUCCESS)
 	        {
 	            Log.infoLog("Published successfully.\n");
 
@@ -586,13 +630,13 @@ public class InstaMsg {
 	}
 
 	
-	public static ReturnCode MQTTConnect(InstaMsg c) {
+	public static InstaMsg.ReturnCode MQTTConnect(InstaMsg c) {
 		
 		MqttConnect connectMsg = new MqttConnect(c.connectOptions);
 		
 		byte[] packet = getEncodedMqttMessageAsByteStream(connectMsg);
 		if(packet == null) {
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
 		return sendPacket(c, packet);
@@ -609,7 +653,7 @@ public class InstaMsg {
 
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks) {
 		
-		c.socket = modulesProvideInterface.getSocket(Globals.INSTAMSG_HOST, Globals.INSTAMSG_PORT);		
+		c.socket = modulesProvideInterface.getSocket(InstaMsg.INSTAMSG_HOST, InstaMsg.INSTAMSG_PORT);		
 		c.socket.socketCorrupted = true;
 		
 		c.socket.initSocket();
@@ -660,7 +704,6 @@ public class InstaMsg {
 	
 	public static void start(InitialCallbacks callbacks, int businessLogicInterval) {
 
-		Globals.globalSystemInit();
 		instaMsg = new InstaMsg();
 		
 		long currentTick = time.getCurrentTick();		
@@ -693,7 +736,7 @@ public class InstaMsg {
 						removeExpiredResultHandlers(instaMsg);
 						
 						if(socketReadJustNow == false) {
-							Globals.startAndCountdownTimer(1, false);
+							InstaMsg.startAndCountdownTimer(1, false);
 						}
 						
 						long latestTick = time.getCurrentTick();
@@ -724,7 +767,7 @@ public class InstaMsg {
 				instaMsg.connectionAttempts++;
 				Log.errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
 
-				if(instaMsg.connectionAttempts > Globals.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
+				if(instaMsg.connectionAttempts > InstaMsg.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
 				{
 					instaMsg.connectionAttempts = 0;
 
@@ -740,6 +783,29 @@ public class InstaMsg {
 			}				
 		}
 
+	}
+
+	/*
+	 * This method causes the current thread to wait for "n" seconds.
+	 */
+	public static void startAndCountdownTimer(int seconds, boolean showRunningStatus)
+	{
+	    int i;
+	    long j;
+	    long cycles = 1000000 / time.getMinimumDelayPossibleInMicroSeconds();
+	
+	    for(i = 0; i < seconds; i++)
+	    {
+	        if(showRunningStatus == true)
+	        {
+	        	Log.infoLog(seconds - 1 + "");
+	        }
+	
+	        for(j = 0; j < cycles; j++)
+	        {
+	            time.minimumDelay();
+	        }
+	    }
 	}
 }
 

@@ -3,10 +3,9 @@ package device.linux.instamsg;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
-import common.instamsg.driver.Globals;
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.include.Log;
-import common.instamsg.driver.include.Socket;
+import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.Log;
+import common.instamsg.driver.Socket;
 
 public class DeviceSocket extends Socket {
 
@@ -29,7 +28,7 @@ public class DeviceSocket extends Socket {
 		
 		try {
 			socket = new java.net.Socket(host, port);
-			socket.setSoTimeout(Globals.SOCKET_READ_TIMEOUT_SECS * 1000);
+			socket.setSoTimeout(InstaMsg.SOCKET_READ_TIMEOUT_SECS * 1000);
 			
 		} catch (Exception e) {
 			
@@ -39,7 +38,7 @@ public class DeviceSocket extends Socket {
 		
 		socketCorrupted = false;
 		Log.infoLog("TCP-SOCKET UNDERLYING_MEDIUM INITIATED FOR HOST = [" + 
-		                  Globals.INSTAMSG_HOST + "], PORT = [" + Globals.INSTAMSG_PORT + "].");
+		                  InstaMsg.INSTAMSG_HOST + "], PORT = [" + InstaMsg.INSTAMSG_PORT + "].");
 	}
 
 	/**
@@ -91,7 +90,7 @@ public class DeviceSocket extends Socket {
 	 * So, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
+	public InstaMsg.ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
 		
 		for(int i = 0; i < len; i++) {
 			
@@ -113,7 +112,7 @@ public class DeviceSocket extends Socket {
 					/*
 					 * Case c).
 					 */
-					return ReturnCode.SOCKET_READ_TIMEOUT;
+					return InstaMsg.ReturnCode.SOCKET_READ_TIMEOUT;
 				}
 				
 			} catch (IOException e) {
@@ -121,14 +120,14 @@ public class DeviceSocket extends Socket {
 				/*
 				 * Case b) and e).
 				 */
-				return ReturnCode.FAILURE;
+				return InstaMsg.ReturnCode.FAILURE;
 			}
 		}
 
 		/*
 		 * Case a) and d).
 		 */
-		return ReturnCode.SUCCESS;
+		return InstaMsg.ReturnCode.SUCCESS;
 	}
 
 	
@@ -147,7 +146,7 @@ public class DeviceSocket extends Socket {
 	 * In this case, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public ReturnCode socketWrite(byte[] buffer, int len) {
+	public InstaMsg.ReturnCode socketWrite(byte[] buffer, int len) {
 		
 		try {
 			socket.getOutputStream().write(buffer);
@@ -155,10 +154,10 @@ public class DeviceSocket extends Socket {
 		} catch (IOException e) {
 			
 			Log.errorLog(SOCKET_ERROR + "Error occurred while writing bytes to socket");
-			return ReturnCode.FAILURE;
+			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
-		return ReturnCode.SUCCESS;
+		return InstaMsg.ReturnCode.SUCCESS;
 	}
 
 	

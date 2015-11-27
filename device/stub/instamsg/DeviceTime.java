@@ -1,6 +1,6 @@
 package device.stub.instamsg;
 
-import common.instamsg.driver.include.Time;
+import common.instamsg.driver.Time;
 
 public class DeviceTime implements Time {
 

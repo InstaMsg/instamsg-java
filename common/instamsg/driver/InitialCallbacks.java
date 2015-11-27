@@ -1,12 +1,11 @@
 package common.instamsg.driver;
 
-import common.instamsg.driver.Globals.ReturnCode;
-import common.instamsg.driver.include.OneToOneResult;
+import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public interface InitialCallbacks {
 
-	ReturnCode onConnectOneTimeOperations();
-	ReturnCode onDisconnect();
-	ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult);
-	ReturnCode coreLoopyBusinessLogicInitiatedBySelf();
+	InstaMsg.ReturnCode onConnectOneTimeOperations();
+	InstaMsg.ReturnCode onDisconnect();
+	InstaMsg.ReturnCode oneToOneMessageReceivedHandler(OneToOneResult oneToOneResult);
+	InstaMsg.ReturnCode coreLoopyBusinessLogicInitiatedBySelf();
 }
