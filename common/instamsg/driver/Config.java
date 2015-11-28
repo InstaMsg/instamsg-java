@@ -13,8 +13,6 @@ public abstract class Config {
 	public static final String CONFIG                  =  "[CONFIG] ";
 	public static final String CONFIG_ERROR            =  "[CONFIG_ERROR] ";
 	
-	static final String TOPIC_CONFIG_SEND              =  "instamsg/client/config/clientToServer";
-
 	public static final String CONFIG_KEY_KEY          =  "key";
 	public static final String CONFIG_TYPE_KEY         =  "type";
 	public static final String CONFIG_VALUE_KEY        =  "val";
@@ -47,7 +45,7 @@ public abstract class Config {
 	     * Finally, publish the config on the server, so that the device and server remain in sync.
 	     */
 	    InstaMsg.startAndCountdownTimer(1, false);
-	    publishConfig(TOPIC_CONFIG_SEND, configJson);
+	    publishConfig(InstaMsg.TOPIC_CONFIG_SEND, configJson);
 	}
 
 

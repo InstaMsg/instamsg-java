@@ -63,6 +63,11 @@ public class InstaMsg {
 	public static Misc misc;
 	public static Watchdog watchdog;
 	
+	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
+	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
+	static final String TOPIC_NETWORK_DATA  =   "instamsg/client/signalinfo";
+	static final String TOPIC_CONFIG_SEND   =  "instamsg/client/config/clientToServer";
+	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
 	OneToOneHandlers[] oneToOneHandlers = new OneToOneHandlers[MAX_MESSAGE_HANDLERS];
@@ -419,12 +424,47 @@ public class InstaMsg {
 	    return InstaMsg.ReturnCode.SUCCESS;
 	}
 	
+	
+	private static void sendClientData(String data, String topicName) {
+		
+		/*
+		 * This method sends the data upon client's connect.
+		 *
+		 * If the message(s) are not sent from this method, that means that the connection is not (fully) completed.
+		 * Thus, the InstaMsg-Driver code will try again for the connection, and then these messages will be sent (again).
+		 *
+		 * Bottom-line : We do not need to re-attempt the message(s) sent by this method.
+		 */
+
+		if((data != null) && (data.length() > 0)) {			
+			MQTTPublish(topicName,
+					    data,
+					    QOS.QOS1,
+					    false,
+					    null,
+					    MQTT_RESULT_HANDLER_TIMEOUT,
+					    false,
+					    true);
+			
+		} else {			
+			Log.infoLog("Not publishing empty-message to topic [" + topicName + "]");
+
+		}
+	}
+	
+
 	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc)
 	{
 	    if(connackRc == 0x00)  /* Connection Accepted */
 	    {
 	        Log.infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
 	        c.connected = true;
+	        
+	        
+	        sendClientData(misc.getClientSessionData(), TOPIC_SESSION_DATA);
+	        sendClientData(misc.getClientMetadata(), TOPIC_METADATA);
+	        sendClientData(misc.getNetworkData(), TOPIC_NETWORK_DATA);
+		
 	        
 	        config.registerEditableConfig(c.pingRequestInterval,
 	        		                      "PING_REQ_INTERVAL",
@@ -440,11 +480,6 @@ public class InstaMsg {
 	                                      "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. " +
 	                                      "This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
 
-	        /*
-	        sendClientData(get_client_session_data, TOPIC_SESSION_DATA);
-	        sendClientData(get_client_metadata, TOPIC_METADATA);
-	        sendClientData(get_network_data, TOPIC_NETWORK_DATA);
-			*/
 
 	        c.callbacks.onConnectOneTimeOperations();
 	    }
