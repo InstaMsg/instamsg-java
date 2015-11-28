@@ -974,7 +974,7 @@ public class InstaMsg implements MessagingAPIs {
 	    {
 	        if(showRunningStatus == true)
 	        {
-	        	Log.infoLog(seconds - 1 + "");
+	        	Log.infoLog(seconds - i + "");
 	        }
 	
 	        for(j = 0; j < cycles; j++)
