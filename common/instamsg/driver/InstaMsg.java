@@ -22,7 +22,7 @@ public class InstaMsg {
 	/**
 	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
 	 */
-	public static final String DEVICE_NAME     =   "linux";
+	public static final String DEVICE_NAME     =   "";
 	public static final int CURRENT_LOG_LEVEL  =   Log.INSTAMSG_LOG_LEVEL_INFO;
 	/**
 	 *

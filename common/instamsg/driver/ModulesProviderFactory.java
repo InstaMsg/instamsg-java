@@ -11,6 +11,9 @@ public class ModulesProviderFactory {
 		else if(device.equals("linux")){
 			return new device.linux.instamsg.ModulesProvider();
 		}
+		/*
+		 * All new device-implementors must add their devices in this factory.
+		 */
 		
 		return null;
 	}
