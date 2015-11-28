@@ -17,6 +17,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSub
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 
+@SuppressWarnings("unused")
 public class InstaMsg implements MessagingAPIs {
 	
 	/**
@@ -24,6 +25,7 @@ public class InstaMsg implements MessagingAPIs {
 	 */
 	public static final String DEVICE_NAME     =   "";
 	public static final int CURRENT_LOG_LEVEL  =   Log.INSTAMSG_LOG_LEVEL_INFO;
+	public static final boolean SSL_SOCKET     =   false;
 	/**
 	 *
 	 */	
@@ -148,7 +150,11 @@ public class InstaMsg implements MessagingAPIs {
 		
 		
 		INSTAMSG_HOST = "platform.instamsg.io";
-		INSTAMSG_PORT = 1883;
+		if(SSL_SOCKET == true) {
+			INSTAMSG_PORT = 8883;
+		} else {
+			INSTAMSG_PORT = 1883;
+		}
 	}
 	
 	
