@@ -1,5 +1,7 @@
 package common.instamsg.driver;
 
+import common.instamsg.driver.InstaMsg.ReturnCode;
+
 import config.DeviceConstants;
 import config.ModulesProviderFactory;
 
@@ -14,7 +16,7 @@ public abstract class Log {
 	
 
 	public abstract void initLogger();
-	public abstract InstaMsg.ReturnCode loggerWrite(byte[] buffer, int len);
+	public abstract ReturnCode loggerWrite(byte[] buffer, int len);
 	public abstract void releaseLogger();
 	
 	static ModulesProviderInterface modulesProvideInterface;
