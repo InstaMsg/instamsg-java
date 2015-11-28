@@ -14,18 +14,7 @@ public class OneToOneResult {
 	    	this.peerMsg = peerMsg;
 	    }
 	    
-	    public ReturnCode reply(String replyMessage) {
-	    	
-	        int msgId = InstaMsg.getNextPackedId(InstaMsg.instaMsg);
 
-	        String message = "{\"message_id\": \""     +  msgId                              + 
-	        		         "\", \"response_id\": \"" +  peerMsgId                          +
-	        		         "\", \"reply_to\": \""    +  InstaMsg.instaMsg.clientIdComplete +
-	        		         "\", \"body\": \""        +  replyMessage                       + 
-	        		         "\", \"status\": 1}";
-
-	        return InstaMsg.doMqttSendPublish(peer, message);
-	    }
 	    
 	    
 	    
@@ -37,6 +26,7 @@ public class OneToOneResult {
 	     */
 	    public String peer;
 	    public int peerMsgId;
+	    
 
 
 	    /*
@@ -50,6 +40,8 @@ public class OneToOneResult {
 	     * "true" denotes that the response was succesfully received.
 	     */
 	    public boolean succeeded;
+	    
+	    
 
 	    /*
 	     * Peer-Message.
@@ -57,15 +49,29 @@ public class OneToOneResult {
 	     * Makes sense only if the value of "succeeded" is "true".
 	     */
 	    public String peerMsg;
+	    
+	    
 
 	    /*
 	     * Function-Pointer, to send a reply to the peer.
 	     *
 	     * Kindly see
 	     *
-	     *                  common/apps/oneToOneInitiator/main.java
-	     *                  common/apps/subscriber/main.java
+	     *                  common/apps/oneToOneInitiator/Main.java
+	     *                  common/apps/subscriber/Main.java
 	     *
 	     * for simple (yet complete) example-usage.
 	     */
+	    public ReturnCode reply(String replyMessage) {
+	    	
+	        int msgId = InstaMsg.getNextPackedId(InstaMsg.instaMsg);
+
+	        String message = "{\"message_id\": \""     +  msgId                              + 
+	        		         "\", \"response_id\": \"" +  peerMsgId                          +
+	        		         "\", \"reply_to\": \""    +  InstaMsg.instaMsg.clientIdComplete +
+	        		         "\", \"body\": \""        +  replyMessage                       + 
+	        		         "\", \"status\": 1}";
+
+	        return InstaMsg.doMqttSendPublish(peer, message);
+	    }
 }
