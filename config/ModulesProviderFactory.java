@@ -1,4 +1,6 @@
-package common.instamsg.driver;
+package config;
+
+import common.instamsg.driver.ModulesProviderInterface;
 
 
 public class ModulesProviderFactory {

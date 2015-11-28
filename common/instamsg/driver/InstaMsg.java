@@ -15,24 +15,14 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPub
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
+import config.DeviceConstants;
+import config.ModulesProviderFactory;
 
 
 @SuppressWarnings("unused")
 public class InstaMsg implements MessagingAPIs {
 	
-	/**
-	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, AS PER THE DEVICE BEING IMPLEMENTED.
-	 */
-	public static final String DEVICE_NAME     =   "";
-	public static final int LOG_LEVEL          =   Log.INSTAMSG_LOG_LEVEL_INFO;
-	public static final boolean SSL_SOCKET     =   false;
-	public static final boolean GSM_DEVICE     =   false;
-	/**
-	 *
-	 */	
 
-
-	
 	public static enum QOS {
 		QOS0,
 		QOS1,
@@ -134,7 +124,7 @@ public class InstaMsg implements MessagingAPIs {
 			}
 		};
 		
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(InstaMsg.DEVICE_NAME);
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(DeviceConstants.DEVICE_NAME);
 		
 		config = modulesProvideInterface.getConfig();
 		config.initConfig();
@@ -152,7 +142,7 @@ public class InstaMsg implements MessagingAPIs {
 		
 		
 		INSTAMSG_HOST = "platform.instamsg.io";
-		if(SSL_SOCKET == true) {
+		if(DeviceConstants.SSL_SOCKET == true) {
 			INSTAMSG_PORT = 8883;
 		} else {
 			INSTAMSG_PORT = 1883;

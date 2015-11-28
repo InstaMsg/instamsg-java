@@ -1,5 +1,8 @@
 package common.instamsg.driver;
 
+import config.DeviceConstants;
+import config.ModulesProviderFactory;
+
 
 
 public abstract class Log {
@@ -17,13 +20,13 @@ public abstract class Log {
 	static ModulesProviderInterface modulesProvideInterface;
 
 	static {
-		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(InstaMsg.DEVICE_NAME);
+		modulesProvideInterface = ModulesProviderFactory.getModulesProvider(DeviceConstants.DEVICE_NAME);
 	}
 	
 	
 	public static void log(String log, int level) {
 		
-		if(level <= InstaMsg.LOG_LEVEL) {
+		if(level <= DeviceConstants.LOG_LEVEL) {
 			modulesProvideInterface.getLogger().loggerWrite(log.getBytes(), log.length());
 		}
 	}

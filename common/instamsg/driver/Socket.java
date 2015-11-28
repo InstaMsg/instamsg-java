@@ -1,5 +1,7 @@
 package common.instamsg.driver;
 
+import config.DeviceConstants;
+
 
 
 public abstract class Socket {
@@ -30,7 +32,7 @@ public abstract class Socket {
 	@SuppressWarnings("unused")
 	public void initSocket() {
 
-		if(InstaMsg.GSM_DEVICE == true) {
+		if(DeviceConstants.GSM_DEVICE == true) {
 
 			/*
 			 *  Fill-in the provisioning-parameters from the SMS obtained from InstaMsg-Server 
