@@ -1,9 +1,13 @@
 package device.linux.instamsg;
 
+import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.Log;
 import common.instamsg.driver.Watchdog;
 
 public class DeviceWatchdog implements Watchdog {
 
+	boolean watchdogActive = false;
+	
 	
 	/**
 	 * This method initializes the watchdog-timer.
@@ -34,7 +38,30 @@ public class DeviceWatchdog implements Watchdog {
 	 */
 	@Override
 	public void watchdogResetAndEnable(int n, String callee) {
+		watchdogActive = true;
 		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				for(int i = n; i >= 0; i--) {
+					
+					if(watchdogActive == false) {
+						return;
+					}
+					
+					InstaMsg.startAndCountdownTimer(1, false);
+				}
+				
+				/*
+				 * If control reaches here.. it means that the loop has run to completion, and the
+				 * watchdog is still active.
+				 */
+				Log.infoLog("Watchdog-timer of interval [" + n + "] seconds expired for callee [" + callee + "]... rebooting device.");
+				InstaMsg.misc.rebootDevice();
+			}
+		}).start();;
 	}
 	
 	
@@ -43,6 +70,6 @@ public class DeviceWatchdog implements Watchdog {
 	 */
 	@Override
 	public void watchdogDisable() {
-		
+		watchdogActive = false;
 	}
 }

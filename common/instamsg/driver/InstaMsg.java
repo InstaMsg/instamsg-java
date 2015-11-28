@@ -291,17 +291,25 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static InstaMsg.ReturnCode sendPacket(InstaMsg c, byte[] packet) {
 		
+		ReturnCode rc = ReturnCode.FAILURE;
+		
+		watchdog.watchdogResetAndEnable(10, "sendPacket");
+		
 		if(c.socket.socketCorrupted == true) {
+			
 			Log.errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
-			return InstaMsg.ReturnCode.FAILURE;
-		}
+
+		} else {
+			
+			rc = c.socket.socketWrite(packet, packet.length);
+			
+			if(rc == ReturnCode.FAILURE) {
+				c.socket.socketCorrupted = true;
+			}
+		}		
 		
-		if(c.socket.socketWrite(packet, packet.length) == InstaMsg.ReturnCode.FAILURE) {
-			c.socket.socketCorrupted = true;
-			return InstaMsg.ReturnCode.FAILURE;
-		}
-		
-		return InstaMsg.ReturnCode.SUCCESS;
+		watchdog.watchdogDisable();
+		return rc;
 	}
 	
 	
@@ -328,13 +336,21 @@ public class InstaMsg implements MessagingAPIs {
 	
 	
 	private static void fillFixedHeaderFieldsFromPacketHeader(MQTTFixedHeader fixedHeader, byte packetHeader) {
-		//System.out.println(String.format("0x%02X", packetHeader));
 		fixedHeader.packetType = (byte) ((packetHeader >> 4) & 0x0F);
-		//System.out.println(String.format("0x%02X", fixedHeader.packetType));
 	}
 	
 	
-	private static InstaMsg.ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
+	private static ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
+		
+		watchdog.watchdogResetAndEnable(10, "readPacket");
+		ReturnCode rc = readPacketActual(c, fixedHeader);
+		watchdog.watchdogDisable();
+		
+		return rc;
+	}
+	
+	
+	private static ReturnCode readPacketActual(InstaMsg c, MQTTFixedHeader fixedHeader) {
 		
 		if(c.socket.socketCorrupted == true) {
 			
