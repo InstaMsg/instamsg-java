@@ -37,21 +37,21 @@ public class Main {
 				counter++;
 				
 				return 
-				InstaMsg.MQTTPublish("listener_topic",
-									 "Test " + counter,
-									 QOS.QOS2,
-									 false,
-									 new ResultHandler() {
+				InstaMsg.instaMsg.MQTTPublish("listener_topic",
+									          "Test " + counter,
+									          QOS.QOS2,
+									          false,
+									          new ResultHandler() {
 
-										@Override
-										public void handle(int msgId) {
+												@Override
+												public void handle(int msgId) {
 											
-											Log.infoLog("PUBACK received for msg-id [" + msgId +"]");
-										}
-									},
-									InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-									false,
-									true);
+													Log.infoLog("PUBACK received for msg-id [" + msgId +"]");
+												}
+											  },
+											  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
+											  false,
+											  true);
 			}
 		};
 		

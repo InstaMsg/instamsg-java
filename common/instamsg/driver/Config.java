@@ -2,7 +2,7 @@ package common.instamsg.driver;
 
 import common.instamsg.driver.InstaMsg.QOS;
 
-public abstract class Config {
+public abstract class Config implements ConfigAPIs {
 
 	public static enum CONFIG_TYPE
 	{
@@ -21,14 +21,14 @@ public abstract class Config {
 	
 	static InstaMsg.ReturnCode publishConfig(String topicName, String message)
 	{
-	    return InstaMsg.MQTTPublish(topicName,
-	                       			message,
-	                       			QOS.QOS1,
-	                       			false,
-	                       			null,
-	                       			InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-	                       			false,
-	                       			true);
+	    return InstaMsg.instaMsg.MQTTPublish(topicName,
+	                       					 message,
+	                       					 QOS.QOS1,
+	                       					 false,
+	                       					 null,
+	                       					 InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
+	                       					 false,
+	                       					 true);
 	}
 
 
@@ -52,7 +52,7 @@ public abstract class Config {
 	public void registerEditableConfig(Object var,
 	                        		   String key,
 	                            	   CONFIG_TYPE type,
-	                            	   String stringified_value,
+	                            	   String stringifiedValue,
 	                            	   String desc) {
 
 
@@ -66,11 +66,11 @@ public abstract class Config {
 	        /*
 	         * Config found on persistent-storage.
 	         */
-	        stringified_value = Json.getJsonKeyValueIfPresent(storedConfig, CONFIG_VALUE_KEY);
+	        stringifiedValue = Json.getJsonKeyValueIfPresent(storedConfig, CONFIG_VALUE_KEY);
 	        desc = Json.getJsonKeyValueIfPresent(storedConfig, CONFIG_DESCRIPTION_KEY);
 
 	        Log.infoLog(CONFIG + "Default-config-values overridden by stored-values. Key = [" + key + "], Value = [" +
-	                             stringified_value + "], Description = [" + desc + "]");
+	                             stringifiedValue + "], Description = [" + desc + "]");
 	    }
 
 
@@ -79,12 +79,12 @@ public abstract class Config {
 	     */
 	    if(type == CONFIG_TYPE.CONFIG_STRING)
 	    {
-	    	((ChangeableString) var).changeTo(stringified_value);
+	    	((ChangeableString) var).changeTo(stringifiedValue);
 	        Log.infoLog(CONFIG + "Using value [" + var + "] for key [" + key + "] of type STRING");
 	    }
 	    else
 	    {
-	        ((ChangeableInt) var).changeTo(Integer.parseInt(stringified_value));;
+	        ((ChangeableInt) var).changeTo(Integer.parseInt(stringifiedValue));;
 	        Log.infoLog(CONFIG + "Using value [" + ((ChangeableInt) var).intValue() + "] for key [" + key + "] of type INTEGER");
 	    }
 
@@ -94,7 +94,7 @@ public abstract class Config {
 	     */
 	    String configMessageToSend = "{'" + CONFIG_KEY_KEY          + "' : '" + key               + "', " +
 	                                 " '" + CONFIG_TYPE_KEY         + "' : '" + type.ordinal()    + "', " +
-	    		                     " '" + CONFIG_VALUE_KEY        + "' : '" + stringified_value + "', " +
+	    		                     " '" + CONFIG_VALUE_KEY        + "' : '" + stringifiedValue + "', " +
 	                                 " '" + CONFIG_DESCRIPTION_KEY  + "' : '" + desc              + "'}";
 
 	    processConfig(configMessageToSend);

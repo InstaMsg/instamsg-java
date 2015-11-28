@@ -55,18 +55,18 @@ public class Main {
 			        	InstaMsg.misc.rebootDevice();
 			        }
 			        
-			        InstaMsg.MQTTSend(remotePeerId,
-			                          "Hi... this is one-to-one initiator !!",
-			                          new OneToOneHandler() {
+			        InstaMsg.instaMsg.MQTTSend(remotePeerId,
+			                          		   "Hi... this is one-to-one initiator !!",
+			                          		   new OneToOneHandler() {
 										
-											@Override
-											public ReturnCode oneToOneMessageHandler(OneToOneResult result) {
+													@Override
+													public ReturnCode oneToOneMessageHandler(OneToOneResult result) {
 												
-												Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
-												return ReturnCode.SUCCESS;
-											}
-										},
-										3600);
+														Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
+														return ReturnCode.SUCCESS;
+													}
+											},
+											3600);
 			    }
 			    else
 			    {

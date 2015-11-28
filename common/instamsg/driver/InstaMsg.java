@@ -17,7 +17,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSub
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 
-public class InstaMsg {
+public class InstaMsg implements MessagingAPIs {
 	
 	/**
 	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
@@ -165,22 +165,23 @@ public class InstaMsg {
 	
 	
 	public static ReturnCode doMqttSendPublish(String peer, String message) {
-		return MQTTPublish(peer,
-                  		   message,
-                		   QOS.QOS2,
-                		   false,
-                		   new ResultHandler() {
+		return instaMsg.MQTTPublish(peer,
+                  		            message,
+                		            QOS.QOS2,
+                		            false,
+                		            new ResultHandler() {
 			
-									@Override
-									public void handle(int msgId) {
-										Log.infoLog("[DEFAULT-PUBLISH-HANDLER] PUBACK received for msg-id [" + msgId + "]");
+										@Override
+										public void handle(int msgId) {
+											Log.infoLog("[DEFAULT-PUBLISH-HANDLER] PUBACK received for msg-id [" + msgId + "]");
 									
-									}
-								},
-						   InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-						   false,
-						   true);
+										}
+									},
+									InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
+									false,
+									true);
 	}
+	
 	
 	private static void attachResultHandler(InstaMsg c, int msgId, int timeout, ResultHandler resultHandler)
 	{
@@ -435,14 +436,14 @@ public class InstaMsg {
 		 */
 
 		if((data != null) && (data.length() > 0)) {			
-			MQTTPublish(topicName,
-					    data,
-					    QOS.QOS1,
-					    false,
-					    null,
-					    MQTT_RESULT_HANDLER_TIMEOUT,
-					    false,
-					    true);
+			instaMsg.MQTTPublish(topicName,
+					             data,
+					             QOS.QOS1,
+					             false,
+					             null,
+					             MQTT_RESULT_HANDLER_TIMEOUT,
+					             false,
+					             true);
 			
 		} else {			
 			Log.infoLog("Not publishing empty-message to topic [" + topicName + "]");
@@ -788,14 +789,14 @@ public class InstaMsg {
 	}
 	
 	
-	public static InstaMsg.ReturnCode MQTTPublish(String topicName,
-										 String payload,
-										 InstaMsg.QOS qos,
-										 boolean dup,
-										 ResultHandler resultHandler,
-										 int resultHandlerTimeout,
-										 boolean retain,
-										 boolean logging) {
+	public InstaMsg.ReturnCode MQTTPublish(String topicName,
+			 							   String payload,
+										   InstaMsg.QOS qos,
+										   boolean dup,
+										   ResultHandler resultHandler,
+										   int resultHandlerTimeout,
+										   boolean retain,
+										   boolean logging) {
 		
 		MqttMessage baseMessage = new MqttMessage();
 		baseMessage.setPayload(payload.getBytes());
@@ -854,12 +855,12 @@ public class InstaMsg {
 	}
 	
 	
-	public static ReturnCode MQTTSubscribe(String topicName,
-										   QOS qos,
-										   MessageHandler messageHandler,
-										   ResultHandler resultHandler,
-										   int resultHandlerTimeout,
-										   boolean logging) {
+	public ReturnCode MQTTSubscribe(String topicName,
+									QOS qos,
+									MessageHandler messageHandler,
+									ResultHandler resultHandler,
+									int resultHandlerTimeout,
+									boolean logging) {
 		
 		InstaMsg c = instaMsg;
 		
@@ -922,7 +923,10 @@ public class InstaMsg {
 	}
 
 	
-	public static ReturnCode MQTTSend(String peer, String payload, OneToOneHandler oneToOneHandler, int timeout) {
+	public ReturnCode MQTTSend(String peer,
+			                   String payload,
+			                   OneToOneHandler oneToOneHandler,
+			                   int timeout) {
 		
 		InstaMsg c = instaMsg;
 		int id = getNextPackedId(c);

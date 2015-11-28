@@ -39,26 +39,26 @@ public class Main {
 			public InstaMsg.ReturnCode onConnectOneTimeOperations() {
 
 				return 
-				InstaMsg.MQTTSubscribe("listener_topic",
-									   QOS.QOS2,
-									   new MessageHandler() {
+				InstaMsg.instaMsg.MQTTSubscribe("listener_topic",
+									   			QOS.QOS2,
+									   			new MessageHandler() {
 										
-											@Override
-											public void handle(MessageData md) {
+													@Override
+													public void handle(MessageData md) {
 												
-												Log.infoLog(md.getPayload());
-											}
-										},
-									   new ResultHandler() {
+														Log.infoLog(md.getPayload());
+													}
+												},
+												new ResultHandler() {
 
-											@Override
-											public void handle(int msgId) {
+													@Override
+													public void handle(int msgId) {
 											
-												Log.infoLog("SUBACK received for msg-id [" + msgId +"]");
-											}
-										},
-										InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-										true);
+														Log.infoLog("SUBACK received for msg-id [" + msgId +"]");
+													}
+												},
+												InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
+												true);
 			
 			}
 
