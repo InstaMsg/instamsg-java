@@ -14,6 +14,24 @@ public class DeviceSocket extends Socket {
 	public DeviceSocket(String hostName, int port) {
 		super(hostName, port);
 	}
+	
+	
+	
+	/**
+	 * This method returns the *****LATEST****** sms, which contains the desired substring.
+	 *
+	 * Note that "{" are sometimes not processed correctly by some SIMs, so a prefix-match (which
+	 * otherwise is a stronger check) is not being done.
+	 *
+	 * Please note that this method is called by Instamsg-application, *****BEFORE***** calling
+	 * "connect_underlying_socket_medium_try_once".
+	 */
+	@Override
+	public String getLatestSmsContainingSubstring(String substring) {
+		return null;
+	}
+	
+	
 
 	/**
 	 * This method tries to establish the socket to super.host on super.port.
@@ -179,4 +197,6 @@ public class DeviceSocket extends Socket {
 		}
 		
 	}
+
+
 }

@@ -23,7 +23,7 @@ public abstract class Log {
 	
 	public static void log(String log, int level) {
 		
-		if(level <= InstaMsg.CURRENT_LOG_LEVEL) {
+		if(level <= InstaMsg.LOG_LEVEL) {
 			modulesProvideInterface.getLogger().loggerWrite(log.getBytes(), log.length());
 		}
 	}

@@ -24,8 +24,9 @@ public class InstaMsg implements MessagingAPIs {
 	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
 	 */
 	public static final String DEVICE_NAME     =   "";
-	public static final int CURRENT_LOG_LEVEL  =   Log.INSTAMSG_LOG_LEVEL_INFO;
+	public static final int LOG_LEVEL          =   Log.INSTAMSG_LOG_LEVEL_INFO;
 	public static final boolean SSL_SOCKET     =   false;
+	public static final boolean GSM_DEVICE     =   false;
 	/**
 	 *
 	 */	
@@ -60,6 +61,8 @@ public class InstaMsg implements MessagingAPIs {
 	public static Log logger;
 	public static Misc misc;
 	public static Watchdog watchdog;
+	public Socket socket;
+
 	
 	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
@@ -84,7 +87,6 @@ public class InstaMsg implements MessagingAPIs {
 	String username;
 	String password;
 	
-	Socket socket;
 	
 	public boolean connected = false;
 	
