@@ -1124,7 +1124,7 @@ public class InstaMsg implements MessagingAPIs {
 			if(instaMsg.socket.socketCorrupted == true) {
 
 				clearInstaMsg(instaMsg);
-				break;
+				startAndCountdownTimer(1, false);
 			}				
 		}
 
