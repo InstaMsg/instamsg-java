@@ -3,6 +3,7 @@ package device.linux.instamsg;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 
+import common.instamsg.driver.Log;
 import common.instamsg.driver.Misc;
 
 public class DeviceMisc implements Misc {
@@ -14,6 +15,8 @@ public class DeviceMisc implements Misc {
 	@Override
 	public void rebootDevice() {
 		
+		Log.infoLog("Dummy-Rebooting Linux-Machine !!!");
+		System.exit(0);
 	}
 
 	

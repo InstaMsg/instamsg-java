@@ -24,13 +24,9 @@ public class InstaMsg {
 	 */
 	public static final String DEVICE_NAME     =   "linux";
 	public static final int CURRENT_LOG_LEVEL  =   Log.INSTAMSG_LOG_LEVEL_INFO;
-	public static final int MAX_BUFFER_SIZE    =   1000;
 	/**
 	 *
-	 */
-
-	
-	
+	 */	
 
 
 	
@@ -67,6 +63,8 @@ public class InstaMsg {
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
 	static final String TOPIC_NETWORK_DATA  =   "instamsg/client/signalinfo";
 	static final String TOPIC_CONFIG_SEND   =  "instamsg/client/config/clientToServer";
+	
+	public static final int MAX_BUFFER_SIZE    =   1000;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];

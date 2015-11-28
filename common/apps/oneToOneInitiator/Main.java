@@ -10,8 +10,16 @@ import common.instamsg.driver.OneToOneResult;
 
 public class Main {
 	
+	/**
+	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
+	 */
+	static String remotePeerId = "";
+	/**
+	 * 
+	 */
+	
+	
 	static boolean onceDone = false;
-	static String remotePeerId = "3e229e40-8149-11e5-8f9f-bc764e102b63";
 	
 	public static void main(String[] args) {
 		
@@ -43,6 +51,8 @@ public class Main {
 
 			        if((remotePeerId == null) || (remotePeerId.length() == 0)) {
 			        	
+			        	Log.errorLog("Remote Peer-Id (as topic) is empty .. MQTT-SEND cannot be sent... rebooting the device");
+			        	InstaMsg.misc.rebootDevice();
 			        }
 			        
 			        InstaMsg.MQTTSend(remotePeerId,
