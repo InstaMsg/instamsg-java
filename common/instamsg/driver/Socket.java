@@ -1,5 +1,7 @@
 package common.instamsg.driver;
 
+import common.instamsg.driver.InstaMsg.ReturnCode;
+
 import config.DeviceConstants;
 
 
@@ -92,7 +94,7 @@ public abstract class Socket {
 	
 	public abstract String getLatestSmsContainingSubstring(String substring);
 	public abstract void connectUnderlyingSocketMediumTryOnce();	
-	public abstract InstaMsg.ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed);
-	public abstract InstaMsg.ReturnCode socketWrite(byte[] buffer, int len);
+	public abstract ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed);
+	public abstract ReturnCode socketWrite(byte[] buffer, int len);
 	public abstract void releaseUnderlyingSocketMediumGuaranteed();
 }

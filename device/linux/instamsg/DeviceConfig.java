@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import common.instamsg.driver.Config;
 import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Json;
 import common.instamsg.driver.Log;
 
@@ -184,7 +185,7 @@ public class DeviceConfig extends Config {
 	 * FAILURE ==> If the config could not be saved.
 	 */
 	@Override
-	public InstaMsg.ReturnCode saveConfigValueOnPersistentStorage(String key, String json) {
+	public ReturnCode saveConfigValueOnPersistentStorage(String key, String json) {
 		
 		deleteConfigValueFromPersistentStorage(key);
 		appendLine(CONFIG_FILE_NAME, json);
@@ -203,7 +204,7 @@ public class DeviceConfig extends Config {
 	 * FAILURE ==> In every other case.
 	 */
 	@Override
-	public InstaMsg.ReturnCode deleteConfigValueFromPersistentStorage(String key) {
+	public ReturnCode deleteConfigValueFromPersistentStorage(String key) {
 		
 		getConfigValueFromPersistentStorageAndDeleteIfAsked(key, true);
 		return InstaMsg.ReturnCode.SUCCESS;

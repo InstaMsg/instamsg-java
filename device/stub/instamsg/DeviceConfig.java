@@ -2,6 +2,7 @@ package device.stub.instamsg;
 
 import common.instamsg.driver.Config;
 import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public class DeviceConfig extends Config {
 
@@ -45,7 +46,7 @@ public class DeviceConfig extends Config {
 	 * FAILURE ==> If the config could not be saved.
 	 */
 	@Override
-	public InstaMsg.ReturnCode saveConfigValueOnPersistentStorage(String key, String json) {
+	public ReturnCode saveConfigValueOnPersistentStorage(String key, String json) {
 		return InstaMsg.ReturnCode.FAILURE;
 	}
 
@@ -59,7 +60,7 @@ public class DeviceConfig extends Config {
 	 * FAILURE ==> In every other case.
 	 */
 	@Override
-	public InstaMsg.ReturnCode deleteConfigValueFromPersistentStorage(String key) {
+	public ReturnCode deleteConfigValueFromPersistentStorage(String key) {
 		return InstaMsg.ReturnCode.FAILURE;
 	}
 }

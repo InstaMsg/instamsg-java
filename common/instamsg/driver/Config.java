@@ -1,6 +1,7 @@
 package common.instamsg.driver;
 
 import common.instamsg.driver.InstaMsg.QOS;
+import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public abstract class Config implements ConfigAPIs {
 
@@ -102,6 +103,6 @@ public abstract class Config implements ConfigAPIs {
 	
 	public abstract void initConfig();
 	public abstract String getConfigValueFromPersistentStorage(String key);
-	public abstract InstaMsg.ReturnCode saveConfigValueOnPersistentStorage(String key, String json);
-	public abstract InstaMsg.ReturnCode deleteConfigValueFromPersistentStorage(String key);
+	public abstract ReturnCode saveConfigValueOnPersistentStorage(String key, String json);
+	public abstract ReturnCode deleteConfigValueFromPersistentStorage(String key);
 }

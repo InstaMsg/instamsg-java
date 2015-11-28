@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import common.instamsg.driver.InstaMsg;
+import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Socket;
 
@@ -108,7 +109,7 @@ public class DeviceSocket extends Socket {
 	 * So, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public InstaMsg.ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
+	public ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
 		
 		for(int i = 0; i < len; i++) {
 			
@@ -164,7 +165,7 @@ public class DeviceSocket extends Socket {
 	 * In this case, FAILURE must be returned immediately (i.e. no socket-reinstantiation must be done in this method).
 	 */
 	@Override
-	public InstaMsg.ReturnCode socketWrite(byte[] buffer, int len) {
+	public ReturnCode socketWrite(byte[] buffer, int len) {
 		
 		try {
 			socket.getOutputStream().write(buffer);
