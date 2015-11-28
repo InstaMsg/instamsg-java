@@ -21,7 +21,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWir
 public class InstaMsg implements MessagingAPIs {
 	
 	/**
-	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
+	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, AS PER THE DEVICE BEING IMPLEMENTED.
 	 */
 	public static final String DEVICE_NAME     =   "";
 	public static final int LOG_LEVEL          =   Log.INSTAMSG_LOG_LEVEL_INFO;

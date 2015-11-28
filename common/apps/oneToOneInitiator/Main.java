@@ -11,7 +11,7 @@ import common.instamsg.driver.OneToOneResult;
 public class Main {
 	
 	/**
-	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, BEFORE FLASHING THE FINAL CODE IN THE DEVICE.
+	 * THESE VARIABLES TO BE CHANGED BY DEVICE-VENDOR, AS PER THE DEVICE BEING IMPLEMENTED.
 	 */
 	static String remotePeerId = "";
 	/**
