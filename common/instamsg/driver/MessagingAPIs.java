@@ -87,13 +87,13 @@ public interface MessagingAPIs {
 	 *
 	 */
 	public ReturnCode MQTTPublish(String topicName,
-                                  String payload,
-                                  QOS qos,
-                                  boolean dup,
-                                  ResultHandler resultHandler,
-                                  int resultHandlerTimeout,
-                                  boolean retain,
-                                  boolean logging);
+			                      String payload,
+			                      QOS qos,
+			                      boolean dup,
+			                      ResultHandler resultHandler,
+			                      int resultHandlerTimeout,
+			                      boolean retain,
+			                      boolean logging);
 	
 	
 	
@@ -157,9 +157,9 @@ public interface MessagingAPIs {
 	 *
 	 */
 	public ReturnCode MQTTSend(String peer,
-                               String payload,
-                               OneToOneHandler oneToOneHandler,
-                               int oneToOneHandlerTimeout);
+            				   String payload,
+            				   OneToOneHandler oneToOneHandler,
+            				   int oneToOneHandlerTimeout);
 	
 	
 	
@@ -234,9 +234,9 @@ public interface MessagingAPIs {
 	 *
 	 */
 	public ReturnCode MQTTSubscribe(String topicName,
-                                    QOS qos,
-                                    MessageHandler messageHandler,
-                                    ResultHandler resultHandler,
-                                    int resultHandlerTimeout,
-                                    boolean logging);
+									QOS qos,
+									MessageHandler messageHandler,
+									ResultHandler resultHandler,
+									int resultHandlerTimeout,
+									boolean logging);
 }
