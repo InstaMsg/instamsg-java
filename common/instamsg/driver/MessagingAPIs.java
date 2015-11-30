@@ -239,4 +239,32 @@ public interface MessagingAPIs {
 									ResultHandler resultHandler,
 									int resultHandlerTimeout,
 									boolean logging);
+	
+	
+	
+	/**
+	 * topicName                            :
+	 *
+	 *      The topic on which the client needs to unsubscribe.
+	 *
+	 *
+	 * Returns:
+	 *
+	 *      SUCCESS   :: If the unsubscribe-packet is successfully encoded AND sent over the wire to the InstaMsg-Server.
+	 *      FAILURE   :: If any of the above steps fails.
+	 *
+	 *
+	 *      Note that in case of FAILURE,
+	 *
+	 *      a)
+	 *      The application MUST ""NOT"" do any socket-reinitialization (or anything related).
+	 *      It will be handled autimatically by the InstaMsg-Driver code (as long as the device-implementor has implemented all
+	 *      the InstaMsg-Kernel APIs in accordance with the requirements).
+	 *
+	 *      b)
+	 *      It is the application's duty to re-send the message (if at all required), because there is no guarantee whether
+	 *      the message reached the server or not.
+	 */
+	public ReturnCode MQTTUnsubscribe(String topicName);
+
 }

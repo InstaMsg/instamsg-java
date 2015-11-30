@@ -14,6 +14,7 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPub
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import config.DeviceConstants;
 import config.ModulesProviderFactory;
@@ -951,6 +952,26 @@ public class InstaMsg implements MessagingAPIs {
 
   		attachOneToOneHandler(c, id, timeout, oneToOneHandler);
   		return doMqttSendPublish(peer, message);
+	}
+	
+	
+	public ReturnCode MQTTUnsubscribe(String topicName) {
+		
+		InstaMsg c = instaMsg;
+		int msgId = getNextPackedId(c);
+		
+		String[] topicNames = new String[1];
+		topicNames[0] = topicName;
+		
+		MqttUnsubscribe unsubMsg = new MqttUnsubscribe(topicNames);
+		unsubMsg.setMessageId(msgId);
+		
+		byte[] packet = getEncodedMqttMessageAsByteStream(unsubMsg);
+		if(packet == null) {
+			return ReturnCode.FAILURE;
+		}
+		
+		return sendPacket(c, packet);
 	}
 	
 
