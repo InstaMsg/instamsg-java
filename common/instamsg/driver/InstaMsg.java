@@ -728,7 +728,7 @@ public class InstaMsg implements MessagingAPIs {
 
 					
 				} catch (MqttException e) {
-					rc = handleMessageDecodingFailure(c, "MQTT-PUBCOMP");
+					rc = handleMessageDecodingFailure(c, "MQTT-SUBACK");
 		
 				}
 			
@@ -743,7 +743,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void oneToOneMessageArrived(InstaMsg c, String payload) {
 		
-		Log.infoLog(ONE_TO_ONE + " Payload == [" + payload + "s]");
+		Log.infoLog(ONE_TO_ONE + " Payload == [" + payload + "]");
 		
 		String peerMessage = Json.getJsonKeyValueIfPresent(payload, "body");
 		String peer = Json.getJsonKeyValueIfPresent(payload, "reply_to");
