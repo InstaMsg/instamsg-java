@@ -64,7 +64,7 @@ public class OneToOneResult {
 	     */
 	    public ReturnCode reply(String payload,
 	    		                OneToOneHandler oneToOneHandler,
-	    		                int timeout) {
+	    		                int oneToOneHandlerTimeout) {
 	    	
 	        int msgId = InstaMsg.getNextPackedId(InstaMsg.instaMsg);
 
@@ -74,6 +74,6 @@ public class OneToOneResult {
 	        		         "\", \"body\": \""        +  payload                       	 + 
 	        		         "\", \"status\": 1}";
 
-	        return InstaMsg.doMqttSendPublish(msgId, oneToOneHandler, timeout, peer, message);
+	        return InstaMsg.doMqttSendPublish(msgId, oneToOneHandler, oneToOneHandlerTimeout, peer, message);
 	    }
 }
