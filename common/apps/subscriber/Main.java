@@ -5,6 +5,7 @@ import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.MessageData;
 import common.instamsg.driver.MessageHandler;
+import common.instamsg.driver.OneToOneHandler;
 import common.instamsg.driver.OneToOneResult;
 import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.Log;
@@ -22,7 +23,14 @@ public class Main {
 
 				if(result.succeeded == true) {
 					Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
-			    	result.reply("Got your response ==> " + result.peerMsg + " :)");
+			    	result.reply("Got your response ==> " + result.peerMsg + " :)", new OneToOneHandler() {
+						
+						@Override
+						public ReturnCode oneToOneMessageHandler(OneToOneResult result) {
+							Log.infoLog("Received ==> " + result.peerMsg);
+							return ReturnCode.SUCCESS;
+						}
+					}, 3600);
 			    
 					return ReturnCode.SUCCESS;
 				}

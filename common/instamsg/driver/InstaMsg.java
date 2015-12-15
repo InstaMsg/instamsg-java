@@ -163,7 +163,9 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	public static ReturnCode doMqttSendPublish(String peer, String message) {
+	public static ReturnCode doMqttSendPublish(int msgId, OneToOneHandler oneToOneHandler, int timeout, String peer, String message) {
+		
+  		attachOneToOneHandler(instaMsg, msgId, timeout, oneToOneHandler);
 		return instaMsg.MQTTPublish(peer,
                   		            message,
                 		            QOS.QOS2,
@@ -950,8 +952,7 @@ public class InstaMsg implements MessagingAPIs {
 				         "\", \"reply_to\": \"" + c.clientIdComplete +
 				         "\", \"body\": \""     + payload + "\"}";
 
-  		attachOneToOneHandler(c, id, timeout, oneToOneHandler);
-  		return doMqttSendPublish(peer, message);
+  		return doMqttSendPublish(id, oneToOneHandler, timeout, peer, message);
 	}
 	
 	
