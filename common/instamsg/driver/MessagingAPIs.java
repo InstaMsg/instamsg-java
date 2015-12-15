@@ -7,13 +7,13 @@ public interface MessagingAPIs {
 	
 	/**
 	 *
-	 * topicName                            :
+	 * topic                            	:
 	 *
 	 *      Topic on which the message should be published
 	 *      FOR SUCCESSFUL PUBLISHING TO A TOPIC, THE TOPIC MUST BE IN THE "Pub Topics" LIST ON INSTAMSG-SERVER.
 	 *
 	 *
-	 * payload                              :
+	 * msg                              	:
 	 *
 	 *      Message-Content
 	 *
@@ -86,8 +86,8 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTPublish(String topicName,
-			                      String payload,
+	public ReturnCode MQTTPublish(String topic,
+			                      String msg,
 			                      QOS qos,
 			                      boolean dup,
 			                      ResultHandler resultHandler,
@@ -99,7 +99,7 @@ public interface MessagingAPIs {
 	
 	/**
 	 *
-	 * peer                                 :
+	 * peerClientId                     	:
 	 *
 	 *      Peer-Id.
 	 *
@@ -110,18 +110,18 @@ public interface MessagingAPIs {
 	 *      FOR SUCCESSFUL SENDING TO THE PEER, THE PEER CLIENT-ID MUST BE LISTED AS ONE OF THE "Pub Topics" ON INSTAMSG-SERVER.
 	 *
 	 *
-	 * payload                              :
+	 * msg                              	:
 	 *
 	 *      Message-Content
 	 *
 	 *
-	 * oneToOneHandler                      :
+	 * replyHandler                      	:
 	 *
 	 *      Callback function-pointer.
 	 *      Called when the remote-peer has sent back a message to the local-peer.
 	 *
 	 *
-	 * oneToOneHandlerTimeout               :
+	 * replyHandlerTimeout               	:
 	 *
 	 *      Time for which "oneToOneHandler" remains active.
 	 *
@@ -156,16 +156,16 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTSend(String peer,
-            				   String payload,
-            				   OneToOneHandler oneToOneHandler,
-            				   int oneToOneHandlerTimeout);
+	public ReturnCode MQTTSend(String peerClientId,
+            				   String msg,
+            				   OneToOneHandler replyHandler,
+            				   int replyHandlerTimeout);
 	
 	
 	
 	/**
 	 *
-	 * topicName                            :
+	 * topic                            	:
 	 *
 	 *      Topic on which client needs to subscribe.
 	 *      FOR SUCCESSFUL SUBSCRIBING TO A TOPIC, THE TOPIC MUST BE IN THE "Sub Topics" LIST ON INSTAMSG-SERVER.
@@ -233,7 +233,7 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTSubscribe(String topicName,
+	public ReturnCode MQTTSubscribe(String topic,
 									QOS qos,
 									MessageHandler messageHandler,
 									ResultHandler resultHandler,
@@ -243,7 +243,7 @@ public interface MessagingAPIs {
 	
 	
 	/**
-	 * topicName                            :
+	 * topic                            	:
 	 *
 	 *      The topic on which the client needs to unsubscribe.
 	 *
@@ -265,6 +265,6 @@ public interface MessagingAPIs {
 	 *      It is the application's duty to re-send the message (if at all required), because there is no guarantee whether
 	 *      the message reached the server or not.
 	 */
-	public ReturnCode MQTTUnsubscribe(String topicName);
+	public ReturnCode MQTTUnsubscribe(String topic);
 
 }
