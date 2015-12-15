@@ -1,6 +1,5 @@
 package common.instamsg.driver;
 
-import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public abstract class Config implements ConfigAPIs {
@@ -24,7 +23,7 @@ public abstract class Config implements ConfigAPIs {
 	{
 	    return InstaMsg.instaMsg.MQTTPublish(topicName,
 	                       					 message,
-	                       					 QOS.QOS1,
+	                       					 InstaMsg.QOS1,
 	                       					 false,
 	                       					 null,
 	                       					 InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,

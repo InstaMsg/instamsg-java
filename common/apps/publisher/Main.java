@@ -3,7 +3,6 @@ package common.apps.publisher;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.OneToOneResult;
-import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.ResultHandler;
 
@@ -39,7 +38,7 @@ public class Main {
 				return 
 				InstaMsg.instaMsg.MQTTPublish("listener_topic",
 									          "Test " + counter,
-									          QOS.QOS2,
+									          InstaMsg.QOS2,
 									          false,
 									          new ResultHandler() {
 

@@ -23,13 +23,6 @@ import config.ModulesProviderFactory;
 @SuppressWarnings("unused")
 public class InstaMsg implements MessagingAPIs {
 	
-
-	public static enum QOS {
-		QOS0,
-		QOS1,
-		QOS2
-	}
-	
 	public static enum ReturnCode
 	{
 	    SOCKET_READ_TIMEOUT,
@@ -37,6 +30,10 @@ public class InstaMsg implements MessagingAPIs {
 	    FAILURE,
 	    SUCCESS
 	}
+
+	public static int QOS0 = 0;
+	public static int QOS1 = 1;
+	public static int QOS2 = 2;
 
 	public static InstaMsg instaMsg;
 	
@@ -168,7 +165,7 @@ public class InstaMsg implements MessagingAPIs {
   		attachOneToOneHandler(instaMsg, msgId, timeout, oneToOneHandler);
 		return instaMsg.MQTTPublish(peer,
                   		            message,
-                		            QOS.QOS2,
+                		            QOS2,
                 		            false,
                 		            new ResultHandler() {
 			
@@ -455,7 +452,7 @@ public class InstaMsg implements MessagingAPIs {
 		if((data != null) && (data.length() > 0)) {			
 			instaMsg.MQTTPublish(topicName,
 					             data,
-					             QOS.QOS1,
+					             QOS1,
 					             false,
 					             null,
 					             MQTT_RESULT_HANDLER_TIMEOUT,
@@ -605,7 +602,7 @@ public class InstaMsg implements MessagingAPIs {
 		byte[] packet = null;
 		
 		int receivedMsgQos = pubMsg.getMessage().getQos();
-		if(receivedMsgQos == QOS.QOS1.ordinal()) {
+		if(receivedMsgQos == QOS1) {
 			packet = getEncodedMqttMessageAsByteStream(new MqttPubAck(pubMsg));
 			
 		} else {
@@ -808,7 +805,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	public InstaMsg.ReturnCode MQTTPublish(String topicName,
 			 							   String payload,
-										   InstaMsg.QOS qos,
+										   int qos,
 										   boolean dup,
 										   ResultHandler resultHandler,
 										   int resultHandlerTimeout,
@@ -817,12 +814,12 @@ public class InstaMsg implements MessagingAPIs {
 		
 		MqttMessage baseMessage = new MqttMessage();
 		baseMessage.setPayload(payload.getBytes());
-		baseMessage.setQos(qos.ordinal());
+		baseMessage.setQos(qos);
 		baseMessage.setDuplicate(dup);
 		baseMessage.setRetained(retain);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
-		if((qos == InstaMsg.QOS.QOS1) || (qos == InstaMsg.QOS.QOS2))
+		if((qos == QOS1) || (qos == QOS2))
 		{
 			int msgId = getNextPackedId(instaMsg);
 			
@@ -873,7 +870,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	
 	public ReturnCode MQTTSubscribe(String topicName,
-									QOS qos,
+									int qos,
 									MessageHandler messageHandler,
 									ResultHandler resultHandler,
 									int resultHandlerTimeout,
@@ -912,7 +909,7 @@ public class InstaMsg implements MessagingAPIs {
 		String[] topicNames = new String[1];
 		int[] qosValues = new int[1];		
 		topicNames[0] = topicName;
-		qosValues[0] = qos.ordinal();
+		qosValues[0] = qos;
 		
 		MqttSubscribe subMsg = new MqttSubscribe(topicNames, qosValues);
 		subMsg.setMessageId(msgId);

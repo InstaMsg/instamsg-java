@@ -7,7 +7,6 @@ import common.instamsg.driver.MessageData;
 import common.instamsg.driver.MessageHandler;
 import common.instamsg.driver.OneToOneHandler;
 import common.instamsg.driver.OneToOneResult;
-import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.ResultHandler;
 
@@ -48,7 +47,7 @@ public class Main {
 
 				return 
 				InstaMsg.instaMsg.MQTTSubscribe("listener_topic",
-									   			QOS.QOS2,
+									   			InstaMsg.QOS2,
 									   			new MessageHandler() {
 										
 													@Override

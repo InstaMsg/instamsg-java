@@ -1,6 +1,5 @@
 package common.instamsg.driver;
 
-import common.instamsg.driver.InstaMsg.QOS;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public interface MessagingAPIs {
@@ -88,7 +87,7 @@ public interface MessagingAPIs {
 	 */
 	public ReturnCode MQTTPublish(String topic,
 			                      String msg,
-			                      QOS qos,
+			                      int qos,
 			                      boolean dup,
 			                      ResultHandler resultHandler,
 			                      int resultHandlerTimeout,
@@ -234,7 +233,7 @@ public interface MessagingAPIs {
 	 *
 	 */
 	public ReturnCode MQTTSubscribe(String topic,
-									QOS qos,
+									int qos,
 									MessageHandler messageHandler,
 									ResultHandler resultHandler,
 									int resultHandlerTimeout,
