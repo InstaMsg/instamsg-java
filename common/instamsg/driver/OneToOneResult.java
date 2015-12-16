@@ -8,7 +8,7 @@ public class OneToOneResult {
 	    	
 	    	super();
 	    	
-	    	this.peer = peer;
+	    	this.peerClientId = peer;
 	    	this.peerMsgId = peerMsgId;
 	    	this.succeeded = succeeded;
 	    	this.peerMsg = peerMsg;
@@ -24,7 +24,7 @@ public class OneToOneResult {
 		/*
 	     ************** NOT EXPECTED TO BE USED BY THE APPLICATION ******************************
 	     */
-	    public String peer;
+	    public String peerClientId;
 	    public int peerMsgId;
 	    
 
@@ -74,6 +74,6 @@ public class OneToOneResult {
 	        		         "\", \"body\": \""        +  msg                       	 + 
 	        		         "\", \"status\": 1}";
 
-	        return InstaMsg.doMqttSendPublish(msgId, replyHandler, replyHandlerTimeout, peer, message);
+	        return InstaMsg.doMqttSendPublish(msgId, replyHandler, replyHandlerTimeout, peerClientId, message);
 	    }
 }

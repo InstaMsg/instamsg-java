@@ -21,7 +21,7 @@ public class Main {
 			public InstaMsg.ReturnCode oneToOneMessageHandler(OneToOneResult result) {
 
 				if(result.succeeded == true) {
-					Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
+					Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peerClientId + "]");
 			    	result.reply("Got your response ==> " + result.peerMsg + " :)", new OneToOneHandler() {
 						
 						@Override

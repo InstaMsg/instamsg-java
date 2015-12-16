@@ -62,7 +62,7 @@ public class Main {
 													@Override
 													public ReturnCode oneToOneMessageHandler(OneToOneResult result) {
 												
-														Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peer + "]");
+														Log.infoLog("Received [" + result.peerMsg + "] from peer [" + result.peerClientId + "]");
 														return ReturnCode.SUCCESS;
 													}
 											},

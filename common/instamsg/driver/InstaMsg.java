@@ -762,7 +762,7 @@ public class InstaMsg implements MessagingAPIs {
 		
 		OneToOneResult oneToOneResult = new OneToOneResult(peer, Integer.parseInt(peerMsgId), true, peerMessage);
 		Log.debugLog(ONE_TO_ONE + "Peer-Message = ["    + oneToOneResult.peerMsg   + "], " +
-		                          "Peer = ["            + oneToOneResult.peer      + "], " +
+		                          "Peer = ["            + oneToOneResult.peerClientId      + "], " +
 				                  "Peer-Message-Id = [" + oneToOneResult.peerMsgId + "]");
 		
 		if(responseMsgId.length() == 0) {
