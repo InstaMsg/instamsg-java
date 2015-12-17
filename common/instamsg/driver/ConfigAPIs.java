@@ -5,8 +5,10 @@ import common.instamsg.driver.Config.CONFIG_TYPE;
 public interface ConfigAPIs {
 	
 	/**
-	 * This method registers a configuration, which is then editable at the InstaMsg-Server.
-	 * Once done, this configuration will be visible/editable in the "Configuration" tab on the Clients-page.
+	 * This method registers a configuration, which is then editable at the InstaMsg-Server/Application-Server.
+	 * 
+	 * Once done, this configuration will be visible/editable in the "Configuration" tab on the Clients-page
+	 * (at the InstaMsg-Server).
 	 *
 	 * The steps for editing and pushing the changed-configuration from server to device, are detailed in the
 	 * "Configuration" tab.
@@ -21,7 +23,7 @@ public interface ConfigAPIs {
 	 *      Variable, that will store the value.
 	 *
 	 *		For integer-variable types, "var" must be a reference to "ChangeableInt".
-	 *		For integer-variable types, "var" must be a reference to "ChangeableString".
+	 *		For string-variable types, "var" must be a reference to "ChangeableString".
 	 *
 	 *		Both "ChangeableInt.java" and "ChangeableString.java" files are shipped with InstaMsg-Java-client.
 	 *
