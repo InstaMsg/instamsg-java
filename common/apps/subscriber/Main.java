@@ -46,7 +46,7 @@ public class Main {
 			public InstaMsg.ReturnCode onConnectOneTimeOperations() {
 
 				return 
-				InstaMsg.instaMsg.MQTTSubscribe("listener_topic",
+				InstaMsg.instaMsg.subscribe("listener_topic",
 									   			InstaMsg.QOS2,
 									   			new MessageHandler() {
 										

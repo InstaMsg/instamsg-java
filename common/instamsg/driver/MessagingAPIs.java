@@ -45,12 +45,6 @@ public interface MessagingAPIs {
 	 *      message under consideration (even if PUBACK is received at some later stage > "resultHandlerTimeout" seconds).
 	 *
 	 *
-	 * retain                               :
-	 *
-	 *      "true" or "false".
-	 *      Meaning of this variable as per the spec at http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html
-	 *
-	 *
 	 * logging                              :
 	 *
 	 *      "true" or "false".
@@ -85,14 +79,13 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTPublish(String topic,
-			                      String msg,
-			                      int qos,
-			                      boolean dup,
-			                      ResultHandler resultHandler,
-			                      int resultHandlerTimeout,
-			                      boolean retain,
-			                      boolean logging);
+	public ReturnCode publish(String topic,
+			                  String msg,
+			                  int qos,
+			                  boolean dup,
+			                  ResultHandler resultHandler,
+			                  int resultHandlerTimeout,
+			                  boolean logging);
 	
 	
 	
@@ -155,10 +148,10 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTSend(String peerClientId,
-            				   String msg,
-            				   OneToOneHandler replyHandler,
-            				   int replyHandlerTimeout);
+	public ReturnCode send(String peerClientId,
+            			   String msg,
+            			   OneToOneHandler replyHandler,
+            			   int replyHandlerTimeout);
 	
 	
 	
@@ -232,12 +225,12 @@ public interface MessagingAPIs {
 	 *      for simple (yet complete) example-usage.
 	 *
 	 */
-	public ReturnCode MQTTSubscribe(String topic,
-									int qos,
-									MessageHandler messageHandler,
-									ResultHandler resultHandler,
-									int resultHandlerTimeout,
-									boolean logging);
+	public ReturnCode subscribe(String topic,
+							    int qos,
+								MessageHandler messageHandler,
+								ResultHandler resultHandler,
+								int resultHandlerTimeout,
+								boolean logging);
 	
 	
 	
@@ -264,6 +257,6 @@ public interface MessagingAPIs {
 	 *      It is the application's duty to re-send the message (if at all required), because there is no guarantee whether
 	 *      the message reached the server or not.
 	 */
-	public ReturnCode MQTTUnsubscribe(String topic);
+	public ReturnCode unsubscribe(String topic);
 
 }

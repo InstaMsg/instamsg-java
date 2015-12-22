@@ -55,7 +55,7 @@ public class Main {
 			        	InstaMsg.misc.rebootDevice();
 			        }
 			        
-			        InstaMsg.instaMsg.MQTTSend(remotePeerId,
+			        InstaMsg.instaMsg.send(remotePeerId,
 			                          		   "Hi... this is one-to-one initiator !!",
 			                          		   new OneToOneHandler() {
 										

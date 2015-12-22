@@ -36,7 +36,7 @@ public class Main {
 				counter++;
 				
 				return 
-				InstaMsg.instaMsg.MQTTPublish("listener_topic",
+				InstaMsg.instaMsg.publish("listener_topic",
 									          "Test " + counter,
 									          InstaMsg.QOS2,
 									          false,
@@ -49,7 +49,6 @@ public class Main {
 												}
 											  },
 											  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-											  false,
 											  true);
 			}
 		};

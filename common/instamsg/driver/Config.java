@@ -21,13 +21,12 @@ public abstract class Config implements ConfigAPIs {
 	
 	static InstaMsg.ReturnCode publishConfig(String topicName, String message)
 	{
-	    return InstaMsg.instaMsg.MQTTPublish(topicName,
+	    return InstaMsg.instaMsg.publish(topicName,
 	                       					 message,
 	                       					 InstaMsg.QOS1,
 	                       					 false,
 	                       					 null,
 	                       					 InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-	                       					 false,
 	                       					 true);
 	}
 

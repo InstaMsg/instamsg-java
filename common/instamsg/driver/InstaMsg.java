@@ -163,7 +163,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static ReturnCode doMqttSendPublish(int msgId, OneToOneHandler oneToOneHandler, int timeout, String peer, String message) {
 		
   		attachOneToOneHandler(instaMsg, msgId, timeout, oneToOneHandler);
-		return instaMsg.MQTTPublish(peer,
+		return instaMsg.publish(peer,
                   		            message,
                 		            QOS2,
                 		            false,
@@ -176,7 +176,6 @@ public class InstaMsg implements MessagingAPIs {
 										}
 									},
 									InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-									false,
 									true);
 	}
 	
@@ -450,13 +449,12 @@ public class InstaMsg implements MessagingAPIs {
 		 */
 
 		if((data != null) && (data.length() > 0)) {			
-			instaMsg.MQTTPublish(topicName,
+			instaMsg.publish(topicName,
 					             data,
 					             QOS1,
 					             false,
 					             null,
 					             MQTT_RESULT_HANDLER_TIMEOUT,
-					             false,
 					             true);
 			
 		} else {			
@@ -803,20 +801,19 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	public InstaMsg.ReturnCode MQTTPublish(String topicName,
+	public InstaMsg.ReturnCode publish(String topicName,
 			 							   String payload,
 										   int qos,
 										   boolean dup,
 										   ResultHandler resultHandler,
 										   int resultHandlerTimeout,
-										   boolean retain,
 										   boolean logging) {
 		
 		MqttMessage baseMessage = new MqttMessage();
 		baseMessage.setPayload(payload.getBytes());
 		baseMessage.setQos(qos);
 		baseMessage.setDuplicate(dup);
-		baseMessage.setRetained(retain);
+		baseMessage.setRetained(false);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
 		if((qos == QOS1) || (qos == QOS2))
@@ -869,7 +866,7 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	public ReturnCode MQTTSubscribe(String topicName,
+	public ReturnCode subscribe(String topicName,
 									int qos,
 									MessageHandler messageHandler,
 									ResultHandler resultHandler,
@@ -937,7 +934,7 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 	
-	public ReturnCode MQTTSend(String peer,
+	public ReturnCode send(String peer,
 			                   String payload,
 			                   OneToOneHandler oneToOneHandler,
 			                   int timeout) {
@@ -953,7 +950,7 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	public ReturnCode MQTTUnsubscribe(String topicName) {
+	public ReturnCode unsubscribe(String topicName) {
 		
 		InstaMsg c = instaMsg;
 		int msgId = getNextPackedId(c);
