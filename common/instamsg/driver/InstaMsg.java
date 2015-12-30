@@ -99,6 +99,9 @@ public class InstaMsg implements MessagingAPIs {
 	int publishCount = 0;
 	private InitialCallbacks callbacks;
 	
+	public static boolean runBusinessLogicImmediately = false;
+	public static boolean businessLogicRunOnceAtStart = false;
+	
 	static String ONE_TO_ONE = "[ONE-TO-ONE] ";
 
 
@@ -1078,8 +1081,6 @@ public class InstaMsg implements MessagingAPIs {
 		long nextPingReqTick = currentTick + instaMsg.pingRequestInterval.intValue();
 		long nextBusinessLogicTick = currentTick + businessLogicInterval;
 
-		boolean socketReadJustNow = false;
-
 		while(true) {
 
 			initInstaMsg(instaMsg, null);			
@@ -1087,7 +1088,7 @@ public class InstaMsg implements MessagingAPIs {
 
 			while(true) {
 
-				socketReadJustNow = false;
+				InstaMsg.startAndCountdownTimer(1, false);
 
 				if(instaMsg.socket.socketCorrupted == true) {
 					Log.errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
@@ -1095,18 +1096,13 @@ public class InstaMsg implements MessagingAPIs {
 
 				} else {
 					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
-					socketReadJustNow = true;
 				}
 
 				if(true) {
 					
-					while(true) {
+					if(true) {
 						removeExpiredResultHandlers(instaMsg);
 						removeExpiredOneToOneHandlers(instaMsg);
-						
-						if(socketReadJustNow == false) {
-							InstaMsg.startAndCountdownTimer(1, false);
-						}
 						
 						long latestTick = time.getCurrentTick();
 						
@@ -1118,9 +1114,12 @@ public class InstaMsg implements MessagingAPIs {
                             nextPingReqTick = latestTick + instaMsg.pingRequestInterval.intValue();
 						}
 						
-						if(latestTick >= nextBusinessLogicTick) {
+						if((latestTick >= nextBusinessLogicTick) || (runBusinessLogicImmediately == true) ||
+						   (businessLogicRunOnceAtStart == false)) {
 							
 							callbacks.coreLoopyBusinessLogicInitiatedBySelf();
+							runBusinessLogicImmediately = false;
+							businessLogicRunOnceAtStart = true;
 							
 							nextBusinessLogicTick = latestTick + businessLogicInterval;
 							break;
