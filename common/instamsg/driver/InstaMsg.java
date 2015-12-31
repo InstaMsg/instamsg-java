@@ -576,13 +576,13 @@ public class InstaMsg implements MessagingAPIs {
 	        if(method.equals("GET") == true) {
 	        	String message = "{\"response_id\": \"" + messageId + "\", \"status\": 1, \"streams\": \"[" + streamId + "]\"}";
 
-	            instaMsg.publish(replyTopic,
-	                             message,
-	                             QOS1,
-	                             false,
-	                             null,
-	                             MQTT_RESULT_HANDLER_TIMEOUT,
-	                             true);
+	            c.publish(replyTopic,
+	                      message,
+	                      QOS1,
+	                      false,
+	                      null,
+	                      MQTT_RESULT_HANDLER_TIMEOUT,
+	                      true);
 	        }
 	    }
 	}
@@ -593,15 +593,51 @@ public class InstaMsg implements MessagingAPIs {
 		Log.infoLog(MEDIA + "Stopping .....");
 		
 	    String message = "{'to':'" + c.clientIdComplete + "','from':'" + c.clientIdComplete + "','type':3,'stream_id': '" + streamId + "'}";
-	    instaMsg.publish(c.mediaTopic,
-	             		 message,
-	             		 QOS1,
-	             		 false,
-	             		 null,
-	             		 MQTT_RESULT_HANDLER_TIMEOUT,
-	             		 true);
+	    c.publish(c.mediaTopic,
+	              message,
+	              QOS1,
+	              false,
+	              null,
+	              MQTT_RESULT_HANDLER_TIMEOUT,
+	              true);
 	}
 	
+	
+	private static void publishMediaMessage(InstaMsg c) {
+
+		//TODO: Calculate the ip-address
+		String ipAddress = "";
+		String sdpOffer = "";
+		
+	    sdpOffer = "v=0\r\n";
+	    sdpOffer += "o=- 0 0 IN IP4 " + ipAddress + "\r\n";
+	    sdpOffer += "s=\r\n";
+	    sdpOffer += "c=IN IP4 " + ipAddress + "\r\n";
+	    sdpOffer += "t=0 0\r\n";
+	    sdpOffer += "a=charset:UTF-8\n";
+	    sdpOffer += "a=recvonly\r\n";
+	    sdpOffer += "m=video 50004 RTP/AVP 96\r\n";
+	    sdpOffer += "a=rtpmap:96 H264/90000\r\n";
+	        
+	    String message = "{"									         +
+	    						"'to': '" + c.clientIdComplete + "', "   +
+	    						"'sdp_offer' : '" + sdpOffer + "', "     +
+	    						"'from': '" + c.clientIdComplete + "', " +
+	    						"'protocol' : 'rtp', "                   +
+	    						"'type':'7', "                           +
+	    						"'stream_id':'" + streamId + "', "       + 
+	    						"'record': True"                         +
+	    				 "}";
+
+		c.publish(c.mediaTopic,
+				  message,
+				  QOS1,
+				  false,
+				  null,
+				  MQTT_RESULT_HANDLER_TIMEOUT,
+				  true);
+				
+	}
 	
 	private static void handleMediaPauseMessage(InstaMsg c) {
 		
