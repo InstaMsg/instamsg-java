@@ -590,6 +590,8 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void handleMediaStopMessage(InstaMsg c) {
 		
+		Log.infoLog(MEDIA + "Stopping .....");
+		
 	    String message = "{'to':" + c.clientIdComplete + ",'from':" + c.clientIdComplete + ",'type':3,'stream_id': " + streamId + "}";
 	    instaMsg.publish(c.mediaTopic,
 	             		 message,
@@ -603,6 +605,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void handleMediaPauseMessage(InstaMsg c) {
 		
+		Log.infoLog(MEDIA + "Pausing .....");
 	}
 
 
