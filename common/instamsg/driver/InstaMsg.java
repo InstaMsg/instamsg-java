@@ -90,6 +90,11 @@ public class InstaMsg implements MessagingAPIs {
 	private String enableServerLoggingTopic;
 	private String fileUploadUrl;
 	private String receiveConfigTopic;
+	private String mediaTopic;
+	private String mediaReplyTopic;
+	private String mediaStopTopic;
+	private String mediaPauseTopic;
+	private String mediaStreamsTopic;
 	
 	private static ResultHandler pubCompResultHandler;
 	
@@ -570,6 +575,15 @@ public class InstaMsg implements MessagingAPIs {
 	    c.serverLogsTopic          = "instamsg/clients/" + c.clientIdComplete + "/logs";
 	    c.receiveConfigTopic       = "instamsg/clients/" + c.clientIdComplete + "/config/serverToClient";
 	    c.fileUploadUrl            = "/api/beta/clients/" + c.clientIdComplete + "/files";
+	    
+	    if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+	    	
+		    c.mediaTopic           = "instamsg/clients/" + c.clientIdComplete + "/media";
+		    c.mediaReplyTopic      = "instamsg/clients/" + c.clientIdComplete + "/mediareply";
+		    c.mediaStopTopic       = "instamsg/clients/" + c.clientIdComplete + "/mediastop";
+		    c.mediaPauseTopic      = "instamsg/clients/" + c.clientIdComplete + "/mediapause";
+		    c.mediaStreamsTopic    = "instamsg/clients/" + c.clientIdComplete + "/mediastreams";
+	    }
 
 
 	    Log.infoLog("\nThe special-topics value :: \n");
@@ -579,6 +593,15 @@ public class InstaMsg implements MessagingAPIs {
 	    Log.infoLog("SERVER_LOGS_TOPIC = [" + c.serverLogsTopic + "]");
 	    Log.infoLog("FILE_UPLOAD_URL = [" + c.fileUploadUrl + "]");
 	    Log.infoLog("CONFIG_FROM_SERVER_TO_CLIENT = [" + c.receiveConfigTopic + "]");
+	    
+	    if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+	    	
+		    Log.infoLog("MEDIA_TOPIC = [" + c.mediaTopic + "]");
+		    Log.infoLog("MEDIA_REPLY_TOPIC = [" + c.mediaReplyTopic + "]");
+		    Log.infoLog("MEDIA_STOP_TOPIC = [" + c.mediaStopTopic + "]");
+		    Log.infoLog("MEDIA_PAUSE_TOPIC = [" + c.mediaPauseTopic + "]");
+		    Log.infoLog("MEDIA_STREAMS_TOPIC = [" + c.mediaStreamsTopic + "]");
+	    }
 	}
 
 
