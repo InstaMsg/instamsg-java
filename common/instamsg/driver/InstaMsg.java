@@ -588,10 +588,8 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	private static void handleMediaStopMessage(InstaMsg c, String payload) {
+	private static void handleMediaStopMessage(InstaMsg c) {
 		
-	    Log.infoLog(MEDIA + "Received media-stop-message [" + payload + "]");
-	    
 	    String message = "{'to':" + c.clientIdComplete + ",'from':" + c.clientIdComplete + ",'type':3,'stream_id': " + streamId + "}";
 	    instaMsg.publish(c.mediaTopic,
 	             		 message,
@@ -600,6 +598,11 @@ public class InstaMsg implements MessagingAPIs {
 	             		 null,
 	             		 MQTT_RESULT_HANDLER_TIMEOUT,
 	             		 true);
+	}
+	
+	
+	private static void handleMediaPauseMessage(InstaMsg c) {
+		
 	}
 
 
@@ -819,7 +822,10 @@ public class InstaMsg implements MessagingAPIs {
                     		handleMediaStreamsMessage(c, new String(pubMsg.getPayload()));
                         
                     	} else if(topicName.equals(c.mediaStopTopic)) {
-                    		handleMediaStopMessage(c, new String(pubMsg.getPayload()));
+                    		handleMediaStopMessage(c);
+                    		
+                    	} else if(topicName.equals(c.mediaPauseTopic)) {
+                    		handleMediaPauseMessage(c);
                     		
                     	}
                     	
