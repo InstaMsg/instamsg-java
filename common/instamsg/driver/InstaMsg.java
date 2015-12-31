@@ -592,7 +592,7 @@ public class InstaMsg implements MessagingAPIs {
 		
 		Log.infoLog(MEDIA + "Stopping .....");
 		
-	    String message = "{'to':" + c.clientIdComplete + ",'from':" + c.clientIdComplete + ",'type':3,'stream_id': " + streamId + "}";
+	    String message = "{'to':'" + c.clientIdComplete + "','from':'" + c.clientIdComplete + "','type':3,'stream_id': '" + streamId + "'}";
 	    instaMsg.publish(c.mediaTopic,
 	             		 message,
 	             		 QOS1,
