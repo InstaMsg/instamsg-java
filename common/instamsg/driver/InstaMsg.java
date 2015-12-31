@@ -527,8 +527,8 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 
-	private static void handleMediaReplyMessage(InstaMsg c, String payload)
-	{
+	private static void handleMediaReplyMessage(InstaMsg c, String payload) {
+		
 	    Log.infoLog(MEDIA + "Received media-reply-message [" + payload + "]");
 
 	    {
@@ -545,8 +545,8 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 
-	private static void handleMediaStreamsMessage(InstaMsg c, String payload)
-	{
+	private static void handleMediaStreamsMessage(InstaMsg c, String payload) {
+		
 	    Log.infoLog(MEDIA + "Received media-streams-message [" + payload + "]");
 
 	    {
@@ -585,6 +585,21 @@ public class InstaMsg implements MessagingAPIs {
 	                             true);
 	        }
 	    }
+	}
+	
+	
+	private static void handleMediaStopMessage(InstaMsg c, String payload) {
+		
+	    Log.infoLog(MEDIA + "Received media-stop-message [" + payload + "]");
+	    
+	    String message = "{'to':" + c.clientIdComplete + ",'from':" + c.clientIdComplete + ",'type':3,'stream_id': " + streamId + "}";
+	    instaMsg.publish(c.mediaTopic,
+	             		 message,
+	             		 QOS1,
+	             		 false,
+	             		 null,
+	             		 MQTT_RESULT_HANDLER_TIMEOUT,
+	             		 true);
 	}
 
 
@@ -803,6 +818,9 @@ public class InstaMsg implements MessagingAPIs {
                     	} else if(topicName.equals(c.mediaStreamsTopic)) {                    	
                     		handleMediaStreamsMessage(c, new String(pubMsg.getPayload()));
                         
+                    	} else if(topicName.equals(c.mediaStopTopic)) {
+                    		handleMediaStopMessage(c, new String(pubMsg.getPayload()));
+                    		
                     	}
                     	
                     } else {
