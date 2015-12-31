@@ -96,6 +96,8 @@ public class InstaMsg implements MessagingAPIs {
 	private String mediaPauseTopic;
 	private String mediaStreamsTopic;
 	
+	static String streamId;
+	
 	private static ResultHandler pubCompResultHandler;
 	
 	int networkInfoInterval = 300;
@@ -109,6 +111,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static boolean businessLogicRunOnceAtStart = false;
 	
 	static String ONE_TO_ONE = "[ONE-TO-ONE] ";
+	static String MEDIA      = "[MEDIA] ";
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -510,6 +513,79 @@ public class InstaMsg implements MessagingAPIs {
 	        Log.infoLog("Client-Connection failed with code [" + connackRc + "]");
 	    }
 	}
+	
+	
+	private static void logJsonFailureMessageAndReturn(String module, String key, String msg)
+	{
+	    Log.errorLog(module + "Could not find key [" + key + "] in message-payload [" + msg + "] .. " +
+	                 "not proceeding further");
+	}
+
+	
+	private static void broadcastMedia(String sdpAnswer) {
+		
+	}
+
+
+	private static void handleMediaReplyMessage(InstaMsg c, String payload)
+	{
+	    Log.infoLog(MEDIA + "Received media-reply-message [" + payload + "]");
+
+	    {
+	        String STREAM_ID = "stream_id";
+	        String SDP_ANSWER = "sdp_answer";
+
+	        streamId = Json.getJsonKeyValueIfPresent(payload, STREAM_ID);
+	        String sdpAnswer = Json.getJsonKeyValueIfPresent(payload, SDP_ANSWER);
+
+	        if(sdpAnswer.length() > 0) {
+	            broadcastMedia(sdpAnswer);
+	        }
+	    }
+	}
+
+
+	private static void handleMediaStreamsMessage(InstaMsg c, String payload)
+	{
+	    Log.infoLog(MEDIA + "Received media-streams-message [" + payload + "]");
+
+	    {
+	        String REPLY_TO = "reply_to";
+	        String MESSAGE_ID = "message_id";
+	        String METHOD = "method";
+
+	        String replyTopic = Json.getJsonKeyValueIfPresent(payload, REPLY_TO);
+	        String messageId = Json.getJsonKeyValueIfPresent(payload, MESSAGE_ID);
+	        String method = Json.getJsonKeyValueIfPresent(payload, METHOD);
+
+	        if(replyTopic.length() == 0) {
+	            logJsonFailureMessageAndReturn(MEDIA, REPLY_TO, payload);
+	            return;
+	        }
+
+	        if(messageId.length() == 0) {
+	            logJsonFailureMessageAndReturn(MEDIA, MESSAGE_ID, payload);
+	            return;
+	        }
+
+	        if(method.length() == 0) {
+	            logJsonFailureMessageAndReturn(MEDIA, METHOD, payload);
+	            return;
+	        }
+
+	        if(method.equals("GET") == true) {
+	        	String message = "{\"response_id\": \"" + messageId + "\", \"status\": 1, \"streams\": \"[" + streamId + "]\"}";
+
+	            instaMsg.publish(replyTopic,
+	                             message,
+	                             QOS1,
+	                             false,
+	                             null,
+	                             MQTT_RESULT_HANDLER_TIMEOUT,
+	                             true);
+	        }
+	    }
+	}
 
 
 	static void removeExpiredResultHandlers(InstaMsg c)
@@ -719,6 +795,16 @@ public class InstaMsg implements MessagingAPIs {
 					} else if(topicName.equals(c.receiveConfigTopic)) {                    	
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
                         
+                    } else if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+                    	
+                    	if(topicName.equals(c.mediaReplyTopic)) {                    	
+                    		handleMediaReplyMessage(c, new String(pubMsg.getPayload()));
+                        
+                    	} else if(topicName.equals(c.mediaStreamsTopic)) {                    	
+                    		handleMediaStreamsMessage(c, new String(pubMsg.getPayload()));
+                        
+                    	}
+                    	
                     } else {
 						deliverMessageToSelf(c, pubMsg);
 
