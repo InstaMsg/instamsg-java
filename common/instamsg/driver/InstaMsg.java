@@ -57,7 +57,7 @@ public class InstaMsg implements MessagingAPIs {
 	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
 	static final String TOPIC_NETWORK_DATA  =   "instamsg/client/signalinfo";
-	static final String TOPIC_CONFIG_SEND   =  "instamsg/client/config/clientToServer";
+	static final String TOPIC_CONFIG_SEND   =   "instamsg/client/config/clientToServer";
 	
 	public static final int MAX_BUFFER_SIZE    =   1000;
 	
@@ -93,6 +93,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static ResultHandler pubCompResultHandler;
 	
+	int networkInfoInterval = 300;
 	ChangeableInt pingRequestInterval = new ChangeableInt(0);
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	
@@ -1011,7 +1012,6 @@ public class InstaMsg implements MessagingAPIs {
 	    }
 	}
 	
-
 	public static void clearInstaMsg(InstaMsg c) {
 		Log.infoLog("CLEARING INSTAMSG !!!!");
 		
@@ -1077,7 +1077,8 @@ public class InstaMsg implements MessagingAPIs {
 		
 		instaMsg.callbacks = callbacks;
 		
-		long currentTick = time.getCurrentTick();		
+		long currentTick = time.getCurrentTick();
+		long nextNetworkInfoTick = currentTick + instaMsg.networkInfoInterval;
 		long nextPingReqTick = currentTick + instaMsg.pingRequestInterval.intValue();
 		long nextBusinessLogicTick = currentTick + businessLogicInterval;
 
@@ -1105,6 +1106,13 @@ public class InstaMsg implements MessagingAPIs {
 						removeExpiredOneToOneHandlers(instaMsg);
 						
 						long latestTick = time.getCurrentTick();
+						
+						if(latestTick >= nextNetworkInfoTick) {
+							Log.infoLog("Time to send network-stats !!!");
+							sendClientData(misc.getNetworkData(), TOPIC_NETWORK_DATA);
+							
+							nextNetworkInfoTick = latestTick + instaMsg.networkInfoInterval;
+						}
 						
 						if((latestTick >= nextPingReqTick) && (instaMsg.pingRequestInterval.intValue() != 0)) {
 							
