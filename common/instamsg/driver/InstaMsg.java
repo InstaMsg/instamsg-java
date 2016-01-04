@@ -547,7 +547,8 @@ public class InstaMsg implements MessagingAPIs {
 		}
 		
 		if(lineToSearch != null) {
-			String mediaServerPort = lineToSearch.split(" ")[1];
+			String mediaServerPort = lineToSearch.split(" ")[1];			
+			createStreamingPipeline(null, mediaServerAddress, mediaServerPort);
 			
 		} else {
 			Log.errorLog(MEDIA + "Could not find server-port for streaming.. not doing anything else !!!");
@@ -555,7 +556,7 @@ public class InstaMsg implements MessagingAPIs {
 		}
 	}
 
-
+	
 	private static void handleMediaReplyMessage(InstaMsg c, String payload) {
 		
 	    Log.infoLog(MEDIA + "Received media-reply-message [" + payload + "]");
@@ -617,6 +618,11 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
+	private static void createStreamingPipeline(String uri, String mediaServerIpAddress, String mediaServerPort) {
+		
+	}
+	
+	
 	private static void handleMediaStopMessage(InstaMsg c) {
 		
 		Log.infoLog(MEDIA + "Stopping .....");
@@ -630,6 +636,13 @@ public class InstaMsg implements MessagingAPIs {
 	              MQTT_RESULT_HANDLER_TIMEOUT,
 	              true);
 	}
+	
+	
+	private static void handleMediaPauseMessage(InstaMsg c) {
+		
+		Log.infoLog(MEDIA + "Pausing .....");
+	}
+
 	
 	
 	private static void publishMediaMessage(InstaMsg c) {
@@ -667,11 +680,6 @@ public class InstaMsg implements MessagingAPIs {
 				  MQTT_RESULT_HANDLER_TIMEOUT,
 				  true);
 				
-	}
-	
-	private static void handleMediaPauseMessage(InstaMsg c) {
-		
-		Log.infoLog(MEDIA + "Pausing .....");
 	}
 
 
