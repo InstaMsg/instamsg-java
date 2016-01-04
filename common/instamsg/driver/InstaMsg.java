@@ -523,7 +523,36 @@ public class InstaMsg implements MessagingAPIs {
 
 	
 	private static void broadcastMedia(String sdpAnswer) {
+		/*
+		 * We hard-code the media-server-ip-address.
+		 */
+		String mediaServerAddress = "23.253.42.123";
 		
+		/*
+		 * We need to extract the media-server-port from the line of type ::
+		 * 
+		 *                 m=video 12345 RTP/AVP 96
+		 */
+		String lineToSearch = null;
+		
+		String[] lines = sdpAnswer.split("\n");
+		for(String line : lines) {
+			if(line.startsWith("m=video")) {
+				lineToSearch = line;
+				break;
+				
+			} else {
+				continue;
+			}
+		}
+		
+		if(lineToSearch != null) {
+			String mediaServerPort = lineToSearch.split(" ")[1];
+			
+		} else {
+			Log.errorLog(MEDIA + "Could not find server-port for streaming.. not doing anything else !!!");
+			return;
+		}
 	}
 
 
@@ -606,14 +635,14 @@ public class InstaMsg implements MessagingAPIs {
 	private static void publishMediaMessage(InstaMsg c) {
 
 		@SuppressWarnings("static-access")
-		String ipAddress = c.misc.getDeviceIpAddress();
+		String selfIpAddress = c.misc.getDeviceIpAddress();
 		
 		String sdpOffer = "";
 		
 	    sdpOffer = "v=0\r\n";
-	    sdpOffer += "o=- 0 0 IN IP4 " + ipAddress + "\r\n";
+	    sdpOffer += "o=- 0 0 IN IP4 " + selfIpAddress + "\r\n";
 	    sdpOffer += "s=\r\n";
-	    sdpOffer += "c=IN IP4 " + ipAddress + "\r\n";
+	    sdpOffer += "c=IN IP4 " + selfIpAddress + "\r\n";
 	    sdpOffer += "t=0 0\r\n";
 	    sdpOffer += "a=charset:UTF-8\n";
 	    sdpOffer += "a=recvonly\r\n";
