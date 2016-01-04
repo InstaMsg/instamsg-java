@@ -90,4 +90,10 @@ public class DeviceMisc implements Misc {
 		
 		return null;
 	}
+
+
+	@Override
+	public String getDeviceIpAddress() {
+		return "";
+	}
 }

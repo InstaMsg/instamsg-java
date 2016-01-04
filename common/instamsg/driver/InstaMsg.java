@@ -605,8 +605,9 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void publishMediaMessage(InstaMsg c) {
 
-		//TODO: Calculate the ip-address
-		String ipAddress = "";
+		@SuppressWarnings("static-access")
+		String ipAddress = c.misc.getDeviceIpAddress();
+		
 		String sdpOffer = "";
 		
 	    sdpOffer = "v=0\r\n";

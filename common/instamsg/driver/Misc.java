@@ -8,4 +8,5 @@ public interface Misc {
 	String getNetworkData();
 	String getManufacturer();
 	String getDeviceUuid();
+	String getDeviceIpAddress();
 }

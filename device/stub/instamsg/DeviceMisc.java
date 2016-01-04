@@ -62,5 +62,11 @@ public class DeviceMisc implements Misc {
 	public String getDeviceUuid() {
 		return null;
 	}
+	
+	
+	@Override
+	public String getDeviceIpAddress() {
+		return "";
+	}
 
 }

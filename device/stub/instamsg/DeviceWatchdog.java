@@ -33,7 +33,7 @@ public class DeviceWatchdog implements Watchdog {
 	 *
 	 */
 	@Override
-	public void watchdogResetAndEnable(int n, String callee) {
+	public void watchdogResetAndEnable(final int n, String callee) {
 		
 	}
 	
