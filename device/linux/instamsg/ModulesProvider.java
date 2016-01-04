@@ -2,6 +2,7 @@ package device.linux.instamsg;
 
 import common.instamsg.driver.Config;
 import common.instamsg.driver.Log;
+import common.instamsg.driver.Media;
 import common.instamsg.driver.Misc;
 import common.instamsg.driver.ModulesProviderInterface;
 import common.instamsg.driver.Socket;
@@ -39,5 +40,10 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public Config getConfig() {
 		return new DeviceConfig();
+	}
+
+	@Override
+	public Media getMedia() {
+		return new DeviceMedia();
 	}
 }

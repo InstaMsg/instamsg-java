@@ -50,6 +50,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static Time time;
 	public static Log logger;
 	public static Misc misc;
+	public static Media media;
 	public static Watchdog watchdog;
 	public Socket socket;
 
@@ -148,6 +149,8 @@ public class InstaMsg implements MessagingAPIs {
 		logger.initLogger();
 		
 		misc = modulesProvideInterface.getMisc();
+		
+		media = modulesProvideInterface.getMedia();
 
 		watchdog = modulesProvideInterface.getWatchdog();
 		watchdog.watchdogInit();
@@ -547,8 +550,8 @@ public class InstaMsg implements MessagingAPIs {
 		}
 		
 		if(lineToSearch != null) {
-			String mediaServerPort = lineToSearch.split(" ")[1];			
-			createStreamingPipeline(null, mediaServerAddress, mediaServerPort);
+			String mediaServerPort = lineToSearch.split(" ")[1];		
+			media.createAndStartStreamingPipeline(mediaServerAddress, mediaServerPort);
 			
 		} else {
 			Log.errorLog(MEDIA + "Could not find server-port for streaming.. not doing anything else !!!");
@@ -618,14 +621,10 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	private static void createStreamingPipeline(String uri, String mediaServerIpAddress, String mediaServerPort) {
-		
-	}
-	
-	
 	private static void handleMediaStopMessage(InstaMsg c) {
 		
 		Log.infoLog(MEDIA + "Stopping .....");
+		media.stopStreaming();
 		
 	    String message = "{'to':'" + c.clientIdComplete + "','from':'" + c.clientIdComplete + "','type':3,'stream_id': '" + streamId + "'}";
 	    c.publish(c.mediaTopic,
@@ -641,6 +640,7 @@ public class InstaMsg implements MessagingAPIs {
 	private static void handleMediaPauseMessage(InstaMsg c) {
 		
 		Log.infoLog(MEDIA + "Pausing .....");
+		media.pauseStreaming();
 	}
 
 	
