@@ -13,7 +13,7 @@ public class DeviceMedia implements Media {
 
 
 	/**
-	 * This method stops the streaming.
+	 * This method pauses the streaming.
 	 */
 	@Override
 	public void pauseStreaming() {
