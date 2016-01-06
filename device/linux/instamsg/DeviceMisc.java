@@ -81,7 +81,7 @@ public class DeviceMisc implements Misc {
 				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
 			}
 			
-			return "LINUX-DESKTOP:ETH0:MAC:" + sb.toString();
+			return "LINUX-DESKTOP:WLAN0:MAC:" + sb.toString();
 
 		} catch (SocketException e) {
 			e.printStackTrace();
