@@ -61,6 +61,7 @@ public class DeviceMisc implements Misc {
 		return null;
 	}
 	
+	static final String INTERFACE = "wlan0";
 	
 	/**
 	 * This method returns the univerally-unique-identifier for this device.
@@ -73,7 +74,7 @@ public class DeviceMisc implements Misc {
 		 */
 		try {
 
-			NetworkInterface network = NetworkInterface.getByName("wlan0");
+			NetworkInterface network = NetworkInterface.getByName(INTERFACE);
 			byte[] mac = network.getHardwareAddress();
 
 			StringBuilder sb = new StringBuilder();
@@ -94,6 +95,7 @@ public class DeviceMisc implements Misc {
 
 	@Override
 	public String getDeviceIpAddress() {
+
 		return "";
 	}
 }

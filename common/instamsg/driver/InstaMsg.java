@@ -1296,6 +1296,7 @@ public class InstaMsg implements MessagingAPIs {
 
 			initInstaMsg(instaMsg, null);			
 			Log.infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
+			Log.infoLog("IP-Address :: [" + modulesProvideInterface.getMisc().getDeviceIpAddress() + "]");
 
 			while(true) {
 
