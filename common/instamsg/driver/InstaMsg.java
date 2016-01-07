@@ -82,6 +82,7 @@ public class InstaMsg implements MessagingAPIs {
 	public boolean connected = false;
 	
 	int connectionAttempts = 0;
+	public static boolean mediaStreamingErrorOccurred = false;
 	
 	byte[] readBuf = new byte[InstaMsg.MAX_BUFFER_SIZE];
 
@@ -1334,6 +1335,14 @@ public class InstaMsg implements MessagingAPIs {
 							businessLogicRunOnceAtStart = true;
 							
 							nextBusinessLogicTick = latestTick + businessLogicInterval;
+						}
+						
+						if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+							
+							if(mediaStreamingErrorOccurred == true) {
+								Log.errorLog(MEDIA + "Error occurred in media-streaming ... rebooting device to reset everything");
+								misc.rebootDevice();
+							}
 						}
 					}
 				}
