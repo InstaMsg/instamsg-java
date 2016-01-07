@@ -105,6 +105,7 @@ public class InstaMsg implements MessagingAPIs {
 	int networkInfoInterval = 300;
 	ChangeableInt pingRequestInterval = new ChangeableInt(0);
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
+	ChangeableInt mediaStreamingEnabledAtRuntime = new ChangeableInt(0);
 	
 	int publishCount = 0;
 	private InitialCallbacks callbacks;
@@ -508,6 +509,19 @@ public class InstaMsg implements MessagingAPIs {
 	                                      "3",
 	                                      "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. " +
 	                                      "This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
+	        
+	        if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+	        
+	        	config.registerEditableConfig(c.mediaStreamingEnabledAtRuntime,
+	        								  "MEDIA_STREAMING_ENABLED",
+	        								  CONFIG_TYPE.CONFIG_INT,
+	        								  "0",
+                    					  	  "0 - Disabled; 1 - Enabled");
+	        	
+	        	if(c.mediaStreamingEnabledAtRuntime.intValue() == 1) {
+	        		initiateStreaming();
+	        	}
+	        }
 
 
 	        c.callbacks.onConnectOneTimeOperations();
@@ -640,7 +654,7 @@ public class InstaMsg implements MessagingAPIs {
 
 	
 	
-	public void initiateStreaming() {
+	private static void initiateStreaming() {
 
 		String selfIpAddress = misc.getDeviceIpAddress();		
 		String sdpOffer = "";

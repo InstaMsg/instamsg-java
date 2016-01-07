@@ -258,21 +258,4 @@ public interface MessagingAPIs {
 	 *      the message reached the server or not.
 	 */
 	public ReturnCode unsubscribe(String topic);
-	
-	
-	
-	/**
-	 * This method initiates-media-streaming.
-	 *
-	 * Kindly see
-	 *                  common/apps/mediaStreamer/Main.java
-	 * for example-usage.
-	 *
-	 *
-	 * Also, for this to be successful, the corresponding-methods in
-	 *                  device/<device>/instamsg/DeviceMedia.java
-	 * must be implemented.
-	 */
-	public void initiateStreaming();
-
 }
