@@ -263,6 +263,15 @@ public interface MessagingAPIs {
 	
 	/**
 	 * This method initiates-media-streaming.
+     *
+     * Kindly see
+     *                  common/apps/mediaStreamer/Main.java
+     * for example-usage.
+     *
+     *
+     * Also, for this to be successful, the corresponding-methods in
+     *                  device/<device>/instamsg/DeviceMedia.java
+     * must be implemented.
 	 */
 	public void initiateStreaming();
 
