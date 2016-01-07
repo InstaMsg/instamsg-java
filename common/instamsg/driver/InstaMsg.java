@@ -536,21 +536,15 @@ public class InstaMsg implements MessagingAPIs {
 		 * 
 		 *                 m=video 12345 RTP/AVP 96
 		 */
-		String lineToSearch = null;
+		String textToSearch = "m=video ";
+		int index = sdpAnswer.indexOf(textToSearch);
 		
-		String[] lines = sdpAnswer.split("\n");
-		for(String line : lines) {
-			if(line.startsWith("m=video")) {
-				lineToSearch = line;
-				break;
-				
-			} else {
-				continue;
-			}
-		}
-		
-		if(lineToSearch != null) {
-			String mediaServerPort = lineToSearch.split(" ")[1];		
+		String[] tokens = sdpAnswer.substring(index + textToSearch.length()).split(" ");
+		String mediaServerPort = tokens[0];		
+	
+		if(mediaServerPort != null) {	
+			Log.infoLog(MEDIA + "Media-Server IP-Address and Port being used for streaming [" + mediaServerAddress + 
+					            "], [" + mediaServerPort + "]");
 			media.createAndStartStreamingPipeline(mediaServerAddress, mediaServerPort);
 			
 		} else {
@@ -645,11 +639,9 @@ public class InstaMsg implements MessagingAPIs {
 
 	
 	
-	private static void publishMediaMessage(InstaMsg c) {
+	public void initiateStreaming() {
 
-		@SuppressWarnings("static-access")
-		String selfIpAddress = c.misc.getDeviceIpAddress();
-		
+		String selfIpAddress = misc.getDeviceIpAddress();		
 		String sdpOffer = "";
 		
 	    sdpOffer = "v=0\r\n";
@@ -662,23 +654,23 @@ public class InstaMsg implements MessagingAPIs {
 	    sdpOffer += "m=video 50004 RTP/AVP 96\r\n";
 	    sdpOffer += "a=rtpmap:96 H264/90000\r\n";
 	        
-	    String message = "{"									         +
-	    						"'to': '" + c.clientIdComplete + "', "   +
-	    						"'sdp_offer' : '" + sdpOffer + "', "     +
-	    						"'from': '" + c.clientIdComplete + "', " +
-	    						"'protocol' : 'rtp', "                   +
-	    						"'type':'7', "                           +
-	    						"'stream_id':'" + streamId + "', "       + 
-	    						"'record': True"                         +
+	    String message = "{"									         				+
+	    						"'to': '" + instaMsg.clientIdComplete + "', "   		+
+	    						"'sdp_offer' : '" + sdpOffer + "', "     				+
+	    						"'from': '" + instaMsg.clientIdComplete + "', " 		+
+	    						"'protocol' : 'rtp', "                   				+
+	    						"'type':'7', "                           				+
+	    						"'stream_id':'" + instaMsg.clientIdComplete + "', "     + 
+	    						"'record': True"                         				+
 	    				 "}";
 
-		c.publish(c.mediaTopic,
-				  message,
-				  QOS1,
-				  false,
-				  null,
-				  MQTT_RESULT_HANDLER_TIMEOUT,
-				  true);
+		instaMsg.publish(instaMsg.mediaTopic,
+				  		 message,
+				  		 QOS1,
+				  		 false,
+				  		 null,
+				  		 MQTT_RESULT_HANDLER_TIMEOUT,
+				  		 true);
 				
 	}
 
@@ -1294,7 +1286,8 @@ public class InstaMsg implements MessagingAPIs {
 
 		while(true) {
 
-			initInstaMsg(instaMsg, null);			
+			initInstaMsg(instaMsg, callbacks);	
+			
 			Log.infoLog("Device-UUID :: [" + modulesProvideInterface.getMisc().getDeviceUuid() + "]");
 			Log.infoLog("IP-Address :: [" + modulesProvideInterface.getMisc().getDeviceIpAddress() + "]");
 
@@ -1341,7 +1334,6 @@ public class InstaMsg implements MessagingAPIs {
 							businessLogicRunOnceAtStart = true;
 							
 							nextBusinessLogicTick = latestTick + businessLogicInterval;
-							break;
 						}
 					}
 				}

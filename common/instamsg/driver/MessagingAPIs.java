@@ -258,5 +258,12 @@ public interface MessagingAPIs {
 	 *      the message reached the server or not.
 	 */
 	public ReturnCode unsubscribe(String topic);
+	
+	
+	
+	/**
+	 * This method initiates-media-streaming.
+	 */
+	public void initiateStreaming();
 
 }

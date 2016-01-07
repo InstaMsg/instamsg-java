@@ -12,8 +12,9 @@ public class Json {
 	 * The key/value can be without double-quotes or single-quotes, but we will return them as a string nevertheless
 	 * (the calling-function will do the necessary conversions as necessary).
 	 */
-	public static String getJsonKeyValueIfPresent(String json, String key)
+	public static String getJsonKeyValueIfPresent(String originalJson, String key)
 	{
+		String json = originalJson.replaceAll("\r", " ").replaceAll("\n", " ");
 		String value = "";
 		
 	    char NOT_FOUND = ' ';
@@ -37,11 +38,18 @@ public class Json {
 	             */
 	            keyWrapper = json.charAt(i);
 	            
-	        } else if((json.charAt(i) == ':') && (keyWrapper == NOT_FOUND)) {
+	        } else if((keyWrapper == NOT_FOUND) && (json.charAt(i) == ':')) {
 	        	
+	        } else if((keyWrapper == NOT_FOUND) && (json.charAt(i) != ':')) {
+	        	
+	        	keyWrapper = ',';
+	        	
+	            /* Simply add to the running token. */
+	            token.changeTo(token.toString() + json.charAt(i));
+	            
 	        }
 	        else if(    (json.charAt(i) == keyWrapper) ||
-	                    ((json.charAt(i) == '}') && (keyWrapper == NOT_FOUND))) {
+	                    ((keyWrapper == NOT_FOUND) && (json.charAt(i) == '}'))) {
 	        	
 	            /*
 	             *  We need to stop parsing the key now.
@@ -64,7 +72,7 @@ public class Json {
 	                {
 	                	value = value + parsedValueToken;
 
-	                	Log.debugLog("Found key [" + parsedKeyToken.toString() + "] and value [" + value + "] in json [" + json + "]");
+	                	Log.debugLog("Found key [" + parsedKeyToken.toString() + "] and value [" + value + "] in json [" + originalJson + "]");
 	                    return value;
 	                }
 
