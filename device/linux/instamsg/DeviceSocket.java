@@ -190,7 +190,9 @@ public class DeviceSocket extends Socket {
 	public void releaseUnderlyingSocketMediumGuaranteed() {
 		
 		try {
-			socket.close();
+			if(socket != null) {
+				socket.close();
+			}
 			
 		} catch (IOException e) {
 	

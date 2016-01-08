@@ -1243,10 +1243,6 @@ public class InstaMsg implements MessagingAPIs {
 		c.socket.socketCorrupted = true;
 		
 		c.socket.initSocket();
-		if(c.socket.socketCorrupted == true) {
-			return;
-		}
-
 
 		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
 		{
@@ -1261,6 +1257,10 @@ public class InstaMsg implements MessagingAPIs {
 			c.oneToOneHandlers[i] = new OneToOneHandlers();
 			c.oneToOneHandlers[i].msgId = 0;
 			c.oneToOneHandlers[i].timeout = 0;
+		}
+		
+		if(c.socket.socketCorrupted == true) {
+			return;
 		}
 
 
@@ -1312,7 +1312,6 @@ public class InstaMsg implements MessagingAPIs {
 
 				if(instaMsg.socket.socketCorrupted == true) {
 					Log.errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
-					break;
 
 				} else {
 					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
@@ -1360,31 +1359,31 @@ public class InstaMsg implements MessagingAPIs {
 						}
 					}
 				}
-			}
+			
 
-			if(instaMsg.connected == true) {
+				if(instaMsg.connected == true) {
 
-			} else if(instaMsg.socket.socketCorrupted == false) {
+				} else if(instaMsg.socket.socketCorrupted == false) {
 
-				instaMsg.connectionAttempts++;
-				Log.errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
+					instaMsg.connectionAttempts++;
+					Log.errorLog("Socket is fine at physical layer, but no connection established (yet) with InstaMsg-Server.");
 
-				if(instaMsg.connectionAttempts > InstaMsg.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
-				{
-					instaMsg.connectionAttempts = 0;
+					if(instaMsg.connectionAttempts > InstaMsg.MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE)
+					{
+						instaMsg.connectionAttempts = 0;
 
-					Log.errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
-					instaMsg.socket.socketCorrupted = true;
+						Log.errorLog("Connection-Attempts exhausted ... so trying with re-initializing the socket-physical layer.");
+						instaMsg.socket.socketCorrupted = true;
+					}
+				}
+
+				if(instaMsg.socket.socketCorrupted == true) {
+
+					clearInstaMsg(instaMsg);
+					break;
 				}
 			}
-
-			if(instaMsg.socket.socketCorrupted == true) {
-
-				clearInstaMsg(instaMsg);
-				startAndCountdownTimer(1, false);
-			}				
 		}
-
 	}
 }
 
