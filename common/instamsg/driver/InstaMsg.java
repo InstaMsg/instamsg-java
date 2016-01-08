@@ -54,6 +54,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static Watchdog watchdog;
 	public Socket socket;
 
+	static boolean mqttConnectFlag = false;
 	
 	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
@@ -317,7 +318,11 @@ public class InstaMsg implements MessagingAPIs {
 			
 			Log.errorLog("Socket not available at physical layer .. so packet cannot be sent to server.");
 
-		} else {
+		} else if((mqttConnectFlag == false) && (c.connected == false)) {
+			
+			Log.errorLog("No CONNACK received from server .. so packet cannot be sent to server.");
+			
+	    } else {
 			
 			rc = c.socket.socketWrite(packet, packet.length);
 			
@@ -325,6 +330,8 @@ public class InstaMsg implements MessagingAPIs {
 				c.socket.socketCorrupted = true;
 			}
 		}		
+		
+		mqttConnectFlag = false;
 		
 		watchdog.watchdogDisable();
 		return rc;
@@ -1202,6 +1209,7 @@ public class InstaMsg implements MessagingAPIs {
 			return InstaMsg.ReturnCode.FAILURE;
 		}
 		
+		mqttConnectFlag = true;
 		return sendPacket(c, packet);
 	}	
 	
