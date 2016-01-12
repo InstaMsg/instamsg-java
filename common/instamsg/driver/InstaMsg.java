@@ -1068,28 +1068,25 @@ public class InstaMsg implements MessagingAPIs {
 			instaMsg.publishCount++;
 		}
 		
-	    if(logging == true)
-	    {
-	        if(rc == InstaMsg.ReturnCode.SUCCESS)
-	        {
+	    if(rc == InstaMsg.ReturnCode.SUCCESS) {
+	    	
+	        if(logging == true) {
 	            Log.infoLog("Published successfully.\n");
+	        }
+	        
+	        if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0) {
+	            if((instaMsg.publishCount % instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue()) == 0) {
+	                Log.infoLog("Doing out-of-order socket-read, as [" + 
+	                            instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() + "] " +
+	                 		    " MQTT-Publishes have been done");
 
-	            if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0)
-	            {
-	                if((instaMsg.publishCount % instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue()) == 0)
-	                {
-	                    Log.infoLog("Doing out-of-order socket-read, as [" + 
-	                                instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() + "] " +
-	                    		    " MQTT-Publishes have been done");
-
-	                    readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
-	                }
+	                readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
 	            }
 	        }
-	        else
-	        {
-	            Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
-	        }
+	        
+	    } else {
+	    	
+	    	Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
 	    }
 	    
 	    return rc;
