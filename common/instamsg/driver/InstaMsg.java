@@ -107,6 +107,7 @@ public class InstaMsg implements MessagingAPIs {
 	ChangeableInt pingRequestInterval = new ChangeableInt(0);
 	ChangeableInt compulsorySocketReadAfterMQTTPublishInterval = new ChangeableInt(0);
 	ChangeableInt mediaStreamingEnabledAtRuntime = new ChangeableInt(0);
+	ChangeableInt editableBusinessLogicInterval = new ChangeableInt(0);
 	
 	int publishCount = 0;
 	private InitialCallbacks callbacks;
@@ -516,6 +517,12 @@ public class InstaMsg implements MessagingAPIs {
 	                                      "3",
 	                                      "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. " +
 	                                      "This prevents any socket-pverrun errors (particularly in hardcore embedded-devices");
+	        
+            config.registerEditableConfig(c.editableBusinessLogicInterval,
+            							  "BUSINESS_LOGIC_INTERVAL",
+            							  CONFIG_TYPE.CONFIG_INT,
+            							  c.editableBusinessLogicInterval.intValue() + "",
+                                          "Business-Logic Interval (in seconds)");
 	        
 	        if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
 	        
@@ -1302,7 +1309,9 @@ public class InstaMsg implements MessagingAPIs {
 		long currentTick = time.getCurrentTick();
 		long nextNetworkInfoTick = currentTick + instaMsg.networkInfoInterval;
 		long nextPingReqTick = currentTick + instaMsg.pingRequestInterval.intValue();
-		long nextBusinessLogicTick = currentTick + businessLogicInterval;
+		
+		instaMsg.editableBusinessLogicInterval = new ChangeableInt(businessLogicInterval);
+		long nextBusinessLogicTick = currentTick + instaMsg.editableBusinessLogicInterval.intValue();
 
 		while(true) {
 
@@ -1352,7 +1361,7 @@ public class InstaMsg implements MessagingAPIs {
 							runBusinessLogicImmediately = false;
 							businessLogicRunOnceAtStart = true;
 							
-							nextBusinessLogicTick = latestTick + businessLogicInterval;
+							nextBusinessLogicTick = latestTick + instaMsg.editableBusinessLogicInterval.intValue();
 						}
 						
 						if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
