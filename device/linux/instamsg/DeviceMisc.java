@@ -79,10 +79,10 @@ public class DeviceMisc implements Misc {
 
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < mac.length; i++) {
-				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
+				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
 			}
 			
-			return "LINUX-DESKTOP:WLAN0:MAC:" + sb.toString().toLowerCase();
+			return "" + sb.toString().toLowerCase();
 
 		} catch (SocketException e) {
 			e.printStackTrace();
