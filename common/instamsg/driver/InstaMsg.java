@@ -160,7 +160,7 @@ public class InstaMsg implements MessagingAPIs {
 		watchdog.watchdogInit();
 		
 		
-		INSTAMSG_HOST = "platform.instamsg.io";
+		INSTAMSG_HOST = "device.instamsg.io";
 		if(DeviceConstants.SSL_SOCKET == true) {
 			INSTAMSG_PORT = 8883;
 		} else {
