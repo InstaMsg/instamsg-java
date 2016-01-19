@@ -1112,9 +1112,12 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	        if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0) {
 	            if((instaMsg.publishCount % instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue()) == 0) {
-	                Log.infoLog("Doing out-of-order socket-read, as [" + 
-	                            instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() + "] " +
-	                 		    " MQTT-Publishes have been done");
+	            	
+	            	if(logging == true) {
+	            		Log.infoLog("Doing out-of-order socket-read, as [" + 
+	            					instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() + "] " +
+	                 		    	" MQTT-Publishes have been done");
+	            	}
 
 	                readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
 	            }
@@ -1122,7 +1125,9 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	    } else {
 	    	
-	    	Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
+	    	if(logging == true) {
+	    		Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
+	    	}
 	    }
 	    
 	    return rc;
