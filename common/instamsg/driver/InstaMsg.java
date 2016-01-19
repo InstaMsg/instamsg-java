@@ -89,7 +89,7 @@ public class InstaMsg implements MessagingAPIs {
 
 	private String filesTopic;
 	private String rebootTopic;
-	private String serverLogsTopic;
+	public String serverLogsTopic;
 	private String enableServerLoggingTopic;
 	private String fileUploadUrl;
 	private String receiveConfigTopic;
@@ -115,8 +115,9 @@ public class InstaMsg implements MessagingAPIs {
 	public static boolean runBusinessLogicImmediately = false;
 	public static boolean businessLogicRunOnceAtStart = false;
 	
-	static String ONE_TO_ONE = "[ONE-TO-ONE] ";
-	static String MEDIA      = "[MEDIA] ";
+	static String ONE_TO_ONE     = "[ONE-TO-ONE] ";
+	static String MEDIA          = "[MEDIA] ";
+	static String SERVER_LOGGING = "[SERVER-LOGGING] ";
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -901,7 +902,11 @@ public class InstaMsg implements MessagingAPIs {
 					MqttPublish pubMsg = (MqttPublish) MqttWireMessage.createWireMessage(c.readBuf);
 					
 					String topicName = pubMsg.getTopicName();
-					if(topicName.equals(c.rebootTopic)) {
+					if(topicName.equals(c.enableServerLoggingTopic)) {
+						serverLoggingTopicMessageArrived(c, new String(pubMsg.getPayload()));
+					}
+					
+					else if(topicName.equals(c.rebootTopic)) {
 						Log.infoLog("Received REBOOT request from server.. rebooting !!!");
 						misc.rebootDevice();
 						
@@ -972,10 +977,34 @@ public class InstaMsg implements MessagingAPIs {
 			}
 		
 		} while (rc == InstaMsg.ReturnCode.SUCCESS);		
-		
 	}
 
 	
+	private static void serverLoggingTopicMessageArrived(InstaMsg c, String payload) {
+		
+	    String CLIENT_ID = "client_id";
+	    String LOGGING = "logging";
+	    
+	    String clientId = Json.getJsonKeyValueIfPresent(payload, CLIENT_ID);
+	    String logging = Json.getJsonKeyValueIfPresent(payload, LOGGING);
+
+	    if( (clientId.length() > 0) && (logging.length() > 0) ) {
+	    	
+	        if(logging.equals("1")) {
+	        	
+	            c.serverLoggingEnabled = true;
+	            Log.infoLog(SERVER_LOGGING + "Enabled.");
+	            
+	        } else {
+	        	
+	            c.serverLoggingEnabled = false;
+	            Log.infoLog(SERVER_LOGGING + "Disabled.");
+	            
+	        }
+	    }		
+	}
+
+
 	private static void oneToOneMessageArrived(InstaMsg c, String payload) {
 		
 		Log.infoLog(ONE_TO_ONE + " Payload == [" + payload + "]");

@@ -28,7 +28,16 @@ public abstract class Log {
 	
 	public static void log(String log, int level) {
 		
-		if(level <= DeviceConstants.LOG_LEVEL) {
+		if(InstaMsg.instaMsg.serverLoggingEnabled == true) {			
+			InstaMsg.instaMsg.publish(InstaMsg.instaMsg.serverLogsTopic,
+					                  log,
+					                  InstaMsg.QOS0,
+					                  false,
+					                  null,
+					                  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT, 
+					                  false);
+			
+		} else if(level <= DeviceConstants.LOG_LEVEL) {
 			modulesProvideInterface.getLogger().loggerWrite(log.getBytes(), log.length());
 		}
 	}
