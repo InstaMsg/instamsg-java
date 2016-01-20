@@ -111,6 +111,9 @@ public class InstaMsg implements MessagingAPIs {
 	
 	int publishCount = 0;
 	private InitialCallbacks callbacks;
+
+	static long FRESH_SERVER_LOGS_TIME = -1;
+	static long serverLogsStartTime = FRESH_SERVER_LOGS_TIME;
 	
 	public static boolean runBusinessLogicImmediately = false;
 	public static boolean businessLogicRunOnceAtStart = false;
@@ -993,6 +996,8 @@ public class InstaMsg implements MessagingAPIs {
 	        if(logging.equals("1")) {
 	        	
 	            c.serverLoggingEnabled = true;
+	            c.serverLogsStartTime = FRESH_SERVER_LOGS_TIME;
+	            
 	            Log.infoLog(SERVER_LOGGING + "Enabled.");
 	            
 	        } else {
