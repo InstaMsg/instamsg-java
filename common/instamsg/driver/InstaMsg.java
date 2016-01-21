@@ -994,14 +994,12 @@ public class InstaMsg implements MessagingAPIs {
 	    if( (clientId.length() > 0) && (logging.length() > 0) ) {
 	    	
 	        if(logging.equals("1")) {
-	        	
 	            c.serverLoggingEnabled = true;
-	            c.serverLogsStartTime = FRESH_SERVER_LOGS_TIME;
+	            InstaMsg.serverLogsStartTime = FRESH_SERVER_LOGS_TIME;
 	            
 	            Log.infoLog(SERVER_LOGGING + "Enabled.");
 	            
 	        } else {
-	        	
 	            c.serverLoggingEnabled = false;
 	            Log.infoLog(SERVER_LOGGING + "Disabled.");
 	            

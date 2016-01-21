@@ -3,10 +3,14 @@ package device.linux.instamsg;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Socket;
+import config.DeviceConstants;
 
 public class DeviceSocket extends Socket {
 
@@ -15,8 +19,6 @@ public class DeviceSocket extends Socket {
 	public DeviceSocket(String hostName, int port) {
 		super(hostName, port);
 	}
-	
-	
 	
 	/**
 	 * This method returns the *****LATEST****** sms, which contains the desired substring.
@@ -46,7 +48,13 @@ public class DeviceSocket extends Socket {
 	public void connectUnderlyingSocketMediumTryOnce() {
 		
 		try {
-			socket = new java.net.Socket(host, port);
+			if(DeviceConstants.SSL_SOCKET == true){
+				SocketFactory socketFactory = SSLSocketFactory.getDefault();
+				socket = socketFactory.createSocket(host, port);
+			}
+			else{
+				socket = new java.net.Socket(host, port);
+			}
 			socket.setSoTimeout(InstaMsg.SOCKET_READ_TIMEOUT_SECS * 1000);
 			
 		} catch (Exception e) {

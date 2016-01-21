@@ -48,7 +48,7 @@ public abstract class Log {
 					InstaMsg.instaMsg.serverLoggingEnabled = false;
 					
 					InstaMsg.instaMsg.publish(InstaMsg.instaMsg.serverLogsTopic,
-			                  				  "****** DISABLING SERVER LOGS, as " + EXPIRY_SECONDS + " have passed ******",
+			                  				  "****** DISABLING SERVER LOGS, as " + EXPIRY_SECONDS + " seconds have passed ******",
 			                  				  InstaMsg.QOS0,
 			                  				  false,
 			                  				  null,
