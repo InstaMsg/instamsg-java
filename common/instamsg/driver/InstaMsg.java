@@ -4,6 +4,7 @@ import common.instamsg.driver.Config.CONFIG_TYPE;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttMessage;
+import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.internal.wire.MqttProvack;
@@ -60,6 +61,7 @@ public class InstaMsg implements MessagingAPIs {
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
 	static final String TOPIC_NETWORK_DATA  =   "instamsg/client/signalinfo";
 	static final String TOPIC_CONFIG_SEND   =   "instamsg/client/config/clientToServer";
+	static final String TOPIC_NOTIFICATION  =   "instamsg/client/notifications";
 	
 	public static final int MAX_BUFFER_SIZE    =   1000;
 	
@@ -121,6 +123,8 @@ public class InstaMsg implements MessagingAPIs {
 	static String ONE_TO_ONE     = "[ONE-TO-ONE] ";
 	static String MEDIA          = "[MEDIA] ";
 	static String SERVER_LOGGING = "[SERVER-LOGGING] ";
+	
+	static String SECRET         = "SECRET";
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -852,24 +856,61 @@ public class InstaMsg implements MessagingAPIs {
 				return;
 			}
 			
-			if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
-				
+			if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_CONNACK) {
 				try {
-					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
+					MqttConnack msg = (MqttConnack) MqttWireMessage.createWireMessage(c.readBuf);
 					if(msg.getReturnCode() == 0) {
-						/*
-						 * Connection was established successfully;
-						 */
-						c.clientIdComplete = msg.getClientId();
-						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
-						
-						setValuesOfSpecialTopics(c);
 						handleConnOrProvAckGeneric(c, msg.getReturnCode());
 					}
 					
 				} catch (MqttException e) {					
-					rc = handleMessageDecodingFailure(c, "MQTT-PROVACK");
+					rc = handleMessageDecodingFailure(c, "MQTT-CONNACK");
 				}
+				
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PROVACK) {
+				
+				try {
+					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
+					if(msg.getReturnCode() == 0) {
+						
+						/*
+						 * Connection was established successfully;
+						 */
+						c.clientIdComplete = msg.getClientId();						
+						if(msg.getSecret() != null) {
+							
+							Log.infoLog("Received client-secret from server via PROVACK [" + msg.getSecret() + "]");
+							
+							String secretConfig = config.generateConfigJson(InstaMsg.SECRET,
+									                                        CONFIG_TYPE.CONFIG_STRING,
+									                                        msg.getCompletePayload(),
+									                                        "");
+							config.saveConfigValueOnPersistentStorage(InstaMsg.SECRET, secretConfig);
+							
+							
+							
+							/*
+							 * Send notification to the server, that the secret-password has been saved.
+							 */
+							InstaMsg.mqttConnectFlag = true;
+							c.publish(TOPIC_NOTIFICATION,
+									  "SECRET RECEIVED",
+									  QOS2,
+									  false,
+									  null,
+									  MQTT_RESULT_HANDLER_TIMEOUT,
+									  true);
+							}
+						}
+													
+						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
+						
+						setValuesOfSpecialTopics(c);
+						handleConnOrProvAckGeneric(c, msg.getReturnCode());
+						
+					} catch (MqttException e) {					
+						rc = handleMessageDecodingFailure(c, "MQTT-PROVACK");
+					}
 
 			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
 				
@@ -1243,6 +1284,35 @@ public class InstaMsg implements MessagingAPIs {
 
 	public static InstaMsg.ReturnCode MQTTConnect(InstaMsg c) {
 		
+		String secretConfig = config.getConfigValueFromPersistentStorage(SECRET);
+		if(secretConfig != null) {
+			
+			/*
+			 * We will receive CONNACK for this leg.
+			 */
+			String secret = Json.getJsonKeyValueIfPresent(secretConfig, Config.CONFIG_VALUE_KEY);
+			
+			c.clientIdComplete = secret.substring(0, 36);
+			setValuesOfSpecialTopics(c);
+			
+			c.clientIdMachine = secret.substring(0, 23);
+			c.username = secret.substring(24, 36);
+			c.password = secret.substring(37, secret.length());
+			
+		} else {
+			
+			/*
+			 * We will receive PROVACK for this leg.
+			 */
+			c.clientIdMachine = NO_CLIENT_ID;
+			c.username = "";
+			c.password = modulesProvideInterface.getMisc().getDeviceUuid();
+		}
+		
+		c.connectOptions.setClientId(c.clientIdMachine);
+		c.connectOptions.setUserName(c.username);
+		c.connectOptions.setPassword(c.password.toCharArray());
+		
 		MqttConnect connectMsg = new MqttConnect(c.connectOptions);
 		
 		byte[] packet = getEncodedMqttMessageAsByteStream(connectMsg);
@@ -1322,15 +1392,6 @@ public class InstaMsg implements MessagingAPIs {
 		
 
 		c.clientIdComplete = "";
-
-		c.clientIdMachine = NO_CLIENT_ID;
-		c.connectOptions.setClientId(c.clientIdMachine);
-
-		c.username = "";
-		c.connectOptions.setUserName(c.username);
-
-		c.password = modulesProvideInterface.getMisc().getDeviceUuid();
-		c.connectOptions.setPassword(c.password.toCharArray());
 
 		c.connected = false;
 		MQTTConnect(c);

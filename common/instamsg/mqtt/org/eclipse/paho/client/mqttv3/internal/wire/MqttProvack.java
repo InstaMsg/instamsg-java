@@ -22,7 +22,10 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
  */
 public class MqttProvack extends MqttAck {
 	private int returnCode;
+	
+	private String completePayload;
 	private String clientId;
+	private String secret;
 	
 
 	public MqttProvack(byte info, byte[] variableHeader) throws IOException {
@@ -36,7 +39,12 @@ public class MqttProvack extends MqttAck {
 		dis.readFully(payload);
 		dis.close();
 		
-		this.clientId = new String(payload);
+		this.completePayload = new String(payload);
+		
+		this.clientId = completePayload.substring(0, 36);
+		if(completePayload.length() > 37) {
+			this.secret = completePayload.substring(37, completePayload.length());
+		}
 	}
 	
 	public int getReturnCode() {
@@ -50,6 +58,14 @@ public class MqttProvack extends MqttAck {
 	
 	public String getClientId() {
 		return clientId;
+	}
+	
+	public String getSecret() {
+		return secret;
+	}
+	
+	public String getCompletePayload() {
+		return completePayload;
 	}
 
 	

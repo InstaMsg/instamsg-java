@@ -30,6 +30,14 @@ public abstract class Config implements ConfigAPIs {
 	                       					 true);
 	}
 
+	public String generateConfigJson(String key, CONFIG_TYPE type, String stringifiedValue, String desc) {
+		
+		String configMessageToSend = "{'" + CONFIG_KEY_KEY          + "' : '" + key               + "', " +
+	                                 " '" + CONFIG_TYPE_KEY         + "' : '" + type.ordinal()    + "', " +
+	    		                     " '" + CONFIG_VALUE_KEY        + "' : '" + stringifiedValue + "', " +
+	                                 " '" + CONFIG_DESCRIPTION_KEY  + "' : '" + desc              + "'}";
+		return configMessageToSend;
+	}
 
 	public void processConfig(String configJson) {
 		
@@ -91,13 +99,10 @@ public abstract class Config implements ConfigAPIs {
 	    /*
 	     * Form a Config-JSON, and do the additional-processing required.
 	     */
-	    String configMessageToSend = "{'" + CONFIG_KEY_KEY          + "' : '" + key               + "', " +
-	                                 " '" + CONFIG_TYPE_KEY         + "' : '" + type.ordinal()    + "', " +
-	    		                     " '" + CONFIG_VALUE_KEY        + "' : '" + stringifiedValue + "', " +
-	                                 " '" + CONFIG_DESCRIPTION_KEY  + "' : '" + desc              + "'}";
-
+	    String configMessageToSend = generateConfigJson(key, type, stringifiedValue, desc);
 	    processConfig(configMessageToSend);
 	}
+
 	
 	public abstract void initConfig();
 	public abstract String getConfigValueFromPersistentStorage(String key);

@@ -4,6 +4,8 @@ import common.instamsg.driver.Config.CONFIG_TYPE;
 
 public interface ConfigAPIs {
 	
+	public String generateConfigJson(String key, CONFIG_TYPE type, String stringifiedValue, String desc);	
+	
 	/**
 	 * This method registers a configuration, which is then editable at the InstaMsg-Server/Application-Server.
 	 * 
