@@ -57,13 +57,15 @@ public abstract class Log {
 				}
 			}
 			
-			InstaMsg.instaMsg.publish(InstaMsg.instaMsg.serverLogsTopic,
-					                  log,
-					                  InstaMsg.QOS0,
-					                  false,
-					                  null,
-					                  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT, 
-					                  false);
+			if(level <= DeviceConstants.LOG_LEVEL) {
+				InstaMsg.instaMsg.publish(InstaMsg.instaMsg.serverLogsTopic,
+										  log,
+										  InstaMsg.QOS0,
+										  false,
+										  null,
+										  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT, 
+										  false);
+			}
 			
 		} else if(level <= DeviceConstants.LOG_LEVEL) {
 			modulesProvideInterface.getLogger().loggerWrite(log.getBytes(), log.length());
