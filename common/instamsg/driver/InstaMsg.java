@@ -486,7 +486,7 @@ public class InstaMsg implements MessagingAPIs {
 		if((data != null) && (data.length() > 0)) {			
 			instaMsg.publish(topicName,
 					             data,
-					             QOS1,
+					             QOS0,
 					             false,
 					             null,
 					             MQTT_RESULT_HANDLER_TIMEOUT,
