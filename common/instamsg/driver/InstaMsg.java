@@ -224,7 +224,7 @@ public class InstaMsg implements MessagingAPIs {
   		attachOneToOneHandler(instaMsg, msgId, timeout, oneToOneHandler);
 		return instaMsg.publish(peer,
                   		            message,
-                		            QOS2,
+                		            QOS0,
                 		            false,
                 		            new ResultHandler() {
 			
@@ -728,7 +728,7 @@ public class InstaMsg implements MessagingAPIs {
 
 	            c.publish(replyTopic,
 	                      message,
-	                      QOS1,
+	                      QOS0,
 	                      false,
 	                      null,
 	                      MQTT_RESULT_HANDLER_TIMEOUT,
@@ -746,7 +746,7 @@ public class InstaMsg implements MessagingAPIs {
 	    String message = "{'to':'" + c.clientIdComplete + "','from':'" + c.clientIdComplete + "','type':3,'stream_id': '" + streamId + "'}";
 	    c.publish(c.mediaTopic,
 	              message,
-	              QOS1,
+	              QOS0,
 	              false,
 	              null,
 	              MQTT_RESULT_HANDLER_TIMEOUT,
@@ -789,7 +789,7 @@ public class InstaMsg implements MessagingAPIs {
 
 		instaMsg.publish(instaMsg.mediaTopic,
 				  		 message,
-				  		 QOS1,
+				  		 QOS0,
 				  		 false,
 				  		 null,
 				  		 MQTT_RESULT_HANDLER_TIMEOUT,
@@ -981,7 +981,7 @@ public class InstaMsg implements MessagingAPIs {
 							InstaMsg.mqttConnectFlag = true;
 							c.publish(TOPIC_NOTIFICATION,
 									  "SECRET RECEIVED",
-									  QOS2,
+									  QOS0,
 									  false,
 									  null,
 									  MQTT_RESULT_HANDLER_TIMEOUT,
@@ -1024,6 +1024,16 @@ public class InstaMsg implements MessagingAPIs {
 					
 				} catch (MqttException e) {
 					rc = handleMessageDecodingFailure(c, "MQTT-PUBCOMP");
+				}
+				
+			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBACK) {
+				
+				try {
+					MqttPubAck pubAckMsg = (MqttPubAck) MqttWireMessage.createWireMessage(c.readBuf);
+					fireResultHandlerUsingMsgIdAsTheKey(instaMsg, pubAckMsg.getMessageId());
+					
+				} catch (MqttException e) {
+					rc = handleMessageDecodingFailure(c, "MQTT-PUBACK");
 				}
 				
 			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
@@ -1228,7 +1238,7 @@ public class InstaMsg implements MessagingAPIs {
 	            	
 	                while(true) {
 	                	
-	                    readAndProcessIncomingMQTTPacketsIfAny(InstaMsg.instaMsg);
+	                    readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
 	                    if(waitingForPuback == PUBACK_STATE.WAITING_FOR_PUBACK)
 	                    {
 	                        pubAckRecvAttempts = pubAckRecvAttempts + 1;
