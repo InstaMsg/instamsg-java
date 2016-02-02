@@ -1293,7 +1293,7 @@ public class InstaMsg implements MessagingAPIs {
 		}
 		
 		if(logging == true) {
-			Log.infoLog("Publishing message [" + payload + "] to topic [" + topicName + "]");
+			Log.infoLog("\nPublishing message [" + payload + "] to topic [" + topicName + "]");
 		}
 		
 		byte[] packet = getEncodedMqttMessageAsByteStream(pubMsg);
@@ -1309,7 +1309,7 @@ public class InstaMsg implements MessagingAPIs {
 	    if(rc == InstaMsg.ReturnCode.SUCCESS) {
 	    	
 	        if(logging == true) {
-	            Log.infoLog("Published successfully pver socket.\n");
+	            Log.infoLog("Published successfully pver socket.");
 	        }
 	        
 	        if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0) {
@@ -1332,7 +1332,7 @@ public class InstaMsg implements MessagingAPIs {
 	    } else {
 	    	
 	    	if(logging == true) {
-	    		Log.infoLog("Publishing failed over socket.\n");
+	    		Log.errorLog("Publishing failed over socket.\n");
 	    	}
 	    	
 	        if((qos == QOS1) || (qos == QOS2)) {
@@ -1716,7 +1716,7 @@ public class InstaMsg implements MessagingAPIs {
 						
 							@Override
 							public void handle(int msgId) {
-								Log.infoLog("[DEFAULT-PUBLISH-HANDLER] PUBACK received for msg-id [" + msgId +"]");							
+								
 							}
 					   },
 	    			   MQTT_RESULT_HANDLER_TIMEOUT,
