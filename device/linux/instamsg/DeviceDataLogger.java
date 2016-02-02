@@ -66,8 +66,8 @@ public class DeviceDataLogger extends DataLogger {
 	 */
 	public String getNextRecordFromPersistentStorage()
 	{
-		
 		String data = null;
+		String temp = null;
 		BufferedReader configReader = null;
 		
 		try {
@@ -81,12 +81,13 @@ public class DeviceDataLogger extends DataLogger {
 		
 		
 	    FileUtils.createEmptyFile(DATA_LOGGING_ERROR, FileUtils.TEMP_FILE_NAME);
-
+	    
+		boolean lineRead = false;
 	    while(true)
 	    {
   	
 			try {
-				data = configReader.readLine();
+				temp = configReader.readLine();
 				
 			} catch (IOException e) {
 				
@@ -96,16 +97,17 @@ public class DeviceDataLogger extends DataLogger {
 				return null;
 			}
 			
-			boolean lineRead = false;
-			if(data != null) {
+			if(temp != null) {
 
-				if(data.length() > 0) {
+				if(temp.length() > 0) {
 
 					if(lineRead == false) {
+						
+						data = temp;
 						lineRead = true;
 						
 					} else {
-						FileUtils.appendLine(DATA_LOGGING_ERROR, FileUtils.TEMP_FILE_NAME, data);
+						FileUtils.appendLine(DATA_LOGGING_ERROR, FileUtils.TEMP_FILE_NAME, temp);
 					}
 
 				} else {
