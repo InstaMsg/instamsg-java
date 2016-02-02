@@ -23,7 +23,7 @@ public abstract class Config implements ConfigAPIs {
 	{
 	    return InstaMsg.instaMsg.publish(topicName,
 	                       					 message,
-	                       					 InstaMsg.QOS1,
+	                       					 InstaMsg.QOS0,
 	                       					 false,
 	                       					 null,
 	                       					 InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,

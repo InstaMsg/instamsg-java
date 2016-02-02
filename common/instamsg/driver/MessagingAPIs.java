@@ -90,6 +90,14 @@ public interface MessagingAPIs {
 	
 	
 	/**
+	 * A useful-utility function using the "publish" API, that should suffice for most business-applications.
+	*/
+	public ReturnCode publishMessageWithDeliveryGuarantee(String topic,
+														  String payload);
+
+	
+	
+		/**
 	 *
 	 * peerClientId                     	:
 	 *

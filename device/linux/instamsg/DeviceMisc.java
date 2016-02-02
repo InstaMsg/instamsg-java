@@ -16,7 +16,7 @@ public class DeviceMisc implements Misc {
 	public void rebootDevice() {
 		
 		Log.infoLog("Dummy-Rebooting Linux-Machine !!!");
-		System.exit(0);
+		System.exit(1);
 	}
 
 	

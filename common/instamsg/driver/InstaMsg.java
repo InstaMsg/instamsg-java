@@ -44,6 +44,30 @@ public class InstaMsg implements MessagingAPIs {
 	static int MAX_PACKET_ID = 10000;
 	static String NO_CLIENT_ID = "NONE";
 	
+	static int MAX_CYCLES_TO_WAIT_FOR_PUBACK = 10;
+	static int pubAckMsgId;
+	static int pubAckRecvAttempts;
+	static String lastPubTopic;
+	static String lastPubPayload;
+	
+	static enum PUBACK_STATE
+	{
+	    WAITING_FOR_PUBACK,
+	    NOT_WAITING_FOR_PUBACK,
+	    PUBACK_TIMEOUT
+	};
+	static PUBACK_STATE waitingForPuback;
+
+	
+	static enum MESSAGE_SOURCE
+	{
+	    PERSISTENT_STORAGE,
+	    GENERAL
+	};
+	
+	static MESSAGE_SOURCE msgSource;
+	static boolean rebootPending;
+	
 	public static int MQTT_RESULT_HANDLER_TIMEOUT = 10;	
 
 	public static ModulesProviderInterface modulesProvideInterface;
@@ -54,8 +78,12 @@ public class InstaMsg implements MessagingAPIs {
 	public static Media media;
 	public static Watchdog watchdog;
 	public Socket socket;
+	public static DataLogger dataLogger;
 
 	static boolean mqttConnectFlag = false;
+	
+	static String DATA_LOG_TOPIC   = "topic";
+	static String DATA_LOG_PAYLOAD = "payload";
 	
 	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
@@ -167,6 +195,8 @@ public class InstaMsg implements MessagingAPIs {
 		watchdog = modulesProvideInterface.getWatchdog();
 		watchdog.watchdogInit();
 		
+		dataLogger = modulesProvideInterface.getDataLogger();
+		
 		
 		INSTAMSG_HOST = "device.instamsg.io";
 		if(DeviceConstants.SSL_SOCKET == true) {
@@ -248,7 +278,19 @@ public class InstaMsg implements MessagingAPIs {
 		}
 	}
 	
+	private static void freeLastPubMessageResources() {
+		
+		if(lastPubTopic != null) {
+			lastPubTopic = null;
+	    }
 	
+	    if(lastPubPayload != null)
+	    {
+	        lastPubPayload = null;
+	    }
+	}
+	
+
 	private static void fireResultHandlerUsingMsgIdAsTheKey(InstaMsg c, int msgId)
 	{       
 		for (int i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
@@ -257,6 +299,12 @@ public class InstaMsg implements MessagingAPIs {
 			{
 				c.resultHandlers[i].resultHandler.handle(msgId);
 				c.resultHandlers[i].msgId = 0;
+				
+				if(msgId == pubAckMsgId) {
+					
+					freeLastPubMessageResources();
+					waitingForPuback = PUBACK_STATE.NOT_WAITING_FOR_PUBACK;
+				}
 
 				break;
 			}
@@ -499,6 +547,44 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 
+	private static String sendPreviouslyUnsentData() {
+		
+		String record = null;	
+	    /*
+	     * Also, try sending the records stored in the persistent-storage (if any).
+	     */
+	    if(true) {
+	        record = dataLogger.getNextRecordFromPersistentStorage();
+	
+	        if(record != null) {
+	        	
+	            /*
+	             * We got the record.
+	             */	
+	            String topic = Json.getJsonKeyValueIfPresent(record, DATA_LOG_TOPIC);
+	            String payload = Json.getJsonKeyValueIfPresent(record, DATA_LOG_PAYLOAD);
+	
+	            startAndCountdownTimer(1, false);
+	
+	            Log.infoLog("Sending data that could not be sent earlier [" + payload + "] over [" + topic + "]");
+	
+	            if(InstaMsg.instaMsg.publishMessageWithDeliveryGuarantee(topic, payload) != ReturnCode.SUCCESS) {
+	                Log.infoLog("Since the data could not be sent to InstaMsg-Server, so not retrying sending data from persistent-storage");
+	            }
+	            
+	        } else {
+	        	
+	            /*
+	             * We did not get any record.
+	             */
+	            Log.infoLog("\n\nNo more pending-data to be sent from persistent-storage\n\n");
+	        }
+	    }	    
+	
+	    return record;
+	}
+
+	
 	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc)
 	{
 	    if(connackRc == 0x00)  /* Connection Accepted */
@@ -1110,14 +1196,68 @@ public class InstaMsg implements MessagingAPIs {
 		return rc;
 	}
 	
+	private static void saveFailedPublishedMessage() {
+		
+	    rebootPending = true;
 	
+	    if(true) {
+	    	
+	        if(true) {
+	        	
+	            String messageSavingJson =  "{'" + DATA_LOG_TOPIC   + "' : '" + lastPubTopic + "', " +
+	                                         "'" + DATA_LOG_PAYLOAD + "' : '" + lastPubPayload + "'}";
+	
+	            dataLogger.saveRecordToPersistentStorage(messageSavingJson);	
+	            Log.errorLog(DataLogger.DATA_LOGGING_ERROR + "Either message-sending failed over wire, " +
+	                         "or PUBACK was not received for message [" + lastPubPayload + "] within time");
+	
+	            waitingForPuback = PUBACK_STATE.PUBACK_TIMEOUT;
+	            freeLastPubMessageResources();
+	        }
+	    }
+	}
+	
+	
+	private static void waitForPubAck()
+	{
+	    if(true) {
+	    	
+	        if(true) {
+	        	
+	            if(true) {
+	            	
+	                while(true) {
+	                	
+	                    readAndProcessIncomingMQTTPacketsIfAny(InstaMsg.instaMsg);
+	                    if(waitingForPuback == PUBACK_STATE.WAITING_FOR_PUBACK)
+	                    {
+	                        pubAckRecvAttempts = pubAckRecvAttempts + 1;
+	                        if(pubAckRecvAttempts >= MAX_CYCLES_TO_WAIT_FOR_PUBACK)
+	                        {
+	                            pubAckRecvAttempts = 0;
+	                            saveFailedPublishedMessage();
+	
+	                            break;
+	                        }
+	                    }
+	                    else
+	                    {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	}
+	
+
 	public InstaMsg.ReturnCode publish(String topicName,
-			 							   String payload,
-										   int qos,
-										   boolean dup,
-										   ResultHandler resultHandler,
-										   int resultHandlerTimeout,
-										   boolean logging) {
+			 						   String payload,
+			 						   int qos,
+			 						   boolean dup,
+			 						   ResultHandler resultHandler,
+			 						   int resultHandlerTimeout,
+			 						   boolean logging) {
 		
 		MqttMessage baseMessage = new MqttMessage();
 		baseMessage.setPayload(payload.getBytes());
@@ -1126,10 +1266,16 @@ public class InstaMsg implements MessagingAPIs {
 		baseMessage.setRetained(false);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
-		if((qos == QOS1) || (qos == QOS2))
-		{
+		if((qos == QOS1) || (qos == QOS2)) {
+			
 			int msgId = getNextPackedId(instaMsg);
 			
+			pubAckMsgId = msgId;
+			waitingForPuback = PUBACK_STATE.WAITING_FOR_PUBACK;
+			
+			lastPubTopic = topicName;
+			lastPubPayload = payload;
+					
 			pubMsg.setMessageId(msgId);
 			attachResultHandler(instaMsg, msgId, resultHandlerTimeout, resultHandler);
 		}
@@ -1167,11 +1313,19 @@ public class InstaMsg implements MessagingAPIs {
 	            }
 	        }
 	        
+	        if((qos == QOS1) || (qos == QOS2)) {
+	        	waitForPubAck();
+	        }
+	        
 	    } else {
 	    	
 	    	if(logging == true) {
 	    		Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
 	    	}
+	    	
+	        if((qos == QOS1) || (qos == QOS2)) {
+	        	saveFailedPublishedMessage();
+	        }
 	    }
 	    
 	    return rc;
@@ -1394,6 +1548,14 @@ public class InstaMsg implements MessagingAPIs {
 		c.clientIdComplete = "";
 
 		c.connected = false;
+		
+		
+		dataLogger.initDataLogger();
+		pubAckRecvAttempts = 0;
+		waitingForPuback = PUBACK_STATE.NOT_WAITING_FOR_PUBACK;
+		msgSource = MESSAGE_SOURCE.GENERAL;
+		rebootPending = false;		
+
 		MQTTConnect(c);
 	}	
 
@@ -1426,7 +1588,25 @@ public class InstaMsg implements MessagingAPIs {
 					Log.errorLog("Socket not available at physical layer .. so nothing can be read from socket.");
 
 				} else {
-					readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
+					
+					if(true) {
+						
+						readAndProcessIncomingMQTTPacketsIfAny(instaMsg);
+						
+						if((msgSource == MESSAGE_SOURCE.PERSISTENT_STORAGE) && 
+						   (waitingForPuback != PUBACK_STATE.WAITING_FOR_PUBACK) &&
+						   (rebootPending == false)) {
+							
+							String retrievedFromPersistenceMessage = sendPreviouslyUnsentData();
+							if(retrievedFromPersistenceMessage == null) {
+								msgSource = MESSAGE_SOURCE.GENERAL;
+						    }
+						}
+						
+						if(rebootPending == true) {
+							msgSource = MESSAGE_SOURCE.GENERAL;
+						}
+					}
 				}
 
 				if(true) {
@@ -1455,11 +1635,26 @@ public class InstaMsg implements MessagingAPIs {
 						if((latestTick >= nextBusinessLogicTick) || (runBusinessLogicImmediately == true) ||
 						   (businessLogicRunOnceAtStart == false)) {
 							
-							callbacks.coreLoopyBusinessLogicInitiatedBySelf();
-							runBusinessLogicImmediately = false;
-							businessLogicRunOnceAtStart = true;
 							
-							nextBusinessLogicTick = latestTick + instaMsg.editableBusinessLogicInterval.intValue();
+                            if(msgSource == MESSAGE_SOURCE.GENERAL) {
+
+                            	callbacks.coreLoopyBusinessLogicInitiatedBySelf();
+    							runBusinessLogicImmediately = false;
+
+                                if(businessLogicRunOnceAtStart == false)
+                                {
+                                    msgSource = MESSAGE_SOURCE.PERSISTENT_STORAGE;
+                                }
+
+                                if((rebootPending == true) && (businessLogicRunOnceAtStart == true))
+                                {
+                                    Log.errorLog("There were some messages which did not complete send-cum-ack cycle, so rebooting");
+                                    misc.rebootDevice();
+                                }
+
+    							businessLogicRunOnceAtStart = true;
+    							nextBusinessLogicTick = latestTick + instaMsg.editableBusinessLogicInterval.intValue();
+                            }							
 						}
 						
 						if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
@@ -1496,6 +1691,24 @@ public class InstaMsg implements MessagingAPIs {
 				}
 			}
 		}
+	}
+
+
+	@Override
+	public ReturnCode publishMessageWithDeliveryGuarantee(String topic, String payload) {
+	    return publish(topic,
+	    			   payload,
+	    			   QOS1,
+	    			   false,
+	    			   new ResultHandler() {
+						
+							@Override
+							public void handle(int msgId) {
+								Log.infoLog("[DEFAULT-PUBLISH-HANDLER] PUBACK received for msg-id [" + msgId +"]");							
+							}
+					   },
+	    			   MQTT_RESULT_HANDLER_TIMEOUT,
+	    			   true);
 	}
 }
 

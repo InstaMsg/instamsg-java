@@ -1,6 +1,7 @@
 package device.stub.instamsg;
 
 import common.instamsg.driver.Config;
+import common.instamsg.driver.DataLogger;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Media;
 import common.instamsg.driver.Misc;
@@ -45,6 +46,11 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public Media getMedia() {
 		return new DeviceMedia();
+	}
+
+	@Override
+	public DataLogger getDataLogger() {
+		return new DeviceDataLogger();
 	}
 
 }

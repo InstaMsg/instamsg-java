@@ -8,5 +8,6 @@ public interface ModulesProviderInterface {
 	Log getLogger();
 	Time getTime();
 	Watchdog getWatchdog();
-	Socket getSocket(String hostName, int port);	
+	Socket getSocket(String hostName, int port);
+	DataLogger getDataLogger();
 }

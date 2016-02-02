@@ -3,8 +3,6 @@ package common.apps.publisher;
 import common.instamsg.driver.InitialCallbacks;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.OneToOneResult;
-import common.instamsg.driver.Log;
-import common.instamsg.driver.ResultHandler;
 
 
 public class Main {
@@ -33,23 +31,8 @@ public class Main {
 			@Override
 			public InstaMsg.ReturnCode coreLoopyBusinessLogicInitiatedBySelf() {
 
-				counter++;
-				
-				return 
-				InstaMsg.instaMsg.publish("listener_topic",
-									          "Test " + counter,
-									          InstaMsg.QOS2,
-									          false,
-									          new ResultHandler() {
-
-												@Override
-												public void handle(int msgId) {
-											
-													Log.infoLog("PUBACK received for msg-id [" + msgId +"]");
-												}
-											  },
-											  InstaMsg.MQTT_RESULT_HANDLER_TIMEOUT,
-											  true);
+				counter++;				
+				return 	InstaMsg.instaMsg.publishMessageWithDeliveryGuarantee("listener_topic", "Test " + counter);
 			}
 		};
 		

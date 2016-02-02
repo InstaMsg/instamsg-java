@@ -1,11 +1,9 @@
 package device.linux.instamsg;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import common.instamsg.driver.Config;
@@ -14,54 +12,14 @@ import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Json;
 import common.instamsg.driver.Log;
 
+import device.linux.instamsg.common.FileUtils;
+
 public class DeviceConfig extends Config {
 
 	String CONFIG_FILE_NAME = "/home/sensegrow/config.txt";
-	String TEMP_FILE_NAME   = "/home/sensegrow/temp";
 	
-	private void cleanFileReader(BufferedReader configReader) {
-		
-		if(configReader != null) {
-			
-			try {
-				configReader.close();
-				
-			} catch (IOException e) {				
-				Log.errorLog(CONFIG_ERROR + "Error happened while cleaning a file-reader");
-				
-			}
-		}
-	}
-	
-	private void appendLine(String filePath, String line) {
-		BufferedWriter configWriter = null;
-		
-		try {
-			configWriter = new BufferedWriter(new FileWriter(filePath, true));
-			
-		} catch (IOException e) {
-			Log.errorLog(CONFIG_ERROR + "Could not open file [" + filePath + "] for writing config.");
-			return;
-		}
-		
-		try {
-			configWriter.write(line + "\n");
-			
-		} catch (IOException e) {
-			Log.errorLog(CONFIG_ERROR + "Could not write config.");
-			
-		} finally {
-			
-			if(configWriter != null) {
-				try {
-					configWriter.close();
-					
-				} catch (IOException e) {
-					Log.errorLog(CONFIG_ERROR + "Failed to properly close config-file");
-				}
-			}
-		}
-	}
+
+
 	
 	private String getConfigValueFromPersistentStorageAndDeleteIfAsked(String key, boolean deleteConfig) {
 		
@@ -86,7 +44,7 @@ public class DeviceConfig extends Config {
 			} catch (IOException e) {
 				
 				Log.errorLog(CONFIG_ERROR + "Error occurred while reading config .. not continuing ..");
-				cleanFileReader(configReader);
+				FileUtils.cleanFileReader(CONFIG_ERROR, configReader);
 				
 				return null;
 			}
@@ -122,7 +80,7 @@ public class DeviceConfig extends Config {
 				} else {
 
 					if(deleteConfig == true) {
-						appendLine(TEMP_FILE_NAME, line);
+						FileUtils.appendLine(CONFIG_ERROR, FileUtils.TEMP_FILE_NAME, line);
 					}
 				}
 
@@ -131,13 +89,13 @@ public class DeviceConfig extends Config {
 			}
 		}
 		
-		cleanFileReader(configReader);
+		FileUtils.cleanFileReader(CONFIG_ERROR, configReader);
 		
 		/*
 		 * Finally.. move the temp-file.
 		 */
 		if(deleteConfig == true) {
-			new File(TEMP_FILE_NAME).renameTo(new File(CONFIG_FILE_NAME));
+			new File(FileUtils.TEMP_FILE_NAME).renameTo(new File(CONFIG_FILE_NAME));
 		}
 		
 		return config;
@@ -188,7 +146,7 @@ public class DeviceConfig extends Config {
 	public ReturnCode saveConfigValueOnPersistentStorage(String key, String json) {
 		
 		deleteConfigValueFromPersistentStorage(key);
-		appendLine(CONFIG_FILE_NAME, json);
+		FileUtils.appendLine(CONFIG_ERROR, CONFIG_FILE_NAME, json);
 		
 		
 		return InstaMsg.ReturnCode.SUCCESS;
