@@ -302,6 +302,8 @@ public class InstaMsg implements MessagingAPIs {
 				
 				if(msgId == pubAckMsgId) {
 					
+					Log.infoLog("PUBACK received for message [" + lastPubPayload + "]");
+			
 					freeLastPubMessageResources();
 					waitingForPuback = PUBACK_STATE.NOT_WAITING_FOR_PUBACK;
 				}
@@ -1307,7 +1309,7 @@ public class InstaMsg implements MessagingAPIs {
 	    if(rc == InstaMsg.ReturnCode.SUCCESS) {
 	    	
 	        if(logging == true) {
-	            Log.infoLog("Published successfully.\n");
+	            Log.infoLog("Published successfully pver socket.\n");
 	        }
 	        
 	        if(instaMsg.compulsorySocketReadAfterMQTTPublishInterval.intValue() != 0) {
@@ -1330,7 +1332,7 @@ public class InstaMsg implements MessagingAPIs {
 	    } else {
 	    	
 	    	if(logging == true) {
-	    		Log.infoLog("Publishing failed, error-code = [" + rc.ordinal() + "]\n");
+	    		Log.infoLog("Publishing failed over socket.\n");
 	    	}
 	    	
 	        if((qos == QOS1) || (qos == QOS2)) {
