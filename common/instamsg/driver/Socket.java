@@ -21,6 +21,7 @@ public abstract class Socket {
 	protected String gsmApn;
 	protected String gsmUser;
 	protected String gsmPass;
+	protected String gsmPin;
 	
 	
 	public boolean socketCorrupted = true;
@@ -75,8 +76,9 @@ public abstract class Socket {
 			gsmApn = Json.getJsonKeyValueIfPresent(sms, "sg_apn");
 			gsmUser = Json.getJsonKeyValueIfPresent(sms, "sg_user");
 			gsmPass = Json.getJsonKeyValueIfPresent(sms, "sg_pass");
+			gsmPin = Json.getJsonKeyValueIfPresent(sms, "sg_pin");
 
-			Log.infoLog("\nProvisioning-Params ::  sg_apn : [" + gsmApn + "], sg_user : [" + gsmUser + "], sg_pass : [" + gsmPass + "]\n");
+			Log.infoLog("\nProvisioning-Params ::  sg_apn : [" + gsmApn + "], sg_user : [" + gsmUser + "], sg_pass : [" + gsmPass + "], sg_pin : [" + gsmPin + "]\n");
 			InstaMsg.startAndCountdownTimer(3, false);
 		}
 		

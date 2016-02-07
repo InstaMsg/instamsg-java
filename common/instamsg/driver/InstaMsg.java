@@ -1471,8 +1471,13 @@ public class InstaMsg implements MessagingAPIs {
 			 * We will receive PROVACK for this leg.
 			 */
 			c.clientIdMachine = NO_CLIENT_ID;
-			c.username = "";
-			c.password = modulesProvideInterface.getMisc().getDeviceUuid();
+			
+			if(DeviceConstants.GSM_DEVICE == true) {
+				c.username = c.instaMsg.socket.gsmPin;
+			} else {
+				c.username = misc.getPinForNonGsmDevices();
+			}
+			c.password = misc.getDeviceUuid();
 		}
 		
 		c.connectOptions.setClientId(c.clientIdMachine);

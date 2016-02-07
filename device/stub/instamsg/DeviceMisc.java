@@ -69,4 +69,9 @@ public class DeviceMisc implements Misc {
 		return "";
 	}
 
+
+	@Override
+	public String getPinForNonGsmDevices() {
+		return "";
+	}
 }
