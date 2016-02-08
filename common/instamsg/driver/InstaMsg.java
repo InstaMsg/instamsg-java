@@ -306,6 +306,7 @@ public class InstaMsg implements MessagingAPIs {
 			
 					freeLastPubMessageResources();
 					waitingForPuback = PUBACK_STATE.NOT_WAITING_FOR_PUBACK;
+					pubAckRecvAttempts = 0;
 				}
 
 				break;
