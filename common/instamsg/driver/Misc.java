@@ -9,5 +9,5 @@ public interface Misc {
 	String getManufacturer();
 	String getDeviceUuid();
 	String getDeviceIpAddress();
-	String getPinForNonGsmDevices();
+	String getProvPinForNonGsmDevices();
 }

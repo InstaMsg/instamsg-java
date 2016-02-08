@@ -101,7 +101,7 @@ public class DeviceMisc implements Misc {
 
 
 	@Override
-	public String getPinForNonGsmDevices() {
+	public String getProvPinForNonGsmDevices() {
 		return "";
 	}
 }

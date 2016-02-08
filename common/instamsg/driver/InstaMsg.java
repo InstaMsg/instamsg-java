@@ -1474,9 +1474,9 @@ public class InstaMsg implements MessagingAPIs {
 			c.clientIdMachine = NO_CLIENT_ID;
 			
 			if(DeviceConstants.GSM_DEVICE == true) {
-				c.username = c.instaMsg.socket.gsmPin;
+				c.username = c.instaMsg.socket.provPin;
 			} else {
-				c.username = misc.getPinForNonGsmDevices();
+				c.username = misc.getProvPinForNonGsmDevices();
 			}
 			c.password = misc.getDeviceUuid();
 		}
