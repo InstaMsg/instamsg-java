@@ -81,7 +81,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static DataLogger dataLogger;
 
 	static boolean mqttConnectFlag = false;
-	
+	static boolean notifyServerOfSecretReceived = false;
 	static String DATA_LOG_TOPIC   = "topic";
 	static String DATA_LOG_PAYLOAD = "payload";
 	
@@ -633,8 +633,18 @@ public class InstaMsg implements MessagingAPIs {
 	        		initiateStreaming();
 	        	}
 	        }
-
-
+	        
+	        if(notifyServerOfSecretReceived == true)
+	        {
+	        	mqttConnectFlag = true;
+				c.publish(TOPIC_NOTIFICATION,
+						  "SECRET RECEIVED",
+						  QOS0,
+						  false,
+						  null,
+						  MQTT_RESULT_HANDLER_TIMEOUT,
+						  true);
+	        }
 	        c.callbacks.onConnectOneTimeOperations();
 	    }
 	    else
@@ -981,14 +991,7 @@ public class InstaMsg implements MessagingAPIs {
 							/*
 							 * Send notification to the server, that the secret-password has been saved.
 							 */
-							InstaMsg.mqttConnectFlag = true;
-							c.publish(TOPIC_NOTIFICATION,
-									  "SECRET RECEIVED",
-									  QOS0,
-									  false,
-									  null,
-									  MQTT_RESULT_HANDLER_TIMEOUT,
-									  true);
+							notifyServerOfSecretReceived = true;
 							}
 						}
 													
@@ -1466,6 +1469,7 @@ public class InstaMsg implements MessagingAPIs {
 			c.username = secret.substring(24, 36);
 			c.password = secret.substring(37, secret.length());
 			
+			notifyServerOfSecretReceived = true;
 		} else {
 			
 			/*
@@ -1474,7 +1478,7 @@ public class InstaMsg implements MessagingAPIs {
 			c.clientIdMachine = NO_CLIENT_ID;
 			
 			if(DeviceConstants.GSM_DEVICE == true) {
-				c.username = c.instaMsg.socket.provPin;
+				c.username = InstaMsg.instaMsg.socket.provPin;
 			} else {
 				c.username = misc.getProvPinForNonGsmDevices();
 			}
