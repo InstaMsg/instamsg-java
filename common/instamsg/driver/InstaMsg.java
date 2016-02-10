@@ -302,7 +302,9 @@ public class InstaMsg implements MessagingAPIs {
 				
 				if(msgId == pubAckMsgId) {
 					
-					Log.infoLog("PUBACK received for message [" + lastPubPayload + "]");
+					if(lastPubPayload != null) {
+						Log.infoLog("PUBACK received for message [" + lastPubPayload + "]");
+					}
 			
 					freeLastPubMessageResources();
 					waitingForPuback = PUBACK_STATE.NOT_WAITING_FOR_PUBACK;
