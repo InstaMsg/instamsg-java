@@ -638,6 +638,8 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	        if(notifyServerOfSecretReceived == true)
 	        {
+	        	startAndCountdownTimer(5, false);
+	        	
 	        	mqttConnectFlag = true;
 				c.publish(TOPIC_NOTIFICATION,
 						  "SECRET RECEIVED",
