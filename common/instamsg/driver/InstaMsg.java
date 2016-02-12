@@ -638,8 +638,6 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	        if(notifyServerOfSecretReceived == true)
 	        {
-	        	startAndCountdownTimer(5, false);
-	        	
 	        	mqttConnectFlag = true;
 				c.publish(TOPIC_NOTIFICATION,
 						  "SECRET RECEIVED",
@@ -1284,6 +1282,8 @@ public class InstaMsg implements MessagingAPIs {
 		baseMessage.setQos(qos);
 		baseMessage.setDuplicate(dup);
 		baseMessage.setRetained(false);
+		
+		startAndCountdownTimer(1, false);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
 		if((qos == QOS1) || (qos == QOS2)) {
