@@ -1,5 +1,6 @@
 package device.linux.instamsg;
 
+import common.instamsg.driver.WatchDogBeforeRebootHandler;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Watchdog;
@@ -37,7 +38,7 @@ public class DeviceWatchdog implements Watchdog {
 	 *
 	 */
 	@Override
-	public void watchdogResetAndEnable(final int n, String callee) {
+	public void watchdogResetAndEnable(final int n, String callee, WatchDogBeforeRebootHandler handler) {
 		watchdogActive = true;
 		
 		new Thread(new Runnable() {

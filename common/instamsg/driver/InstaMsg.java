@@ -374,7 +374,7 @@ public class InstaMsg implements MessagingAPIs {
 		
 		ReturnCode rc = ReturnCode.FAILURE;
 		
-		watchdog.watchdogResetAndEnable(30, "sendPacket");
+		watchdog.watchdogResetAndEnable(30, "sendPacket", null);
 		
 		if(c.socket.socketCorrupted == true) {
 			
@@ -429,7 +429,7 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static ReturnCode readPacket(InstaMsg c, MQTTFixedHeader fixedHeader) {
 		
-		watchdog.watchdogResetAndEnable(30 * MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM * SOCKET_READ_TIMEOUT_SECS, "readPacket");
+		watchdog.watchdogResetAndEnable(30 * MAX_TRIES_ALLOWED_WHILE_READING_FROM_SOCKET_MEDIUM * SOCKET_READ_TIMEOUT_SECS, "readPacket", null);
 		ReturnCode rc = readPacketActual(c, fixedHeader);
 		watchdog.watchdogDisable();
 		

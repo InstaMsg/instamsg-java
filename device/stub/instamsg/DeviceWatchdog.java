@@ -1,5 +1,6 @@
 package device.stub.instamsg;
 
+import common.instamsg.driver.WatchDogBeforeRebootHandler;
 import common.instamsg.driver.Watchdog;
 
 public class DeviceWatchdog implements Watchdog {
@@ -33,7 +34,7 @@ public class DeviceWatchdog implements Watchdog {
 	 *
 	 */
 	@Override
-	public void watchdogResetAndEnable(final int n, String callee) {
+	public void watchdogResetAndEnable(final int n, String callee, WatchDogBeforeRebootHandler handler) {
 		
 	}
 	
