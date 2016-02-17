@@ -32,7 +32,7 @@ public class InstaMsg implements MessagingAPIs {
 	    SUCCESS
 	}
 
-	public static String INSTAMSG_VERSION = "1.5.0";
+	public static String INSTAMSG_VERSION = "1.5.1";
 	
 	public static int QOS0 = 0;
 	public static int QOS1 = 1;
@@ -638,8 +638,6 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	        if(notifyServerOfSecretReceived == true)
 	        {
-	        	startAndCountdownTimer(5, false);
-	        	
 	        	mqttConnectFlag = true;
 				c.publish(TOPIC_NOTIFICATION,
 						  "SECRET RECEIVED",
@@ -1284,6 +1282,8 @@ public class InstaMsg implements MessagingAPIs {
 		baseMessage.setQos(qos);
 		baseMessage.setDuplicate(dup);
 		baseMessage.setRetained(false);
+		
+		startAndCountdownTimer(1, false);
 		
 		MqttPublish pubMsg = new MqttPublish(topicName, baseMessage);
 		if((qos == QOS1) || (qos == QOS2)) {
