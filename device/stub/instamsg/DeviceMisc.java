@@ -24,16 +24,6 @@ public class DeviceMisc implements Misc {
 	}
 
 
-	/**
-	 * This method returns the client-network-data, in simple JSON form, of type ::
-	 *
-	 * {'imei' : 'value', 'serial_number' : 'value', 'model' : 'value', 'firmware_version' : 'value', 'manufacturer' : 'value', 'client_version' : 'value'}
-	 */
-	@Override
-	public String getClientMetadata() {
-		return null;
-	}
-
 
 	/**
 	 * This method returns the client-network-data, in simple JSON form, of type ::
@@ -73,5 +63,17 @@ public class DeviceMisc implements Misc {
 	@Override
 	public String getProvPinForNonGsmDevices() {
 		return "";
+	}
+
+	/**
+	 *  * This method return all possible info of a client.
+	*{'imei':'value', 'manufacturer':'value', 'model':'GE-value', 'firmware_version':'value', 'client_version':'value', 'instamsg_version':'value',
+	*	'programming_language':'value', 'os':'value', 'micro_controller_info': {'make':'value','mode':'value','ram':'value','rom':'value'}, 
+	*	'cpu_info':{'make':'value','model':'value'}, 'memory_info':{'ram':'value','rom':'value'}, 'storage_info':{'flash':'value','external':'value'}, 'gps_info':{'make':'value','model':'value'},
+	*	'network_interfaces':[{'type':'value','make':'value','model':'value','firmware_version':'value','imei':'value'}]}
+	**/
+	@Override
+	public String getClientInfo() {
+		return null;
 	}
 }

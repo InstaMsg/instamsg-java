@@ -85,11 +85,11 @@ public class InstaMsg implements MessagingAPIs {
 	static String DATA_LOG_TOPIC   = "topic";
 	static String DATA_LOG_PAYLOAD = "payload";
 	
-	static final String TOPIC_METADATA      =   "instamsg/client/metadata";
 	static final String TOPIC_SESSION_DATA  =   "instamsg/client/session";
 	static final String TOPIC_NETWORK_DATA  =   "instamsg/client/signalinfo";
 	static final String TOPIC_CONFIG_SEND   =   "instamsg/client/config/clientToServer";
 	static final String TOPIC_NOTIFICATION  =   "instamsg/client/notifications";
+	static final String TOPIC_INFO     		=   "instamsg/client/info";
 	
 	public static final int MAX_BUFFER_SIZE    =   1000;
 	
@@ -198,7 +198,8 @@ public class InstaMsg implements MessagingAPIs {
 		dataLogger = modulesProvideInterface.getDataLogger();
 		
 		
-		INSTAMSG_HOST = "device.instamsg.io";
+//		INSTAMSG_HOST = "device.instamsg.io";
+		INSTAMSG_HOST = "localhost";
 		if(DeviceConstants.SSL_SOCKET == true) {
 			INSTAMSG_PORT = 8883;
 		} else {
@@ -599,8 +600,8 @@ public class InstaMsg implements MessagingAPIs {
 	        
 	        
 	        sendClientData(misc.getClientSessionData(), TOPIC_SESSION_DATA);
-	        sendClientData(misc.getClientMetadata(), TOPIC_METADATA);
 	        sendClientData(misc.getNetworkData(), TOPIC_NETWORK_DATA);
+	        sendClientData(misc.getClientInfo(), TOPIC_INFO);
 		
 	        
 	        config.registerEditableConfig(c.pingRequestInterval,
