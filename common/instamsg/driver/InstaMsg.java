@@ -198,8 +198,7 @@ public class InstaMsg implements MessagingAPIs {
 		dataLogger = modulesProvideInterface.getDataLogger();
 		
 		
-//		INSTAMSG_HOST = "device.instamsg.io";
-		INSTAMSG_HOST = "localhost";
+		INSTAMSG_HOST = "device.instamsg.io";
 		if(DeviceConstants.SSL_SOCKET == true) {
 			INSTAMSG_PORT = 8883;
 		} else {
