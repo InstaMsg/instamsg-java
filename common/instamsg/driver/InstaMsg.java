@@ -42,7 +42,9 @@ public class InstaMsg implements MessagingAPIs {
 	
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
-	static String NO_CLIENT_ID = "NONE";
+	
+	static String EMPTY_CLIENT_ID = "EMPTY";
+	static String NO_CLIENT_ID    = "NONE";
 	
 	static int MAX_CYCLES_TO_WAIT_FOR_PUBACK = 10;
 	static int pubAckMsgId;
@@ -1469,8 +1471,8 @@ public class InstaMsg implements MessagingAPIs {
 			c.clientIdComplete = secret.substring(0, 36);
 			setValuesOfSpecialTopics(c);
 			
-			c.clientIdMachine = secret.substring(0, 23);
-			c.username = secret.substring(24, 36);
+			c.clientIdMachine = EMPTY_CLIENT_ID;
+			c.username = secret.substring(0, 36);
 			c.password = secret.substring(37, secret.length());
 			
 			notifyServerOfSecretReceived = true;
