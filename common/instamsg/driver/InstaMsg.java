@@ -1482,11 +1482,11 @@ public class InstaMsg implements MessagingAPIs {
 			c.clientIdMachine = NO_CLIENT_ID;
 			
 			if(DeviceConstants.GSM_DEVICE == true) {
-				c.username = InstaMsg.instaMsg.socket.provPin;
+				c.password = InstaMsg.instaMsg.socket.provPin;
 			} else {
-				c.username = misc.getProvPinForNonGsmDevices();
+				c.password = misc.getProvPinForNonGsmDevices();
 			}
-			c.password = misc.getDeviceUuid();
+			c.username = misc.getDeviceUuid();
 		}
 		
 		c.connectOptions.setClientId(c.clientIdMachine);
