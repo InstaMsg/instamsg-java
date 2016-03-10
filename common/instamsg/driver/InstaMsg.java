@@ -43,8 +43,10 @@ public class InstaMsg implements MessagingAPIs {
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
 	
-	static String EMPTY_CLIENT_ID = "EMPTY";
-	static String NO_CLIENT_ID    = "NONE";
+	static String EMPTY_CLIENT_ID 	= "EMPTY";
+	static String NO_CLIENT_ID    	= "NONE";
+	static String PROVISIONED     	= "PROVISIONED";
+	static String CONNECTED 		= "CONNECTED";
 	
 	static int MAX_CYCLES_TO_WAIT_FOR_PUBACK = 10;
 	static int pubAckMsgId;
@@ -592,11 +594,11 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 	
-	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc)
+	private static void handleConnOrProvAckGeneric(InstaMsg c, int connackRc, String mode)
 	{
 	    if(connackRc == 0x00)  /* Connection Accepted */
 	    {
-	        Log.infoLog("\n\nConnected successfully to InstaMsg-Server.\n\n");
+	        Log.infoLog("\n\n" + mode + " successfully to InstaMsg-Server.\n\n");
 	        c.connected = true;
 	        
 	        
@@ -653,7 +655,7 @@ public class InstaMsg implements MessagingAPIs {
 	    }
 	    else
 	    {
-	        Log.infoLog("Client-Connection failed with code [" + connackRc + "]");
+	        Log.infoLog("Client-" + mode + " failed with code [" + connackRc + "]");
 	    }
 	}
 	
@@ -963,7 +965,7 @@ public class InstaMsg implements MessagingAPIs {
 				try {
 					MqttConnack msg = (MqttConnack) MqttWireMessage.createWireMessage(c.readBuf);
 					if(msg.getReturnCode() == 0) {
-						handleConnOrProvAckGeneric(c, msg.getReturnCode());
+						handleConnOrProvAckGeneric(c, msg.getReturnCode(), CONNECTED);
 					}
 					
 				} catch (MqttException e) {					
@@ -975,38 +977,38 @@ public class InstaMsg implements MessagingAPIs {
 				try {
 					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
 					if(msg.getReturnCode() == 0) {
-						
+
 						/*
 						 * Connection was established successfully;
 						 */
 						c.clientIdComplete = msg.getClientId();						
 						if(msg.getSecret() != null) {
-							
+
 							Log.infoLog("Received client-secret from server via PROVACK [" + msg.getSecret() + "]");
-							
+
 							String secretConfig = config.generateConfigJson(InstaMsg.SECRET,
-									                                        CONFIG_TYPE.CONFIG_STRING,
-									                                        msg.getCompletePayload(),
-									                                        "");
+																			CONFIG_TYPE.CONFIG_STRING,
+																			msg.getCompletePayload(),
+																			"");
 							config.saveConfigValueOnPersistentStorage(InstaMsg.SECRET, secretConfig);
-							
-							
-							
+
+
+
 							/*
 							 * Send notification to the server, that the secret-password has been saved.
 							 */
 							notifyServerOfSecretReceived = true;
-							}
 						}
-													
+
 						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
-						
 						setValuesOfSpecialTopics(c);
-						handleConnOrProvAckGeneric(c, msg.getReturnCode());
-						
-					} catch (MqttException e) {					
-						rc = handleMessageDecodingFailure(c, "MQTT-PROVACK");
-					}
+					}													
+
+					handleConnOrProvAckGeneric(c, msg.getReturnCode(), PROVISIONED);
+
+				} catch (MqttException e) {					
+					rc = handleMessageDecodingFailure(c, "MQTT-PROVACK");
+				}
 
 			} else if(fixedHeader.packetType == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
 				
