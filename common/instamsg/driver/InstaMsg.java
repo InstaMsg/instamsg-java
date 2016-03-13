@@ -43,10 +43,10 @@ public class InstaMsg implements MessagingAPIs {
 	static int MAX_MESSAGE_HANDLERS = 5;
 	static int MAX_PACKET_ID = 10000;
 	
-	static String EMPTY_CLIENT_ID 	= "EMPTY";
-	static String NO_CLIENT_ID    	= "NONE";
-	static String PROVISIONED     	= "PROVISIONED";
-	static String CONNECTED 		= "CONNECTED";
+	static String EMPTY_CLIENT_ID 				= "EMPTY";
+	static String PROVISIONING_CLIENT_ID    	= "PROVISIONING";
+	static String PROVISIONED     				= "PROVISIONED";
+	static String CONNECTED 					= "CONNECTED";
 	
 	static int MAX_CYCLES_TO_WAIT_FOR_PUBACK = 10;
 	static int pubAckMsgId;
@@ -1483,7 +1483,7 @@ public class InstaMsg implements MessagingAPIs {
 			/*
 			 * We will receive PROVACK for this leg.
 			 */
-			c.clientIdMachine = NO_CLIENT_ID;
+			c.clientIdMachine = PROVISIONING_CLIENT_ID;
 			
 			if(DeviceConstants.GSM_DEVICE == true) {
 				c.password = InstaMsg.instaMsg.socket.provPin;
