@@ -165,7 +165,6 @@ public class InstaMsg implements MessagingAPIs {
 	public static int SOCKET_READ_TIMEOUT_SECS = 1;
 	
 	public static int INSTAMSG_PORT;
-	public static String INSTAMSG_HOST;
 	
 
 
@@ -202,7 +201,6 @@ public class InstaMsg implements MessagingAPIs {
 		dataLogger = modulesProvideInterface.getDataLogger();
 		
 		
-		INSTAMSG_HOST = "device.instamsg.io";
 		if(DeviceConstants.SSL_SOCKET == true) {
 			INSTAMSG_PORT = 8883;
 		} else {
@@ -1542,7 +1540,7 @@ public class InstaMsg implements MessagingAPIs {
 
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks) {
 		
-		c.socket = modulesProvideInterface.getSocket(InstaMsg.INSTAMSG_HOST, InstaMsg.INSTAMSG_PORT);		
+		c.socket = modulesProvideInterface.getSocket(DeviceConstants.INSTAMSG_HOST, InstaMsg.INSTAMSG_PORT);		
 		c.socket.socketCorrupted = true;
 		
 		c.socket.initSocket();
