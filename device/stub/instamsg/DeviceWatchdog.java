@@ -1,9 +1,8 @@
 package device.stub.instamsg;
 
-import common.instamsg.driver.WatchDogBeforeRebootHandler;
 import common.instamsg.driver.Watchdog;
 
-public class DeviceWatchdog implements Watchdog {
+public class DeviceWatchdog extends Watchdog {
 
 	
 	/**
@@ -24,17 +23,17 @@ public class DeviceWatchdog implements Watchdog {
 	 * a)
 	 * Counter reaches 0.
 	 *
-	 * The device must then be reset/restarted.
+	 * In this case, the base-class-variable "watchdogExpired" variable must be set to "true".
+	 * Also, if base-class-variable "immediate" is "true", the device must be reboooted immediately.
 	 *
 	 * b)
-	 * "watchdogDisable()" is called.
+	 * "watchdogDisable()" (the global API-function) is called by the callee.
 	 *
-	 * In this case, the countdown-timer stops, and the device must never be reset/restarted (until the entire
-	 * "watchdogResetAndEnable" loop is repeated).
+	 * In this case, the countdown-timer stops, and the device must not be reset/restarted.
 	 *
 	 */
 	@Override
-	public void watchdogResetAndEnable(final int n, String callee, WatchDogBeforeRebootHandler handler) {
+	public void doWatchdogResetAndEnable(final int n) {
 		
 	}
 	
@@ -43,7 +42,7 @@ public class DeviceWatchdog implements Watchdog {
 	 * This method disables the watchdog-timer.
 	 */
 	@Override
-	public void watchdogDisable() {
+	public void doWatchdogDisable() {
 		
 	}
 }

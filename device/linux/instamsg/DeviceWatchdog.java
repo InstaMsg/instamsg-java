@@ -1,13 +1,12 @@
 package device.linux.instamsg;
 
-import common.instamsg.driver.WatchDogBeforeRebootHandler;
 import common.instamsg.driver.InstaMsg;
-import common.instamsg.driver.Log;
 import common.instamsg.driver.Watchdog;
 
-public class DeviceWatchdog implements Watchdog {
+public class DeviceWatchdog extends Watchdog {
 
 	boolean watchdogActive = false;
+	boolean immediateReboot = false;
 	
 	
 	/**
@@ -28,17 +27,17 @@ public class DeviceWatchdog implements Watchdog {
 	 * a)
 	 * Counter reaches 0.
 	 *
-	 * The device must then be reset/restarted.
+	 * In this case, the base-class-variable "watchdogExpired" variable must be set to "true".
+	 * Also, if base-class-variable "immediate" is "true", the device must be reboooted immediately.
 	 *
 	 * b)
-	 * "watchdogDisable()" is called.
+	 * "watchdogDisable()" (the global API-function) is called by the callee.
 	 *
-	 * In this case, the countdown-timer stops, and the device must never be reset/restarted (until the entire
-	 * "watchdogResetAndEnable" loop is repeated).
+	 * In this case, the countdown-timer stops, and the device must not be reset/restarted.
 	 *
 	 */
 	@Override
-	public void watchdogResetAndEnable(final int n, String callee, WatchDogBeforeRebootHandler handler) {
+	public void doWatchdogResetAndEnable(final int n) {
 		watchdogActive = true;
 		
 		new Thread(new Runnable() {
@@ -55,12 +54,13 @@ public class DeviceWatchdog implements Watchdog {
 					InstaMsg.startAndCountdownTimer(1, false);
 				}
 				
-				/*
-				 * If control reaches here.. it means that the loop has run to completion, and the
-				 * watchdog is still active.
-				 */
-				Log.infoLog("Watchdog-timer of interval [" + n + "] seconds expired for callee [" + callee + "]... rebooting device.");
-				InstaMsg.misc.rebootDevice();
+				
+				watchdogExpired = true;
+				
+				if(immediateReboot == true) {
+					printRebootingMessage();
+					InstaMsg.misc.rebootDevice();	
+				}
 			}
 		}).start();;
 	}
@@ -70,7 +70,7 @@ public class DeviceWatchdog implements Watchdog {
 	 * This method disables the watchdog-timer.
 	 */
 	@Override
-	public void watchdogDisable() {
+	public void doWatchdogDisable() {
 		watchdogActive = false;
 	}
 }
