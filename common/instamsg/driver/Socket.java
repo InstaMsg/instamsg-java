@@ -94,7 +94,7 @@ public abstract class Socket {
 		
 		releaseUnderlyingSocketMediumGuaranteed();		
 	    Log.infoLog("COMPLETE [TCP-SOCKET] STRUCTURE, INCLUDING THE UNDERLYING MEDIUM CLEANED FOR HOST = [" +
-	                     InstaMsg.INSTAMSG_HOST + "], PORT = [" + InstaMsg.INSTAMSG_PORT + "].");
+	                     DeviceConstants.INSTAMSG_HOST + "], PORT = [" + InstaMsg.INSTAMSG_PORT + "].");
 
 	}
 	
