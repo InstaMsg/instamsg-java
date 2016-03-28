@@ -1000,6 +1000,11 @@ public class InstaMsg implements MessagingAPIs {
 
 						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
 						setValuesOfSpecialTopics(c);
+						
+                        /*
+                         * Reboot the device, so that the next time the CONNECT-cycle takes place.
+                         */
+                        misc.rebootDevice();
 					}													
 
 					handleConnOrProvAckGeneric(c, msg.getReturnCode(), PROVISIONED);
