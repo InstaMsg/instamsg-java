@@ -40,8 +40,10 @@ public class MqttProvack extends MqttAck {
 		dis.close();
 		
 		this.completePayload = new String(payload);
+		if(completePayload.length() > 0){
+			this.clientId = completePayload.substring(0, 36);
+		}
 		
-		this.clientId = completePayload.substring(0, 36);
 		if(completePayload.length() > 37) {
 			this.secret = completePayload.substring(37, completePayload.length());
 		}

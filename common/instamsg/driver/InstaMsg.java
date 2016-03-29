@@ -655,6 +655,7 @@ public class InstaMsg implements MessagingAPIs {
 	    else
 	    {
 	        Log.infoLog("Client-" + mode + " failed with code [" + connackRc + "]");
+	        misc.rebootDevice();
 	    }
 	}
 	
