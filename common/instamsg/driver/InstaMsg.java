@@ -936,7 +936,7 @@ public class InstaMsg implements MessagingAPIs {
 		if(receivedMsgQos == QOS1) {
 			packet = getEncodedMqttMessageAsByteStream(new MqttPubAck(pubMsg));
 			
-		} else {
+		} else if(receivedMsgQos == QOS2) {
 			packet = getEncodedMqttMessageAsByteStream(new MqttPubRec(pubMsg));
 		}
 		
