@@ -65,7 +65,7 @@ public class DeviceSocket extends Socket {
 		
 		socketCorrupted = false;
 		Log.infoLog("TCP-SOCKET UNDERLYING_MEDIUM INITIATED FOR HOST = [" + 
-		                  DeviceConstants.INSTAMSG_HOST + "], PORT = [" + InstaMsg.INSTAMSG_PORT + "].");
+		                  host + "], PORT = [" + port + "].");
 	}
 
 	/**
