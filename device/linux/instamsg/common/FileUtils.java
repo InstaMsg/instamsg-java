@@ -13,10 +13,10 @@ public class FileUtils {
 
 	public static void appendLine(String module, String filePath, String line) {
 		
-		BufferedWriter configWriter = null;
+		BufferedWriter writer = null;
 		
 		try {
-			configWriter = new BufferedWriter(new FileWriter(filePath, true));
+			writer = new BufferedWriter(new FileWriter(filePath, true));
 			
 		} catch (IOException e) {
 			Log.errorLog(module + "Could not open file [" + filePath + "] for writing config.");
@@ -24,19 +24,19 @@ public class FileUtils {
 		}
 		
 		try {
-			configWriter.write(line + "\n");
+			writer.write(line + "\n");
 			
 		} catch (IOException e) {
-			Log.errorLog(module + "Could not write config.");
+			Log.errorLog(module + "Could not write.");
 			
 		} finally {
 			
-			if(configWriter != null) {
+			if(writer != null) {
 				try {
-					configWriter.close();
+					writer.close();
 					
 				} catch (IOException e) {
-					Log.errorLog(module + "Failed to properly close config-file");
+					Log.errorLog(module + "Failed to properly close file [" + filePath + "]");
 				}
 			}
 		}
@@ -44,35 +44,35 @@ public class FileUtils {
 
 	public static void createEmptyFile(String module, String filePath) {	
 
-		BufferedWriter configWriter = null;
+		BufferedWriter fileWriter = null;
 
 		try {
-			configWriter = new BufferedWriter(new FileWriter(filePath, true));
+			fileWriter = new BufferedWriter(new FileWriter(filePath, true));
 
 		} catch (IOException e) {
-			Log.errorLog(module + "Could not open file [" + filePath + "] for writing config.");
+			Log.errorLog(module + "Could not open file [" + filePath + "] for writing.");
 			return;
 
 		} finally {
 
-			if(configWriter != null) {
+			if(fileWriter != null) {
 
 				try {
-					configWriter.close();
+					fileWriter.close();
 
 				} catch (IOException e) {
-					Log.errorLog(module + "Failed to properly close config-file");
+					Log.errorLog(module + "Failed to properly close file [" + filePath + "]");
 				}
 			}
 		}
 	}
 	
-	public static void cleanFileReader(String module, BufferedReader configReader) {
+	public static void cleanFileReader(String module, BufferedReader reader) {
 		
-		if(configReader != null) {
+		if(reader != null) {
 			
 			try {
-				configReader.close();
+				reader.close();
 				
 			} catch (IOException e) {				
 				Log.errorLog(module + "Error happened while cleaning a file-reader");
