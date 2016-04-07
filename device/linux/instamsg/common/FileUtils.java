@@ -2,6 +2,7 @@ package device.linux.instamsg.common;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -11,6 +12,13 @@ public class FileUtils {
 	
 	public static String TEMP_FILE_NAME   = "/home/sensegrow/temp";
 
+	public static void removeFile(String filePath) {
+		File f = new File(filePath);
+		if(f.exists()) {
+			f.delete();
+		}
+	}
+	
 	public static void appendLine(String module, String filePath, String line) {
 		
 		BufferedWriter writer = null;
