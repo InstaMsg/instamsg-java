@@ -7,7 +7,16 @@ import common.instamsg.driver.InstaMsg.ReturnCode;
 
 public class HttpClient {
 
+	private static final String FILE_DOWNLOAD_SUCCESS_MESSAGE = "";
+	private static final String ERROR_READING_FILE_CONTENT = "Error while downloading content of file";
+	private static final String ERROR_READING_META_RESPONSE = "Error while reading meta-response for downloading-file";
+	private static final String REQUEST_NOT_SEND = "Could not send-request for downloading-file";
+	private static final String SOCKET_NOT_AVAILABLE = "Could not instantiate socket for downloading-file";
+
 	final static String contentLengthPrefix = "Content-Length:";
+	
+	final static int DOWNLOAD_FILE_SUCCESS = 200;
+	final static int DOWNLOAD_FILE_FAILURE = 404;
 
 	enum REQUEST_TYPE {
 		GET
@@ -62,10 +71,9 @@ public class HttpClient {
 		return completeUrl;
 	}
 	
-	private static void handleSocketError(Socket s, String log) {
+	private static void handleSocketError(Socket s) {
 		
 		s.releaseSocket();
-		Log.errorLog(log + " ... returning :( :(");
 	}
 	
 	
@@ -105,16 +113,16 @@ public class HttpClient {
 		socket.initSocket();
 		
 		if(socket.socketCorrupted == true) {
-			handleSocketError(socket, "Could not instantiate socket for downloading-file");
-			return null;
+			handleSocketError(socket);
+			return new HttpResponse(DOWNLOAD_FILE_FAILURE, SOCKET_NOT_AVAILABLE);
 		}
 		
 		String completeUrl = getCompleteUrl(REQUEST_TYPE.GET, url, params, headers);
 		ReturnCode rc = socket.socketWrite(completeUrl.getBytes(), completeUrl.getBytes().length);
 		
 		if(rc == ReturnCode.FAILURE) {	
-			handleSocketError(socket, "Could not send-request for downloading-file");
-			return null;
+			handleSocketError(socket);
+			return new HttpResponse(DOWNLOAD_FILE_FAILURE, REQUEST_NOT_SEND);
 		}
 		
 		int contentLength = 0;
@@ -123,8 +131,8 @@ public class HttpClient {
 			
 			String nextLine = getNextLine(socket);
 			if(nextLine == null) {
-				handleSocketError(socket, "Error while reading meta-response for downloading-file");
-				return null;	
+				handleSocketError(socket);
+				return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_META_RESPONSE);	
 			}
 			
 			if(nextLine.startsWith(contentLengthPrefix)) {
@@ -142,8 +150,8 @@ public class HttpClient {
 			byte[] b = new byte[1];
 			
 			if(socket.socketRead(b, 1, true) == ReturnCode.FAILURE) {
-				handleSocketError(socket, "Error while downloading content of file");
-				return null;	
+				handleSocketError(socket);
+				return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_FILE_CONTENT);	
 			}
 			
 			String nextChar = new String(b);
@@ -154,7 +162,7 @@ public class HttpClient {
 		FileUtils.appendLine("[FILE-DOWNLOAD]", downloadedFilePath, file);
 		
 		socket.releaseSocket();		
-		return new HttpResponse(200, "");	
+		return new HttpResponse(DOWNLOAD_FILE_SUCCESS, FILE_DOWNLOAD_SUCCESS_MESSAGE);	
 	}
 	
 	
