@@ -2,14 +2,20 @@ package device.linux.instamsg;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
-import javax.net.SocketFactory;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Socket;
+
 import config.DeviceConstants;
 
 public class DeviceSocket extends Socket {
@@ -49,7 +55,40 @@ public class DeviceSocket extends Socket {
 		
 		try {
 			if(DeviceConstants.SSL_SOCKET == true){
-				SocketFactory socketFactory = SSLSocketFactory.getDefault();
+				String keyFile = "/home/gsachan/5e8cdaa0-fa5d-11e5-8d85-a41f726775dd.key";
+				String certFile = "/home/gsachan/5e8cdaa0-fa5d-11e5-8d85-a41f726775dd.crt.pem";
+				
+				PrivateKey privateKey = PemReader.loadPrivateKey(keyFile);
+				X509Certificate certificate = PemReader.loadPublicX509(certFile);
+				
+				KeyStore ks = KeyStore.getInstance("PKCS12");
+				ks.load(null, null);
+				ks.setKeyEntry("1", privateKey, null, new java.security.cert.Certificate[]{certificate});
+				
+				
+				/*KeyStore ks = KeyStore.getInstance("pkcs12");
+				InputStream ksIs = new FileInputStream("/home/gsachan/5e8cdaa0-fa5d-11e5-8d85-a41f726775dd.p12");
+				ks.load(ksIs, "password".toCharArray());*/
+				 
+				KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+				kmf.init(ks, null);
+				 
+				SSLContext sc = SSLContext.getInstance("TLSv1.2");
+				
+				/*
+				 * Either of the first two parameters may be null in which case the installed security providers will be searched for the highest priority implementation of the appropriate factory.
+				 * 
+				 * So as per our use case we do not have any trust chain. thats why authentication can be done using certificate itself.
+				 * 
+				 * 
+				 * Further read  https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/SSLContext.html#init(javax.net.ssl.KeyManager[],%20javax.net.ssl.TrustManager[],%20java.security.SecureRandom)
+				 */
+				
+				//TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+				//trustManagerFactory.init(ks);
+				sc.init(kmf.getKeyManagers(),null, new SecureRandom());
+				 
+				SSLSocketFactory socketFactory = sc.getSocketFactory();
 				socket = socketFactory.createSocket(host, port);
 			}
 			else{
@@ -58,8 +97,8 @@ public class DeviceSocket extends Socket {
 			socket.setSoTimeout(InstaMsg.SOCKET_READ_TIMEOUT_SECS * 1000);
 			
 		} catch (Exception e) {
-			
 			Log.errorLog(SOCKET_ERROR + "Error occurred while connecting to [" + host + "] on port [" + port + "]");
+			e.printStackTrace();
 			return;
 		}
 		
@@ -201,7 +240,6 @@ public class DeviceSocket extends Socket {
 			if(socket != null) {
 				socket.close();
 			}
-			
 		} catch (IOException e) {
 	
 			Log.errorLog(SOCKET_ERROR + "Error occurred while closing the socket");
