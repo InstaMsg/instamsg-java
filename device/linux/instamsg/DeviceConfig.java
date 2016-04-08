@@ -7,12 +7,11 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import common.instamsg.driver.Config;
+import common.instamsg.driver.FileUtils;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Json;
 import common.instamsg.driver.Log;
-
-import device.linux.instamsg.common.FileUtils;
 
 public class DeviceConfig extends Config {
 

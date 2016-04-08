@@ -7,9 +7,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import common.instamsg.driver.DataLogger;
+import common.instamsg.driver.FileUtils;
 import common.instamsg.driver.Log;
-
-import device.linux.instamsg.common.FileUtils;
 
 
 

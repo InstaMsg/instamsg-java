@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import common.instamsg.driver.InstaMsg.ReturnCode;
-import device.linux.instamsg.DeviceSocket;
-import device.linux.instamsg.common.FileUtils;
 
 public class HttpClient {
 
@@ -100,11 +98,11 @@ public class HttpClient {
 	 *
 	 * echo "hi ajay"
 	 */
-	public static HttpResponse downloadFile(String url, String downloadedFilePath, Map<String, String> params, Map<String, String> headers,
-			                                int timeout) {
+	public static HttpResponse downloadFile(InstaMsg im, String url, String downloadedFilePath,
+			                                Map<String, String> params, Map<String, String> headers, int timeout) {
 		
-		Socket socket = new DeviceSocket("platform.instamsg.io", 80);
-		socket.initSocket();;
+		Socket socket = im.modulesProvideInterface.getSocket("platform.instamsg.io", 80);
+		socket.initSocket();
 		
 		if(socket.socketCorrupted == true) {
 			handleSocketError(socket, "Could not instantiate socket for downloading-file");
@@ -163,7 +161,7 @@ public class HttpClient {
 	public static void main(String[] args) {
 		
 		InstaMsg.instaMsg = new InstaMsg();
-		downloadFile("/files/7bdfa2be-bbb7-4d13-b89e-c491a1b3cb83.gst_test.py", "/home/ajay/downloaded.txt",
+		downloadFile(InstaMsg.instaMsg, "/files/7bdfa2be-bbb7-4d13-b89e-c491a1b3cb83.gst_test.py", "/home/ajay/downloaded.txt",
 					 new HashMap<String, String>(), new HashMap<String, String>(), 10);
 
 	}	

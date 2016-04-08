@@ -1,12 +1,10 @@
-package device.linux.instamsg.common;
+package common.instamsg.driver;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import common.instamsg.driver.Log;
 
 public class FileUtils {
 	
