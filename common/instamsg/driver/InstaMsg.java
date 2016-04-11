@@ -1005,6 +1005,10 @@ public class InstaMsg implements MessagingAPIs {
 							notifyServerOfSecretReceived = true;
 						}
 						
+
+						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
+						setValuesOfSpecialTopics(c);
+						
 						if(msg.isSecureSslCertificate() == true) {
 							/*
 							 * For this, we assume that the file has to have a file-system.
@@ -1014,8 +1018,6 @@ public class InstaMsg implements MessagingAPIs {
 							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate(), CERT_CERT_FILE);
 						}
 
-						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
-						setValuesOfSpecialTopics(c);
 						
                         /*
                          * Reboot the device, so that the next time the CONNECT-cycle takes place.
