@@ -25,8 +25,8 @@ import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 
 public class MqttProvack extends MqttAck {
 
-	private static final int PROVISIONING_SUCCESSFUL = 0;
-	private static final int PROVISIONING_SUCCESSFUL_WITH_CERT = 6;
+	public static final int PROVISIONING_SUCCESSFUL = 0;
+	public static final int PROVISIONING_SUCCESSFUL_WITH_CERT = 6;
 
 	private int returnCode;
 	

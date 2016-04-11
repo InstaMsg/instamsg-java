@@ -55,11 +55,9 @@ public class DeviceSocket extends Socket {
 		
 		try {
 			if(DeviceConstants.SSL_SOCKET == true){
-				String keyFile = "/home/gsachan/5e8cdaa0-fa5d-11e5-8d85-a41f726775dd.key";
-				String certFile = "/home/gsachan/5e8cdaa0-fa5d-11e5-8d85-a41f726775dd.crt.pem";
 				
-				PrivateKey privateKey = PemReader.loadPrivateKey(keyFile);
-				X509Certificate certificate = PemReader.loadPublicX509(certFile);
+				PrivateKey privateKey = PemReader.loadPrivateKey(InstaMsg.CERT_KEY_FILE);
+				X509Certificate certificate = PemReader.loadPublicX509(InstaMsg.CERT_CERT_FILE);
 				
 				KeyStore ks = KeyStore.getInstance("PKCS12");
 				ks.load(null, null);

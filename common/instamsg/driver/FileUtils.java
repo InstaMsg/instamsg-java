@@ -86,4 +86,9 @@ public class FileUtils {
 			}
 		}
 	}
+	
+	public static void createFileAndAddContent(String module, String content, String filePath) {
+		removeFile(filePath);
+		appendLine(module, filePath, content);
+	}
 }

@@ -157,6 +157,10 @@ public class InstaMsg implements MessagingAPIs {
 	static String SERVER_LOGGING = "[SERVER-LOGGING] ";
 	
 	static String SECRET         = "SECRET";
+	
+	private static String CERT_MODULE   = "[CERTIFICATE]";
+	public static String CERT_KEY_FILE  = "/home/sensegrow/key";
+	public static String CERT_CERT_FILE = "/home/sensegrow/cert"; 
 
 
 	public static int NETWORK_INFO_INTERVAL = 300;
@@ -976,7 +980,8 @@ public class InstaMsg implements MessagingAPIs {
 				
 				try {
 					MqttProvack msg = (MqttProvack) MqttWireMessage.createWireMessage(c.readBuf);
-					if(msg.getReturnCode() == 0) {
+					if((msg.getReturnCode() == MqttProvack.PROVISIONING_SUCCESSFUL) ||
+					   (msg.getReturnCode() == MqttProvack.PROVISIONING_SUCCESSFUL_WITH_CERT)) {
 
 						/*
 						 * Connection was established successfully;
@@ -998,6 +1003,15 @@ public class InstaMsg implements MessagingAPIs {
 							 * Send notification to the server, that the secret-password has been saved.
 							 */
 							notifyServerOfSecretReceived = true;
+						}
+						
+						if(msg.isSecureSslCertificate() == true) {
+							/*
+							 * For this, we assume that the file has to have a file-system.
+							 * Thus, saving the certificate-file(s) has been integrated in the driver-code itself.
+							 */
+							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificateKey(), CERT_KEY_FILE);
+							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate(), CERT_CERT_FILE);
 						}
 
 						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
