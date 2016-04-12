@@ -95,7 +95,7 @@ public class InstaMsg implements MessagingAPIs {
 	static final String TOPIC_NOTIFICATION  =   "instamsg/client/notifications";
 	static final String TOPIC_INFO     		=   "instamsg/client/info";
 	
-	public static final int MAX_BUFFER_SIZE    =   1000;
+	public static final int MAX_BUFFER_SIZE    =   5000;
 	
 	MessageHandlers[] messageHandlers = new MessageHandlers[MAX_MESSAGE_HANDLERS];
 	ResultHandlers[] resultHandlers = new ResultHandlers[MAX_MESSAGE_HANDLERS];
@@ -986,25 +986,7 @@ public class InstaMsg implements MessagingAPIs {
 						/*
 						 * Connection was established successfully;
 						 */
-						c.clientIdComplete = msg.getClientId();						
-						if(msg.getSecret() != null) {
-
-							Log.infoLog("Received client-secret from server via PROVACK [" + msg.getSecret() + "]");
-
-							String secretConfig = config.generateConfigJson(InstaMsg.SECRET,
-																			CONFIG_TYPE.CONFIG_STRING,
-																			msg.getCompletePayload(),
-																			"");
-							config.saveConfigValueOnPersistentStorage(InstaMsg.SECRET, secretConfig);
-
-
-
-							/*
-							 * Send notification to the server, that the secret-password has been saved.
-							 */
-							notifyServerOfSecretReceived = true;
-						}
-						
+						c.clientIdComplete = msg.getClientId();									
 
 						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
 						setValuesOfSpecialTopics(c);
@@ -1018,6 +1000,25 @@ public class InstaMsg implements MessagingAPIs {
 							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate(), CERT_CERT_FILE);
 						}
 
+						/*
+						 * We must ensure that the certificate-files are saved BEFORE saving the secret
+						 */
+						if(msg.getSecret() != null) {
+
+							Log.infoLog("Received client-secret from server via PROVACK [" + msg.getSecret() + "]");
+
+							String secretConfig = config.generateConfigJson(InstaMsg.SECRET,
+																			CONFIG_TYPE.CONFIG_STRING,
+																			msg.getClientId() + "-" + msg.getSecret(),
+																			"");
+							config.saveConfigValueOnPersistentStorage(InstaMsg.SECRET, secretConfig);
+
+
+							/*
+							 * Send notification to the server, that the secret-password has been saved.
+							 */
+							notifyServerOfSecretReceived = true;
+						}
 						
                         /*
                          * Reboot the device, so that the next time the CONNECT-cycle takes place.
