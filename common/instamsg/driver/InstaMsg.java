@@ -996,8 +996,8 @@ public class InstaMsg implements MessagingAPIs {
 							 * For this, we assume that the file has to have a file-system.
 							 * Thus, saving the certificate-file(s) has been integrated in the driver-code itself.
 							 */
-							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificateKey(), CERT_KEY_FILE);
-							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate(), CERT_CERT_FILE);
+							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificateKey().replaceAll("\\\\n", "\n"), CERT_KEY_FILE);
+							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate().replaceAll("\\\\n", "\n"), CERT_CERT_FILE);
 						}
 
 						/*
