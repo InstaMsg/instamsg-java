@@ -168,12 +168,15 @@ public class DeviceSocket extends Socket {
 	 */
 	@Override
 	public ReturnCode socketRead(byte[] buffer, int len, boolean guaranteed) {
-		
 		for(int i = 0; i < len; i++) {
 			
 			try {
 				byte c = (byte) socket.getInputStream().read();
 				buffer[i] = c;
+				
+				if(buffer[i] == -1) {
+					return InstaMsg.ReturnCode.FAILURE;
+				}
 				
 			} catch (SocketTimeoutException e) {
 				
