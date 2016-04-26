@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import common.instamsg.driver.CertificateManager;
 import common.instamsg.driver.Json;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -34,11 +35,6 @@ public class MqttProvack extends MqttAck {
 	private String clientId;
 	private String secret;	
 	
-	private boolean isSecureSslCertificate = false;
-	private String certificateKey = "";
-	private String certificate = "";
-
-
 	public MqttProvack(byte info, byte[] variableHeader) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PROVACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
@@ -53,6 +49,7 @@ public class MqttProvack extends MqttAck {
 		this.completePayload = new String(payload);
 		
 		if(returnCode == PROVISIONING_SUCCESSFUL) {
+			
 			if(completePayload.length() > 0){
 				this.clientId = completePayload.substring(0, 36);
 			}
@@ -61,13 +58,12 @@ public class MqttProvack extends MqttAck {
 				this.secret = completePayload.substring(37, completePayload.length());
 			}
 			
-		} else if (returnCode == PROVISIONING_SUCCESSFUL_WITH_CERT) {			
+		} else if (returnCode == PROVISIONING_SUCCESSFUL_WITH_CERT) {		
+			
 			this.clientId = Json.getJsonKeyValueIfPresent(completePayload, "client_id");
 			this.secret = Json.getJsonKeyValueIfPresent(completePayload, "auth_token");
 			
-			this.isSecureSslCertificate = Boolean.parseBoolean(Json.getJsonKeyValueIfPresent(completePayload, "secure_ssl_certificate"));
-			this.certificateKey = Json.getJsonKeyValueIfPresent(completePayload, "key");
-			this.certificate = Json.getJsonKeyValueIfPresent(completePayload, "certificate");
+			CertificateManager.processCertificateInfoIfAny(completePayload);
 		}
 	}
 	
@@ -92,19 +88,7 @@ public class MqttProvack extends MqttAck {
 		return completePayload;
 	}
 	
-	public boolean isSecureSslCertificate() {
-		return isSecureSslCertificate;
-	}
-	
-	public String getCertificateKey() {
-		return certificateKey;
-	}
-	
-	public String getCertificate() {
-		return certificate;
-	}
 
-	
 	/**
 	 * Returns whether or not this message needs to include a message ID.
 	 */

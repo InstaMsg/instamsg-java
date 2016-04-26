@@ -13,6 +13,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import common.instamsg.driver.CertificateManager;
 import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Log;
@@ -59,12 +60,12 @@ public class DeviceSocket extends Socket {
 				SocketFactory socketFactory = null;
 				
 				boolean certificateFilesExist = false;
-				certificateFilesExist = new File(InstaMsg.CERT_KEY_FILE).exists() && new File(InstaMsg.CERT_CERT_FILE).exists();
+				certificateFilesExist = new File(CertificateManager.CERT_KEY_FILE).exists() && new File(CertificateManager.CERT_CERT_FILE).exists();
 				
 				if(certificateFilesExist == true){
 					
-					PrivateKey privateKey = PemReader.loadPrivateKey(InstaMsg.CERT_KEY_FILE);
-					X509Certificate certificate = PemReader.loadPublicX509(InstaMsg.CERT_CERT_FILE);
+					PrivateKey privateKey = PemReader.loadPrivateKey(CertificateManager.CERT_KEY_FILE);
+					X509Certificate certificate = PemReader.loadPublicX509(CertificateManager.CERT_CERT_FILE);
 					
 					KeyStore ks = KeyStore.getInstance("PKCS12");
 					ks.load(null, null);

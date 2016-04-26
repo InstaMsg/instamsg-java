@@ -127,6 +127,7 @@ public class InstaMsg implements MessagingAPIs {
 	private String enableServerLoggingTopic;
 	private String fileUploadUrl;
 	private String receiveConfigTopic;
+	private String updateCertTopic;
 	private String mediaTopic;
 	private String mediaReplyTopic;
 	private String mediaStopTopic;
@@ -157,11 +158,6 @@ public class InstaMsg implements MessagingAPIs {
 	static String SERVER_LOGGING = "[SERVER-LOGGING] ";
 	
 	static String SECRET         = "SECRET";
-	
-	private static String CERT_MODULE   = "[CERTIFICATE]";
-	public static String CERT_KEY_FILE  = "/home/sensegrow/key";
-	public static String CERT_CERT_FILE = "/home/sensegrow/cert"; 
-
 
 	public static int NETWORK_INFO_INTERVAL = 300;
 	public static int MAX_CONN_ATTEMPTS_WITH_PHYSICAL_LAYER_FINE = 5;
@@ -169,9 +165,6 @@ public class InstaMsg implements MessagingAPIs {
 	public static int SOCKET_READ_TIMEOUT_SECS = 1;
 	
 	public static int INSTAMSG_PORT;
-	
-
-
 	
 	
 	static {
@@ -883,6 +876,7 @@ public class InstaMsg implements MessagingAPIs {
 	    c.enableServerLoggingTopic = "instamsg/clients/" + c.clientIdComplete + "/enableServerLogging";
 	    c.serverLogsTopic          = "instamsg/clients/" + c.clientIdComplete + "/logs";
 	    c.receiveConfigTopic       = "instamsg/clients/" + c.clientIdComplete + "/config/serverToClient";
+	    c.updateCertTopic          = "instamsg/clients/" + c.clientIdComplete + "/updateCert";
 	    c.fileUploadUrl            = "/api/beta/clients/" + c.clientIdComplete + "/files";
 	    
 	    if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
@@ -990,15 +984,7 @@ public class InstaMsg implements MessagingAPIs {
 
 						Log.infoLog("Received client-id from server via PROVACK [" + c.clientIdComplete + "]");
 						setValuesOfSpecialTopics(c);
-						
-						if(msg.isSecureSslCertificate() == true) {
-							/*
-							 * For this, we assume that the file has to have a file-system.
-							 * Thus, saving the certificate-file(s) has been integrated in the driver-code itself.
-							 */
-							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificateKey().replaceAll("\\\\n", "\n"), CERT_KEY_FILE);
-							FileUtils.createFileAndAddContent(CERT_MODULE, msg.getCertificate().replaceAll("\\\\n", "\n"), CERT_CERT_FILE);
-						}
+
 
 						/*
 						 * We must ensure that the certificate-files are saved BEFORE saving the secret
@@ -1090,7 +1076,10 @@ public class InstaMsg implements MessagingAPIs {
 					} else if(topicName.equals(c.receiveConfigTopic)) {                    	
                         handleConfigReceived(c, new String(pubMsg.getPayload()));
                         
-                    } else if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+                    } else if(topicName.equals(c.updateCertTopic)) {                    	
+                        handleCertReceived(c, new String(pubMsg.getPayload()));
+                        
+                    }else if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
                     	
                     	if(topicName.equals(c.mediaReplyTopic)) {                    	
                     		handleMediaReplyMessage(c, new String(pubMsg.getPayload()));
@@ -1154,6 +1143,9 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 	
+
+
+
 	private static void serverLoggingTopicMessageArrived(InstaMsg c, String payload) {
 		
 	    String CLIENT_ID = "client_id";
@@ -1223,13 +1215,18 @@ public class InstaMsg implements MessagingAPIs {
 		}
 	}
 	
-	
+
 	private static void handleConfigReceived(InstaMsg c, String payload) {
 		
 		Log.infoLog(common.instamsg.driver.Config.CONFIG + "Received the config-payload [" + payload + "] from server");
 		config.processConfig(payload);
 	}
-
+	
+	
+	private static void handleCertReceived(InstaMsg c, String payload) {
+		CertificateManager.processCertificateInfoIfAny(payload);
+	}
+	
 
 	private static InstaMsg.ReturnCode handleMessageDecodingFailure(InstaMsg c, String messageType) {
 		InstaMsg.ReturnCode rc;
