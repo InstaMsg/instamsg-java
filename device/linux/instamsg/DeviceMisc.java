@@ -8,12 +8,15 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
+import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.Log;
 import common.instamsg.driver.Misc;
 
 public class DeviceMisc implements Misc {
 
 	
+	public static String DEVICE_VERSION = "2.0.0";
+
 	/**
 	 * Utility-function that reboots the device.
 	 */
@@ -100,7 +103,8 @@ public class DeviceMisc implements Misc {
 	
 	/**
 	 *  * This method return all possible info of a client.
-	*{'imei':'value', 'manufacturer':'value', 'model':'GE-value', 'firmware_version':'value', 'client_version':'value', 'instamsg_version':'value',
+	 *  
+	*    {'imei':'value', 'manufacturer':'value', 'model':'GE-value', 'firmware_version':'value', 'client_version':'value', 'instamsg_version':'value',
 	*	'programming_language':'value', 'os':'value', 'micro_controller_info': {'make':'value','mode':'value','ram':'value','rom':'value'}, 
 	*	'cpu_info':{'make':'value','model':'value'}, 'memory_info':{'ram':'value','rom':'value'}, 'storage_info':{'flash':'value','external':'value'}, 'gps_info':{'make':'value','model':'value'},
 	*	'network_interfaces':[{'type':'value','make':'value','model':'value','firmware_version':'value','imei':'value'}]}
@@ -110,6 +114,10 @@ public class DeviceMisc implements Misc {
 	public String getClientInfo() {
 		JSONObject json = new JSONObject();
 		
+		json.put("client_version", InstaMsg.INSTAMSG_VERSION + "_" + DEVICE_VERSION);
+		json.put("programming_language", "java");
+
+		/*
 		json.put("imei", "354789312361213");
 		json.put("manufacturer", "Telit");
 		json.put("model", "GE-Quad");
@@ -127,52 +135,77 @@ public class DeviceMisc implements Misc {
 		json.put("gps_info", getGpsInfo());
 		
 		json.put("network_interfaces", getNwInterfaceInfo());
+		*/
 		
 		return json.toString();
 	}
 	
 	private HashMap<String, String> getMicroControllerInfo(){
 		HashMap<String, String> microControllerInfo = new HashMap<String, String>();
+		
+		/*
 		microControllerInfo.put("make", "Telit");
 		microControllerInfo.put("mode", "Ge910");
 		microControllerInfo.put("ram", "2");
 		microControllerInfo.put("rom", "4");
+		*/
+		
 		return microControllerInfo;
 	}
 	
 	private HashMap<String, String> getCpuInfo(){
 		HashMap<String, String> cpuInfo = new HashMap<String, String>();
+		
+		/*
 		cpuInfo.put("make", "Intel");
 		cpuInfo.put("model", "Gh910");
+		*/
+		
 		return cpuInfo;
 	}
 	private HashMap<String, String> getMemoryInfo(){
 		HashMap<String, String> info = new HashMap<String, String>();
+		
+		/*
 		info.put("ram", "6");
 		info.put("rom", "9");
+		*/
+		
 		return info;
 	}
 	private HashMap<String, String> getStorageInfo(){
 		HashMap<String, String> info = new HashMap<String, String>();
+		
+		/*
 		info.put("flash", "500");
 		info.put("external", "5000");
+		*/
+		
 		return info;
 	}
 	private HashMap<String, String> getGpsInfo(){
 		HashMap<String, String> info = new HashMap<String, String>();
+		
+		/*
 		info.put("make", "Intel");
 		info.put("model", "5.0");
+		*/
+		
 		return info;
 	}
 	
 	private Set<HashMap<String, String>> getNwInterfaceInfo(){
 		Set<HashMap<String, String>> set = new HashSet<HashMap<String, String>>();
 		HashMap<String, String> info = new HashMap<String, String>();
+		
+		/*
 		info.put("type", "GSM");
 		info.put("make", "telit");
 		info.put("model", "Ge910");
 		info.put("firmware_version", "13.00.008");
 		info.put("imei", "354789312361213");
+		*/
+		
 		set.add(info);
 		return set;
 	}
