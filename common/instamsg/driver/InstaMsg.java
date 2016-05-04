@@ -1230,11 +1230,17 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void handleCertReceived(InstaMsg c, String payload) {
 		CertificateManager.processCertificateInfoIfAny(payload);
+		
+		Log.infoLog("Rebooting machine, as certificate has been updated.");
+		misc.rebootDevice();
 	}
 	
 	private static void handleAuthTokenReceived(InstaMsg c, String payload) {
 		String newSecretConfig = config.generateConfigJson(SECRET, CONFIG_TYPE.CONFIG_STRING, c.clientIdComplete + "-" + payload, "");
 		config.saveConfigValueOnPersistentStorage(SECRET, newSecretConfig);
+		
+		Log.infoLog("Rebooting machine, as secret has been updated.");
+		misc.rebootDevice();
 	}
 	
 
