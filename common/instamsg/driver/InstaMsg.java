@@ -128,6 +128,7 @@ public class InstaMsg implements MessagingAPIs {
 	private String fileUploadUrl;
 	private String receiveConfigTopic;
 	private String updateCertTopic;
+	private String updateAuthTokenTopic;
 	private String mediaTopic;
 	private String mediaReplyTopic;
 	private String mediaStopTopic;
@@ -877,6 +878,7 @@ public class InstaMsg implements MessagingAPIs {
 	    c.serverLogsTopic          = "instamsg/clients/" + c.clientIdComplete + "/logs";
 	    c.receiveConfigTopic       = "instamsg/clients/" + c.clientIdComplete + "/config/serverToClient";
 	    c.updateCertTopic          = "instamsg/clients/" + c.clientIdComplete + "/updateCert";
+	    c.updateAuthTokenTopic     = "instamsg/clients/" + c.clientIdComplete + "/updateAuthToken";
 	    c.fileUploadUrl            = "/api/beta/clients/" + c.clientIdComplete + "/files";
 	    
 	    if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
@@ -1079,7 +1081,10 @@ public class InstaMsg implements MessagingAPIs {
                     } else if(topicName.equals(c.updateCertTopic)) {                    	
                         handleCertReceived(c, new String(pubMsg.getPayload()));
                         
-                    }else if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
+                    } else if(topicName.equals(c.updateAuthTokenTopic)) {                    	
+                        handleAuthTokenReceived(c, new String(pubMsg.getPayload()));
+                        
+                    } else if(DeviceConstants.MEDIA_STREAMING_ENABLED == true) {
                     	
                     	if(topicName.equals(c.mediaReplyTopic)) {                    	
                     		handleMediaReplyMessage(c, new String(pubMsg.getPayload()));
@@ -1225,6 +1230,11 @@ public class InstaMsg implements MessagingAPIs {
 	
 	private static void handleCertReceived(InstaMsg c, String payload) {
 		CertificateManager.processCertificateInfoIfAny(payload);
+	}
+	
+	private static void handleAuthTokenReceived(InstaMsg c, String payload) {
+		String newSecretConfig = config.generateConfigJson(SECRET, CONFIG_TYPE.CONFIG_STRING, c.clientIdComplete + "-" + payload, "");
+		config.saveConfigValueOnPersistentStorage(SECRET, newSecretConfig);
 	}
 	
 
