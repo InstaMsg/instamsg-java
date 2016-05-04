@@ -32,7 +32,7 @@ public class InstaMsg implements MessagingAPIs {
 	    SUCCESS
 	}
 
-	public static String INSTAMSG_VERSION = "2.0.0";
+	public static String INSTAMSG_VERSION = "3.5.0";
 	
 	public static int QOS0 = 0;
 	public static int QOS1 = 1;
