@@ -13,6 +13,7 @@ public class DeviceConstants {
 	public static final boolean SSL_SOCKET              =   false;
 	public static final boolean GSM_DEVICE              =   false;
 	public static final boolean MEDIA_STREAMING_ENABLED =   false;
+	public static final String SENSEGROW_FOLDER         =   "";
 	/**
 	 *
 	 */	

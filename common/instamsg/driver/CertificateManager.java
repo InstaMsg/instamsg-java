@@ -1,10 +1,12 @@
 package common.instamsg.driver;
 
+import config.DeviceConstants;
+
 public class CertificateManager {
 	
 	private static String CERT_MODULE   = "[CERTIFICATE]";
-	public static String CERT_KEY_FILE  = "/home/sensegrow/key";
-	public static String CERT_CERT_FILE = "/home/sensegrow/cert"; 
+	public static String CERT_KEY_FILE  = DeviceConstants.SENSEGROW_FOLDER + "key";
+	public static String CERT_CERT_FILE = DeviceConstants.SENSEGROW_FOLDER + "cert"; 
 	
 	public static void processCertificateInfoIfAny(String payload) {
 		

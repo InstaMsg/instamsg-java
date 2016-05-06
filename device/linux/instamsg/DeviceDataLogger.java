@@ -9,12 +9,13 @@ import java.io.IOException;
 import common.instamsg.driver.DataLogger;
 import common.instamsg.driver.FileUtils;
 import common.instamsg.driver.Log;
+import config.DeviceConstants;
 
 
 
 public class DeviceDataLogger extends DataLogger {	
 	
-	String DATA_FILE_NAME = "/home/sensegrow/data.txt";
+	String DATA_FILE_NAME = DeviceConstants.SENSEGROW_FOLDER + "data.txt";
 	
 	
 	/**

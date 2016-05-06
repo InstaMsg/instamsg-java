@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import config.DeviceConstants;
+
 public class FileUtils {
 	
-	public static String TEMP_FILE_NAME   = "/home/sensegrow/temp";
+	public static String TEMP_FILE_NAME   = DeviceConstants.SENSEGROW_FOLDER + "temp";
 
 	public static void removeFile(String filePath) {
 		File f = new File(filePath);

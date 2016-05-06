@@ -12,10 +12,11 @@ import common.instamsg.driver.InstaMsg;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import common.instamsg.driver.Json;
 import common.instamsg.driver.Log;
+import config.DeviceConstants;
 
 public class DeviceConfig extends Config {
 
-	String CONFIG_FILE_NAME = "/home/sensegrow/config.txt";
+	String CONFIG_FILE_NAME = DeviceConstants.SENSEGROW_FOLDER + "config.txt";
 	
 
 
