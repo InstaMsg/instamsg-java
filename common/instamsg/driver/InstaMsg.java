@@ -612,7 +612,7 @@ public class InstaMsg implements MessagingAPIs {
 	        
 
 	        config.registerEditableConfig(c.compulsorySocketReadAfterMQTTPublishInterval,
-	                                      "COMPULSORY_SOCKET_READ_AFTER_MQTT_PUBLISH_INTERVAL",
+	                                      "COMPULSORY_SOCKET_READ_AFTER_WRITE_COUNT",
 	                                      CONFIG_TYPE.CONFIG_INT,
 	                                      "3",
 	                                      "This variable controls after how many MQTT-Publishes a compulsory socket-read is done. " +
