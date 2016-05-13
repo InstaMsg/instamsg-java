@@ -1,9 +1,12 @@
 package common.instamsg.driver;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import common.instamsg.driver.InstaMsg.ReturnCode;
+
 import config.DeviceConstants;
 
 public class HttpClient {
@@ -13,6 +16,7 @@ public class HttpClient {
 	private static final String ERROR_READING_META_RESPONSE = "Error while reading meta-response for downloading-file";
 	private static final String REQUEST_NOT_SEND = "Could not send-request for downloading-file";
 	private static final String SOCKET_NOT_AVAILABLE = "Could not instantiate socket for downloading-file";
+	private static final String FILE_NOT_COPYABLE = "Could not copy content to the end-device";
 
 	final static String contentLengthPrefix = "Content-Length:";
 	
@@ -154,21 +158,25 @@ public class HttpClient {
 			}
 		}
 		
-		String file = "";
-		for(int i = 0; i < contentLength; i++) {
-			byte[] b = new byte[1];
-			
-			if(socket.socketRead(b, 1, true) == ReturnCode.FAILURE) {
-				handleSocketError(socket);
-				return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_FILE_CONTENT);	
+		FileUtils.removeFile(downloadedFilePath);
+		
+		try (FileOutputStream os = new FileOutputStream(new File(downloadedFilePath))) {
+			for(int i = 0; i < contentLength; i++) {
+				byte[] b = new byte[1];
+				
+				if(socket.socketRead(b, 1, true) == ReturnCode.FAILURE) {
+					handleSocketError(socket);
+					return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_FILE_CONTENT);	
+				}
+				
+				os.write(b);
 			}
 			
-			String nextChar = new String(b);
-			file = file + nextChar;
-		}
-		
-		FileUtils.removeFile(downloadedFilePath);
-		FileUtils.appendLine("[FILE-DOWNLOAD]", downloadedFilePath, file);
+		} catch (Exception e) {
+			
+			handleSocketError(socket);
+			return new HttpResponse(DOWNLOAD_FILE_FAILURE, FILE_NOT_COPYABLE);
+		}		
 		
 		socket.releaseSocket();		
 		return new HttpResponse(DOWNLOAD_FILE_SUCCESS, FILE_DOWNLOAD_SUCCESS_MESSAGE);	
