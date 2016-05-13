@@ -17,7 +17,7 @@ public class DeviceConstants {
 	public static final boolean GSM_DEVICE              =   false;
 	public static final boolean MEDIA_STREAMING_ENABLED =   false;
 	public static final String SENSEGROW_FOLDER         =   "";
-	public static final int OTA_PING_BUFFER_SIZE        =   10000;
+	public static final int OTA_PING_BUFFER_SIZE        =   100;
 	/**
 	 *
 	 */	
