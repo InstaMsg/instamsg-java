@@ -1,5 +1,7 @@
 package common.instamsg.driver;
 
+import java.util.HashMap;
+
 import common.instamsg.driver.Config.CONFIG_TYPE;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import common.instamsg.mqtt.org.eclipse.paho.client.mqttv3.MqttException;
@@ -47,6 +49,8 @@ public class InstaMsg implements MessagingAPIs {
 	static String PROVISIONING_CLIENT_ID    	= "PROVISIONING";
 	static String PROVISIONED     				= "PROVISIONED";
 	static String CONNECTED 					= "CONNECTED";
+	
+	static String FILE_TRANSFER                 = "[FILE-TRANSFER] ";
 	
 	static int MAX_CYCLES_TO_WAIT_FOR_PUBACK = 10;
 	static int pubAckMsgId;
@@ -1064,11 +1068,13 @@ public class InstaMsg implements MessagingAPIs {
 					MqttPublish pubMsg = (MqttPublish) MqttWireMessage.createWireMessage(c.readBuf);
 					
 					String topicName = pubMsg.getTopicName();
-					if(topicName.equals(c.enableServerLoggingTopic)) {
+					if(topicName.equals(c.filesTopic)) {
+						handleFileTransfer(c, new String(pubMsg.getPayload()));
+						
+					} else if(topicName.equals(c.enableServerLoggingTopic)) {
 						serverLoggingTopicMessageArrived(c, new String(pubMsg.getPayload()));
-					}
-					
-					else if(topicName.equals(c.rebootTopic)) {
+						
+					} else if(topicName.equals(c.rebootTopic)) {
 						Log.infoLog("Received REBOOT request from server.. rebooting !!!");
 						misc.rebootDevice();
 						
@@ -1149,7 +1155,127 @@ public class InstaMsg implements MessagingAPIs {
 
 	
 
+	private static void handleFileTransfer(InstaMsg c, String payload) {
+		
+	    String REPLY_TOPIC = "reply_to";
+	    String MESSAGE_ID = "message_id";
+	    String METHOD = "method";
+	    
+	    String ackMessage = "";
+	    
+	    boolean downloadCase = false;
 
+	    String replyTopic = Json.getJsonKeyValueIfPresent(payload, REPLY_TOPIC);
+	    String messageId = Json.getJsonKeyValueIfPresent(payload, MESSAGE_ID);
+	    String method = Json.getJsonKeyValueIfPresent(payload, METHOD);
+	    String url = Json.getJsonKeyValueIfPresent(payload, "url");
+	    String filename = Json.getJsonKeyValueIfPresent(payload, "filename");
+
+
+	    if(replyTopic.length() == 0) {
+	        logJsonFailureMessageAndReturn(FILE_TRANSFER, REPLY_TOPIC, payload);
+	        return;
+	    }
+	    if(messageId.length() == 0) {
+	        logJsonFailureMessageAndReturn(FILE_TRANSFER, MESSAGE_ID, payload);
+	        return;
+	    }
+	    if(method.length() == 0) {
+	        logJsonFailureMessageAndReturn(FILE_TRANSFER, METHOD, payload);
+	        return;
+	    }
+
+
+
+	    if( (   (method.equals("POST") == true) || (method.equals("PUT") == true)   ) &&
+	            (filename.length() > 0) &&
+	            (url.length() > 0)   ) {
+	        downloadCase = true;
+	    }
+
+	    if(downloadCase == true) {
+	        /*
+	         * Remove the protocol:hostname.
+	         *
+	         * Eg. ::  https://localhost, http://localhost, etc.
+	         */
+	        if(url.length() > 0)
+	        {
+	        	String[] tokens = url.split("/");
+	        	
+	        	url = "";
+	        	for(int i = 3; i < tokens.length; i++) {
+	        		url = url + "/" + tokens[i];
+	        	}
+	        }
+	    }
+
+
+	    if(downloadCase == true) {
+	        int ackStatus = 0;
+
+	        /*
+	         * Behaviour of File-Download Status-Notification to user
+	         * (as per the scenario tested, when a browser-client uploads file, and a C-client downloads the file).
+	         * ====================================================================================================
+	         *
+	         * While browser-client uploads the file to server, "Uploading %" is shown.
+	         *
+	         * Once the upload is complete, the C-client starts downloading, and the browser-client sees a "Waiting .."
+	         * note .. (in the browser-lower panel).
+	         *
+	         * Now, following scenarios arise ::
+	         *
+	         * a)
+	         * C-client finishes the downloading, returns status 200 and the ACK-message is sent to server
+	         * with status 1.
+	         *
+	         * In this case, the "Waiting .." message disappears (as expected), and an additional ioEYE-message
+	         * "File uploaded successfully" is displayed to browser-client.
+	         *
+	         *
+	         * b)
+	         * C-client might or might not finish downloading, but it returns a status other than 200, and the ACK-message
+	         * is sent to server with status 0.
+	         *
+	         * In this case, the "Waiting .." message disappears (as expected), but no additional ioEYE message is displayed.
+	         * (MAY BE, SOME ERROR-NOTIFICATION SHOULD BE SHOWN TO THE BROWSER-CLIENT).
+	         *
+	         *
+	         * c)
+	         * C-client might or might not finish downloading, but no ACK-message is sent to the server whatsoever.
+	         *
+	         * In this case, the "Waiting .." message is kept showing on the browser-client (posssibly timing out after
+	         * a long time).
+	         *
+	         *
+	         * ALL IN ALL, IF THE "Waiting .." MESSAGE DISAPPEARS, AND THE "File uploaded succcessfully" MESSAGE IS SEEN,
+	         * IT MEANS THE FILE-TRANSFER COMPLETED, AND THAT TOO PERFECTLY SUCCESSFULLY.
+	         *
+	         */
+
+	        HttpResponse httpResponse = HttpClient.downloadFile(c, url, filename,
+	        		                                            new HashMap<String, String>(), new HashMap<String, String>(), 10);
+
+	        if(httpResponse.getStatus() == HttpClient.DOWNLOAD_FILE_SUCCESS)
+	        {
+	            ackStatus = 1;
+	        }
+	        ackMessage = "{\"response_id\": \"" + messageId + "\", \"status\": " + ackStatus + "}";
+
+	    }
+
+	    /*
+	     * Send the acknowledgement, along with the ackStatus (success/failure).
+	     */
+	    c.publish(replyTopic,
+	              ackMessage,
+	              QOS0,
+	              false,
+	              null,
+				  MQTT_RESULT_HANDLER_TIMEOUT,
+				  true);
+	}
 
 	private static void serverLoggingTopicMessageArrived(InstaMsg c, String payload) {
 		

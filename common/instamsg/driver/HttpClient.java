@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import common.instamsg.driver.InstaMsg.ReturnCode;
+import config.DeviceConstants;
 
 public class HttpClient {
 
@@ -109,7 +110,15 @@ public class HttpClient {
 	public static HttpResponse downloadFile(InstaMsg im, String url, String downloadedFilePath,
 			                                Map<String, String> params, Map<String, String> headers, int timeout) {
 		
-		Socket socket = im.modulesProvideInterface.getSocket("platform.instamsg.io", 80);
+		int portToUse = 0;
+		
+		if(DeviceConstants.SSL_SOCKET == true) {
+			portToUse = DeviceConstants.INSTAMSG_HTTPS_PORT;
+		} else {
+			portToUse = DeviceConstants.INSTAMSG_HTTP_PORT;
+		}
+		
+		Socket socket = im.modulesProvideInterface.getSocket(DeviceConstants.INSTAMSG_HTTP_HOST, portToUse);
 		socket.initSocket();
 		
 		if(socket.socketCorrupted == true) {
