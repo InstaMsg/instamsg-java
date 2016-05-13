@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import common.instamsg.driver.InstaMsg.ReturnCode;
-
 import config.DeviceConstants;
 
 public class HttpClient {
@@ -18,8 +17,9 @@ public class HttpClient {
 	private static final String SOCKET_NOT_AVAILABLE = "Could not instantiate socket for downloading-file";
 	private static final String FILE_NOT_COPYABLE = "Could not copy content to the end-device";
 
-	final static String contentLengthPrefix = "Content-Length:";
-	
+	final static String contentLengthPrefix = "Content-Length:";	
+	static String FILE_DOWNLOAD             = "[FILE-DOWNLOAD] ";
+
 	final static int DOWNLOAD_FILE_SUCCESS = 200;
 	final static int DOWNLOAD_FILE_FAILURE = 404;
 
@@ -160,8 +160,9 @@ public class HttpClient {
 		
 		FileUtils.removeFile(downloadedFilePath);
 		
+		int i = 0;
 		try (FileOutputStream os = new FileOutputStream(new File(downloadedFilePath))) {
-			for(int i = 0; i < contentLength; i++) {
+			for(i = 0; i < contentLength; i++) {
 				byte[] b = new byte[1];
 				
 				if(socket.socketRead(b, 1, true) == ReturnCode.FAILURE) {
@@ -169,6 +170,12 @@ public class HttpClient {
 					return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_FILE_CONTENT);	
 				}
 				
+				if((i % DeviceConstants.OTA_PING_BUFFER_SIZE) == 0) {
+					Log.infoLog(i + " / " + contentLength + " bytes downloaded ...");
+					
+					InstaMsg.sendPingReqToServer(im);
+					InstaMsg.readAndProcessIncomingMQTTPacketsIfAny(im);
+				}
 				os.write(b);
 			}
 			
@@ -177,6 +184,9 @@ public class HttpClient {
 			handleSocketError(socket);
 			return new HttpResponse(DOWNLOAD_FILE_FAILURE, FILE_NOT_COPYABLE);
 		}		
+		
+		Log.infoLog(i + " / " + contentLength + " bytes downloaded ...");
+		Log.infoLog(FILE_DOWNLOAD + "File-Download SUCCESS !!!!!!!!!!");
 		
 		socket.releaseSocket();		
 		return new HttpResponse(DOWNLOAD_FILE_SUCCESS, FILE_DOWNLOAD_SUCCESS_MESSAGE);	

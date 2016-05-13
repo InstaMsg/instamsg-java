@@ -857,7 +857,7 @@ public class InstaMsg implements MessagingAPIs {
 	}
 
 	
-	private static void sendPingReqToServer(InstaMsg c)
+	public static void sendPingReqToServer(InstaMsg c)
 	{
 		if(c.socket.socketCorrupted == true) {
 			
@@ -953,7 +953,7 @@ public class InstaMsg implements MessagingAPIs {
 	}
 	
 	
-	private static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
+	public static void readAndProcessIncomingMQTTPacketsIfAny(InstaMsg c) {
 		InstaMsg.ReturnCode rc = InstaMsg.ReturnCode.FAILURE;
 		
 		do {

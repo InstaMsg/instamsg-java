@@ -172,12 +172,13 @@ public class DeviceSocket extends Socket {
 		for(int i = 0; i < len; i++) {
 			
 			try {
-				byte c = (byte) socket.getInputStream().read();
-				buffer[i] = c;
+				int c = socket.getInputStream().read();
 				
-				if(buffer[i] == -1) {
+				if(c == -1) {
 					return InstaMsg.ReturnCode.FAILURE;
 				}
+				
+				buffer[i] = (byte) c;
 				
 			} catch (SocketTimeoutException e) {
 				
