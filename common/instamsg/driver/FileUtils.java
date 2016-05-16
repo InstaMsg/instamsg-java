@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import config.DeviceConstants;
 
@@ -92,5 +93,21 @@ public class FileUtils {
 	public static void createFileAndAddContent(String module, String content, String filePath) {
 		removeFile(filePath);
 		appendLine(module, filePath, content);
+	}	
+	
+	public static void deleteFile(String module, String path) {
+		File f = new File(path);
+		if(f.exists() && f.isFile()) {
+			f.delete();
+		}
+	}
+	
+	public static void copyFile(String module, String oldPath, String newPath) {
+		try {
+			Files.copy(new File(oldPath).toPath(), new File(newPath).toPath());
+			
+		} catch (IOException e) {
+			Log.errorLog(module + "Error happened while copying file [" + oldPath + "] to [" + newPath + "]"); 
+		}
 	}
 }

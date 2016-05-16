@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import common.instamsg.driver.Config.CONFIG_TYPE;
 import common.instamsg.driver.InstaMsg.ReturnCode;
 import config.DeviceConstants;
 
@@ -158,15 +159,18 @@ public class HttpClient {
 			}
 		}
 		
-		FileUtils.removeFile(downloadedFilePath);
+		InstaMsg.upgrade.prepareForNewBinaryDownload();
 		
 		int i = 0;
-		try (FileOutputStream os = new FileOutputStream(new File(downloadedFilePath))) {
+		if(true) {
 			for(i = 0; i < contentLength; i++) {
 				byte[] b = new byte[1];
 				
 				if(socket.socketRead(b, 1, true) == ReturnCode.FAILURE) {
+					
+					InstaMsg.upgrade.tearDownBinaryDownload();
 					handleSocketError(socket);
+					
 					return new HttpResponse(DOWNLOAD_FILE_FAILURE, ERROR_READING_FILE_CONTENT);	
 				}
 				
@@ -176,16 +180,17 @@ public class HttpClient {
 					InstaMsg.sendPingReqToServer(im);
 					InstaMsg.readAndProcessIncomingMQTTPacketsIfAny(im);
 				}
-				os.write(b);
-			}
-			
-		} catch (Exception e) {
-			
-			handleSocketError(socket);
-			return new HttpResponse(DOWNLOAD_FILE_FAILURE, FILE_NOT_COPYABLE);
-		}		
+				
+				InstaMsg.upgrade.copyNextChar((char) b[0]);
+			}			
+		} 	
 		
 		Log.infoLog(i + " / " + contentLength + " bytes downloaded ...");
+		InstaMsg.upgrade.tearDownBinaryDownload();
+		
+        String configJson = InstaMsg.config.generateConfigJson(Upgrade.NEW_FILE_KEY, CONFIG_TYPE.CONFIG_STRING, Upgrade.NEW_FILE_ARRIVED, "");
+        InstaMsg.config.saveConfigValueOnPersistentStorage(Upgrade.NEW_FILE_KEY, configJson);
+
 		Log.infoLog(FILE_DOWNLOAD + "File-Download SUCCESS !!!!!!!!!!");
 		
 		socket.releaseSocket();		

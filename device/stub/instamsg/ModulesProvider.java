@@ -8,6 +8,7 @@ import common.instamsg.driver.Misc;
 import common.instamsg.driver.ModulesProviderInterface;
 import common.instamsg.driver.Socket;
 import common.instamsg.driver.Time;
+import common.instamsg.driver.Upgrade;
 import common.instamsg.driver.Watchdog;
 
 public class ModulesProvider implements ModulesProviderInterface {
@@ -51,6 +52,11 @@ public class ModulesProvider implements ModulesProviderInterface {
 	@Override
 	public DataLogger getDataLogger() {
 		return new DeviceDataLogger();
+	}
+
+	@Override
+	public Upgrade getUpgrade() {
+		return new DeviceUpgrade();
 	}
 
 }

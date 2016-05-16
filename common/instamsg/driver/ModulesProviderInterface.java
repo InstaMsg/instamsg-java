@@ -10,4 +10,5 @@ public interface ModulesProviderInterface {
 	Watchdog getWatchdog();
 	Socket getSocket(String hostName, int port);
 	DataLogger getDataLogger();
+	Upgrade getUpgrade();
 }

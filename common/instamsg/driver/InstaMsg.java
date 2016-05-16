@@ -87,6 +87,7 @@ public class InstaMsg implements MessagingAPIs {
 	public static Watchdog watchdog;
 	public Socket socket;
 	public static DataLogger dataLogger;
+	public static Upgrade upgrade;
 
 	static boolean mqttConnectFlag = false;
 	static boolean notifyServerOfSecretReceived = false;
@@ -201,6 +202,8 @@ public class InstaMsg implements MessagingAPIs {
 		watchdog.watchdogInit();
 		
 		dataLogger = modulesProvideInterface.getDataLogger();
+		
+		upgrade = modulesProvideInterface.getUpgrade();
 		
 		
 		if(DeviceConstants.SSL_SOCKET == true) {
@@ -1702,6 +1705,8 @@ public class InstaMsg implements MessagingAPIs {
 	
 
 	public static void initInstaMsg(InstaMsg c, InitialCallbacks callbacks) {
+		
+		InstaMsg.upgrade.checkForUpgrade();
 		
 		c.socket = modulesProvideInterface.getSocket(DeviceConstants.INSTAMSG_HOST, InstaMsg.INSTAMSG_PORT);		
 		c.socket.socketCorrupted = true;
